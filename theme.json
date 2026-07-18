@@ -1,0 +1,28 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/theme.json",
+  "version": 3,
+  "settings": {
+    "appearanceTools": true,
+    "layout": { "contentSize": "800px", "wideSize": "1080px" },
+    "color": {
+      "defaultPalette": false,
+      "palette": [
+        { "slug": "ink", "name": "墨色", "color": "#282722" },
+        { "slug": "paper", "name": "纸白", "color": "#faf9f5" },
+        { "slug": "ochre", "name": "赭石", "color": "#8b5a3c" }
+      ]
+    },
+    "typography": {
+      "fluid": true,
+      "fontFamilies": [
+        { "slug": "sans", "name": "中英系统黑体", "fontFamily": "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans CJK SC', 'Source Han Sans SC', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif" },
+        { "slug": "serif", "name": "系统宋体", "fontFamily": "'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', SimSun, serif" }
+      ]
+    },
+    "spacing": { "units": ["px", "em", "rem", "%", "vw"] }
+  },
+  "styles": {
+    "color": { "background": "#f3f1eb", "text": "#282722" },
+    "typography": { "fontFamily": "var(--wp--preset--font-family--sans)", "fontSize": "17px", "lineHeight": "1.9" }
+  }
+}
