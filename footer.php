@@ -5,8 +5,8 @@
 			<span class="footer-copyright">© 2017–<?php echo esc_html( gmdate( 'Y' ) ); ?> <a href="<?php echo esc_url( home_url( '/' ) ); ?>">太傅博客</a></span>
 			<a class="footer-icp" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">湘ICP备17002466号</a>
 		</div>
-		<?php $github_url = get_theme_mod( 'quietype_github_url', 'https://github.com/taifuer' ); ?>
-		<?php $contact_email = get_theme_mod( 'quietype_contact_email', 'taifu@taifua.com' ); ?>
+		<?php $github_url = quietype_get_setting( 'quietype_github_url', 'https://github.com/taifuer' ); ?>
+		<?php $contact_email = quietype_get_setting( 'quietype_contact_email', 'taifu@taifua.com' ); ?>
 		<?php if ( $github_url || $contact_email ) : ?>
 			<nav class="footer-contact" aria-label="联系方式">
 				<?php if ( $contact_email ) : ?><a href="mailto:<?php echo esc_attr( antispambot( $contact_email ) ); ?>" aria-label="发送邮件"><?php echo quietype_icon( 'mail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></a><?php endif; ?>

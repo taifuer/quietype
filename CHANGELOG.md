@@ -4,6 +4,18 @@ All notable changes to Quietype will be documented in this file.
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-07-19
+
+### Added
+
+- Added conflict-aware description, keyword, Open Graph, social, and Schema.org metadata with per-entry overrides.
+- Added optional SMTP transport, a protected test-mail action, and rate-limited administrator login and comment notifications.
+
+### Changed
+
+- Consolidated all Quietype-owned preferences into one navigable Appearance settings screen and migrated legacy Customizer values.
+- Unified static, archive, taxonomy, search, and links page-hero width and vertical rhythm across desktop and mobile.
+
 ## [0.5.3] - 2026-07-19
 
 ### Added

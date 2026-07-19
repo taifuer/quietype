@@ -67,9 +67,15 @@ git clone git@github.com:taifuer/quietype.git
 
 Quietype 目前只提供亮色阅读背景。
 
-页脚的 GitHub 和联系邮箱可在“外观 → 自定义 → 页脚联系方式”中修改；将字段留空即可隐藏对应图标。
+Quietype 自有配置集中在“外观 → Quietype 设置”，包括页脚联系方式、SEO、国内访问、登录安全、SMTP 通知和自定义代码。WordPress 原生的站点标题、菜单和额外 CSS 仍使用各自原生界面。旧版本保存在 Customizer 中的 Quietype 配置会自动迁移。
 
 统计脚本和站点验证代码可在“外观 → Quietype 设置”中分别添加到 Head 或 Footer。该页面使用 WordPress 自带代码编辑器，避免脚本在 Customizer 实时预览中意外执行。只有具备 `unfiltered_html` 权限的管理员可以保存可执行代码；样式仍建议优先使用 WordPress 原生“额外 CSS”。
+
+## SEO
+
+主题在没有检测到 Yoast SEO、Rank Math、All in One SEO、SEOPress 或 The SEO Framework 时输出轻量元数据：description、keywords、Open Graph、社交摘要和 Schema.org JSON-LD。文章描述按“文章 SEO 自定义描述 → 手工摘要 → 自动摘要”取值，关键词按“文章 SEO 自定义关键词 → 标签 → 分类 → 站点关键词”取值。文章和页面编辑页中的“Quietype SEO”区域可以覆盖自动结果。
+
+后台可填写站点级描述和关键词。`meta keywords` 对主流搜索引擎的作用已经很小，只作为兼容字段保留；描述、规范标题、结构化数据和可读内容更重要。启用专用 SEO 插件后，Quietype 会停止输出整组 SEO 元数据，避免重复。
 
 ## 中国大陆访问优化
 
@@ -85,11 +91,17 @@ Prism 只负责语法解析、语言标记和行号；Quietype 内置亮色 toke
 
 ## 登录入口与安全
 
-Quietype 会重设 WordPress 登录相关页面的视觉样式，并可在“外观 → 自定义 → 登录与安全”中启用自定义入口参数、一次性算术验证码和 XML-RPC 认证保护。例如参数名为 `entry`、参数值为一个私有随机字符串时，登录入口是 `wp-login.php?entry=<私有值>`；默认入口、错误参数和未登录的 `/wp-admin/` 均返回 404。请勿将真实入口值写入公开仓库、截图或文档。
+Quietype 会重设 WordPress 登录相关页面的视觉样式，并可在“外观 → Quietype 设置 → 安全”中启用自定义入口参数、一次性算术验证码和 XML-RPC 认证保护。例如参数名为 `entry`、参数值为一个私有随机字符串时，登录入口是 `wp-login.php?entry=<私有值>`；默认入口、错误参数和未登录的 `/wp-admin/` 均返回 404。请勿将真实入口值写入公开仓库、截图或文档。
 
 启用前请先保存完整入口地址。参数值留空时入口保护保持关闭；需要文件级配置时，也可以在 `wp-config.php` 中定义 `QUIETYPE_LOGIN_GATE_KEY` 和 `QUIETYPE_LOGIN_GATE_VALUE`，常量优先于后台字段。找回密码、密码重置、退出登录和 WordPress 签名恢复链接均保留兼容处理。
 
 验证码和入口保护默认关闭，需由站点管理员明确启用。若站点不使用 WordPress App 或旧式远程发布，可以同时关闭 XML-RPC 认证与 Pingback，避免它绕过网页验证码。隐藏入口和简单验证码主要用于降低自动扫描噪声，不能替代强密码、双重验证和服务器限速。由于入口功能由主题提供，切换主题会恢复 WordPress 默认登录行为。
+
+## SMTP 与通知
+
+“外观 → Quietype 设置 → 邮件”可以让 WordPress 内置 `wp_mail()` 使用 SMTP，并发送测试邮件。支持 TLS、SMTPS 和无加密连接、可选身份验证、自定义发件地址，以及管理员成功登录和新评论通知。登录通知仅针对拥有站点管理权限的账户并设有五分钟防重复；评论通知忽略垃圾评论、Pingback 和 Trackback，也会避开 WordPress 已发送给同一管理员的通知。
+
+SMTP 密码会以原值保存在 WordPress 数据库中。优先使用邮箱服务商提供的独立授权码；若不希望密码进入数据库，可在 `wp-config.php` 定义 `QUIETYPE_SMTP_PASSWORD`。SMTP 只负责把邮件交给服务器，正式使用前仍应配置 SPF、DKIM 和 DMARC，并通过测试邮件确认投递。
 
 ## 内容兼容
 

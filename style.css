@@ -4,7 +4,7 @@ Theme URI: https://github.com/taifuer/quietype
 Author: taifu
 Author URI: https://github.com/taifuer
 Description: A quiet WordPress theme for thoughtful reading, designed for Chinese long-form and technical writing.
-Version: 0.5.3
+Version: 0.6.0
 Requires at least: 6.4
 Requires PHP: 8.0
 License: GNU General Public License v2 or later
@@ -422,11 +422,10 @@ body:before{display:none}
 .post-category:hover{border-bottom-color:var(--accent);color:var(--accent)}
 .post-index.section-wrap{padding-bottom:54px}
 .post-index .pagination{margin-top:54px}
-.archive-index.section-wrap,.archive-page.section-wrap{padding-top:42px}
-.archive-index .page-hero,.archive-page .page-hero{margin-bottom:24px}
+.page-entry.section-wrap,.archive-index.section-wrap,.archive-page.section-wrap,.links-page.section-wrap,.tags-page.section-wrap{padding-top:42px}
+.site-main .page-hero{max-width:800px;margin-bottom:24px}
+.site-main .page-hero>:last-child{margin-bottom:0}
 .archive-page .archive-tags{margin-top:0;margin-bottom:40px;padding-top:20px;padding-bottom:22px}
-.page-entry.section-wrap{padding-top:52px}
-.page-entry .page-hero{margin-bottom:18px}
 .page-entry .article-content{margin-top:0}
 .page-entry .article-content>:first-child{margin-top:0}
 .article-toc{top:164px}
@@ -455,10 +454,8 @@ body:before{display:none}
   body.nav-open .reading-tools{opacity:0;visibility:hidden;pointer-events:none}
   .post-index.section-wrap{padding-bottom:36px}
   .post-index .pagination{margin-top:36px}
-  .archive-index.section-wrap,.archive-page.section-wrap{padding-top:30px}
-  .archive-index .page-hero,.archive-page .page-hero{margin-bottom:20px}
-  .page-entry.section-wrap{padding-top:36px}
-  .page-entry .page-hero{margin-bottom:16px}
+  .page-entry.section-wrap,.archive-index.section-wrap,.archive-page.section-wrap,.links-page.section-wrap,.tags-page.section-wrap{padding-top:30px}
+  .site-main .page-hero{margin-bottom:20px}
   .article-content h2{margin-top:1.95em}
   .article-content h3{margin-top:1.7em}
   .article-content h4{margin-top:1.5em}
@@ -570,14 +567,9 @@ html[data-reading-bg=green]{--page:#f2f7ef;--paper:#f2f7ef}
 
 /* Quietype 0.3.8: short-page navigation and consistent static-page spacing. */
 .reading-tools__navigation[hidden]{display:none!important}
-.page-entry .page-hero{max-width:800px}
 .page-entry>.content-width{max-width:800px;margin-left:0;margin-right:0}
-.links-page.section-wrap{padding-top:42px}
-.links-page .page-hero{margin-bottom:24px}
 @media(max-width:720px){
   .page-entry>.content-width{width:100%}
-  .links-page.section-wrap{padding-top:30px}
-  .links-page .page-hero{margin-bottom:20px}
 }
 
 /* Quietype 0.3.9: compact mobile drawer without sticky pointer focus. */

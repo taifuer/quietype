@@ -30,7 +30,7 @@ function quietype_login_gate_key() {
 	if ( defined( 'QUIETYPE_LOGIN_GATE_KEY' ) ) {
 		return quietype_sanitize_login_gate_key( QUIETYPE_LOGIN_GATE_KEY );
 	}
-	return quietype_sanitize_login_gate_key( get_theme_mod( 'quietype_login_gate_key', 'user' ) );
+	return quietype_sanitize_login_gate_key( quietype_get_setting( 'quietype_login_gate_key', 'user' ) );
 }
 
 /** Return the configured entrance parameter value. */
@@ -38,7 +38,7 @@ function quietype_login_gate_value() {
 	if ( defined( 'QUIETYPE_LOGIN_GATE_VALUE' ) ) {
 		return quietype_sanitize_login_gate_value( QUIETYPE_LOGIN_GATE_VALUE );
 	}
-	return quietype_sanitize_login_gate_value( get_theme_mod( 'quietype_login_gate_value', '' ) );
+	return quietype_sanitize_login_gate_value( quietype_get_setting( 'quietype_login_gate_value', '' ) );
 }
 
 /** The entrance gate is fail-open until both enabled and fully configured. */
@@ -46,7 +46,7 @@ function quietype_login_gate_enabled() {
 	if ( defined( 'QUIETYPE_LOGIN_GATE_VALUE' ) ) {
 		return '' !== quietype_login_gate_value();
 	}
-	return (bool) get_theme_mod( 'quietype_login_gate_enabled', false ) && '' !== quietype_login_gate_value();
+	return (bool) quietype_get_setting( 'quietype_login_gate_enabled', false ) && '' !== quietype_login_gate_value();
 }
 
 /** Return whether this request carries the configured entrance token. */
@@ -179,7 +179,7 @@ add_filter( 'retrieve_password_message', 'quietype_gate_password_reset_message',
 
 /** Create a short-lived, one-time arithmetic challenge for the login form. */
 function quietype_login_captcha_field() {
-	if ( ! get_theme_mod( 'quietype_login_captcha_enabled', false ) ) {
+	if ( ! quietype_get_setting( 'quietype_login_captcha_enabled', false ) ) {
 		return;
 	}
 	$left         = wp_rand( 1, 9 );
@@ -198,7 +198,7 @@ add_action( 'login_form', 'quietype_login_captcha_field', 5 );
 
 /** Reject a missing, expired, reused, or incorrect arithmetic answer. */
 function quietype_validate_login_captcha( $user ) {
-	if ( ! get_theme_mod( 'quietype_login_captcha_enabled', false ) || 'POST' !== strtoupper( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
+	if ( ! quietype_get_setting( 'quietype_login_captcha_enabled', false ) || 'POST' !== strtoupper( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
 		return $user;
 	}
 	if ( ! isset( $_POST['log'], $_POST['pwd'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
@@ -220,13 +220,13 @@ add_filter( 'authenticate', 'quietype_validate_login_captcha', 100 );
 
 /** Disable legacy remote authentication when the site does not use it. */
 function quietype_xmlrpc_enabled( $enabled ) {
-	return get_theme_mod( 'quietype_xmlrpc_auth_disabled', false ) ? false : $enabled;
+	return quietype_get_setting( 'quietype_xmlrpc_auth_disabled', false ) ? false : $enabled;
 }
 add_filter( 'xmlrpc_enabled', 'quietype_xmlrpc_enabled' );
 
 /** Remove unauthenticated pingback methods alongside XML-RPC authentication. */
 function quietype_xmlrpc_methods( $methods ) {
-	if ( get_theme_mod( 'quietype_xmlrpc_auth_disabled', false ) ) {
+	if ( quietype_get_setting( 'quietype_xmlrpc_auth_disabled', false ) ) {
 		unset( $methods['pingback.ping'], $methods['pingback.extensions.getPingbacks'] );
 	}
 	return $methods;
@@ -235,7 +235,7 @@ add_filter( 'xmlrpc_methods', 'quietype_xmlrpc_methods' );
 
 /** Stop advertising a disabled pingback endpoint in front-end headers. */
 function quietype_remove_pingback_header( $headers ) {
-	if ( get_theme_mod( 'quietype_xmlrpc_auth_disabled', false ) ) {
+	if ( quietype_get_setting( 'quietype_xmlrpc_auth_disabled', false ) ) {
 		unset( $headers['X-Pingback'] );
 	}
 	return $headers;
