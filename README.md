@@ -68,6 +68,18 @@ Quietype 目前只提供亮色阅读背景。
 
 页脚的 GitHub 和联系邮箱可在“外观 → 自定义 → 页脚联系方式”中修改；将字段留空即可隐藏对应图标。
 
+## 中国大陆访问优化
+
+评论头像默认将 WordPress 生成的 Gravatar 地址替换为 `https://gravatar.loli.net/avatar/`，不修改用户或评论数据。站点开发者可以通过过滤器更换头像入口；返回空值则保留 WordPress 原始地址：
+
+```php
+add_filter( 'quietype_avatar_base_url', function () {
+	return 'https://secure.gravatar.com/avatar/';
+} );
+```
+
+Prism 只负责语法解析、语言标记和行号；Quietype 内置亮色 token 配色与中文复制按钮，不依赖远程代码样式或剪贴板 CDN。
+
 ## 内容兼容
 
 主题通过标准 `the_content` 渲染文章，不修改编辑器保存的 Markdown 原文。对于 WP Editor.md，Markdown 仍保存在 `post_content_filtered`，主题只负责前台输出样式。

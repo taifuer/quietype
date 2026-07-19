@@ -4,6 +4,18 @@ All notable changes to Quietype will be documented in this file.
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-07-19
+
+### Fixed
+
+- Prevented duplicate Prism language and copy controls while keeping the theme's local Chinese copy fallback.
+- Stacked mobile footer contacts above copyright and removed wrapping view counts from mobile post lists.
+- Routed WordPress avatars through a configurable mainland-friendly Gravatar endpoint.
+
+### Changed
+
+- Refined the light syntax palette using restrained One Light and GHColors-inspired token roles.
+
 ## [0.4.0] - 2026-07-19
 
 ### Added

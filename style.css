@@ -4,7 +4,7 @@ Theme URI: https://github.com/taifuer/quietype
 Author: taifu
 Author URI: https://github.com/taifuer
 Description: A quiet WordPress theme for thoughtful reading, designed for Chinese long-form and technical writing.
-Version: 0.4.0
+Version: 0.4.1
 Requires at least: 6.4
 Requires PHP: 8.0
 License: GNU General Public License v2 or later
@@ -591,3 +591,21 @@ html[data-reading-bg=green]{--page:#f2f7ef;--paper:#f2f7ef}
 .taxonomy-path a{color:var(--muted)}
 .taxonomy-path a:hover,.taxonomy-path a:focus-visible{color:var(--accent)}
 .taxonomy-path span[aria-current=page]{color:var(--accent)}
+
+/* Quietype 0.4.1: China-friendly avatars and calmer mobile metadata. */
+.article-content pre,.article-content pre[class*=language-]{color:#383a42}
+.article-content pre .comment,.article-content .token.comment,.article-content .token.prolog,.article-content .token.doctype,.article-content .token.cdata{color:#6f757d}
+.article-content .token.punctuation{color:#5c6370}
+.article-content .token.property,.article-content .token.tag,.article-content .token.constant,.article-content .token.symbol,.article-content .token.deleted{color:#b34b42}
+.article-content .token.boolean,.article-content .token.number{color:#986801}
+.article-content .token.selector,.article-content .token.attr-name,.article-content .token.string,.article-content .token.char,.article-content .token.builtin,.article-content .token.inserted{color:#3f7f4f}
+.article-content .token.operator,.article-content .token.entity,.article-content .token.url{color:#2b7188;background:none}
+.article-content .token.atrule,.article-content .token.attr-value,.article-content .token.keyword{color:#8f3f91}
+.article-content .token.function,.article-content .token.class-name{color:#356b9a}
+@media(max-width:720px){
+  .post-row__views{display:none}
+  .site-footer__inner{display:flex;min-height:0;padding:13px 0 15px;flex-direction:column;justify-content:center;gap:2px;text-align:center;line-height:1.5}
+  .footer-contact{position:static;order:-1;margin:0 0 2px;gap:6px;transform:none}
+  .footer-contact a{width:30px;height:30px}
+  .footer-icp{margin-left:0}
+}

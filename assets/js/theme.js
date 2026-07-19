@@ -155,7 +155,8 @@
     const code = pre.querySelector('code');
     const languageClass = [...new Set([...(pre.classList || []), ...(code?.classList || [])])]
       .find((name) => name.startsWith('language-'));
-    if (languageClass && !wrapper.querySelector('.code-language, .toolbar-item span')) {
+    const prismLanguagePlugin = document.querySelector('#prism-plugin-show-language-js, script[src*="prism-show-language"]');
+    if (languageClass && !prismLanguagePlugin && !wrapper.querySelector('.code-language, .toolbar-item span')) {
       const language = languageClass.replace('language-', '').toLowerCase();
       const label = document.createElement('span');
       label.className = 'code-language';
@@ -164,7 +165,8 @@
       wrapper.prepend(label);
     }
 
-    if (wrapper.querySelector('.copy-code, .toolbar-item button[data-copy-state], .copy-to-clipboard-button')) return;
+    const prismCopyPlugin = document.querySelector('#prism-plugin-copy-to-clipboard-js, script[src*="prism-copy-to-clipboard"]');
+    if (prismCopyPlugin || wrapper.querySelector('.copy-code, .toolbar-item button[data-copy-state], .copy-to-clipboard-button')) return;
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'copy-code';

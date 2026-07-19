@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'QUIETYPE_VERSION', '0.4.0' );
+define( 'QUIETYPE_VERSION', '0.4.1' );
 
 function quietype_setup() {
 	load_theme_textdomain( 'quietype', get_template_directory() . '/languages' );
@@ -61,6 +61,9 @@ function quietype_trim_editor_assets() {
 	foreach ( $prism_styles as $handle ) {
 		wp_dequeue_style( $handle );
 	}
+	// Quietype supplies a local Chinese copy action without ClipboardJS/CDN fallback.
+	wp_dequeue_script( 'prism-plugin-copy-to-clipboard' );
+	wp_dequeue_script( 'copy-clipboard' );
 	if ( is_singular() ) {
 		return;
 	}
@@ -103,6 +106,19 @@ function quietype_cleanup_head() {
 	remove_action( 'admin_print_styles', 'print_emoji_styles' );
 }
 add_action( 'init', 'quietype_cleanup_head' );
+
+/** Route Gravatar images through a mainland-friendly endpoint. */
+function quietype_avatar_url( $url ) {
+	if ( ! is_string( $url ) || ! preg_match( '#^https?://[^/]*gravatar\.com/avatar/#i', $url ) ) {
+		return $url;
+	}
+	$base_url = apply_filters( 'quietype_avatar_base_url', 'https://gravatar.loli.net/avatar/' );
+	if ( ! $base_url ) {
+		return $url;
+	}
+	return preg_replace( '#^https?://[^/]*gravatar\.com/avatar/#i', trailingslashit( $base_url ), $url );
+}
+add_filter( 'get_avatar_url', 'quietype_avatar_url' );
 
 function quietype_body_classes( $classes ) {
 	if ( is_singular() ) {
