@@ -9,12 +9,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'QUIETYPE_VERSION', '0.6.0' );
+define( 'QUIETYPE_VERSION', '0.7.0' );
 
 require_once get_template_directory() . '/inc/admin-settings.php';
 require_once get_template_directory() . '/inc/login-security.php';
 require_once get_template_directory() . '/inc/seo.php';
 require_once get_template_directory() . '/inc/mail.php';
+require_once get_template_directory() . '/inc/content-performance.php';
 
 function quietype_setup() {
 	load_theme_textdomain( 'quietype', get_template_directory() . '/languages' );
@@ -36,13 +37,14 @@ add_action( 'after_setup_theme', 'quietype_setup' );
 
 function quietype_assets() {
 	$style_dependencies = array();
-	if ( is_singular() ) {
+	$features = quietype_content_features();
+	if ( is_singular() && $features['images'] ) {
 		wp_enqueue_style( 'quietype-photoswipe', get_template_directory_uri() . '/assets/vendor/photoswipe/photoswipe.css', array(), '5.4.4' );
 		$style_dependencies[] = 'quietype-photoswipe';
 	}
 	wp_enqueue_style( 'quietype', get_stylesheet_uri(), $style_dependencies, QUIETYPE_VERSION );
 	wp_enqueue_script( 'quietype', get_template_directory_uri() . '/assets/js/theme.js', array(), QUIETYPE_VERSION, true );
-	if ( is_singular() ) {
+	if ( is_singular() && $features['images'] ) {
 		wp_enqueue_script( 'quietype-lightbox', get_template_directory_uri() . '/assets/js/lightbox.js', array(), QUIETYPE_VERSION, true );
 	}
 }
@@ -85,6 +87,7 @@ add_filter( 'script_loader_tag', 'quietype_module_script', 10, 3 );
  * content pages, but do not make archive and search pages pay that cost.
  */
 function quietype_trim_editor_assets() {
+	$features = quietype_content_features();
 	$prism_styles = array( 'prism-theme-style', 'prism-plugin-toolbar', 'prism-plugin-line-numbers', 'Prism' );
 	foreach ( $prism_styles as $handle ) {
 		wp_dequeue_style( $handle );
@@ -92,16 +95,34 @@ function quietype_trim_editor_assets() {
 	// Quietype supplies a local Chinese copy action without ClipboardJS/CDN fallback.
 	wp_dequeue_script( 'prism-plugin-copy-to-clipboard' );
 	wp_dequeue_script( 'copy-clipboard' );
-	if ( is_singular() ) {
-		return;
+	$styles  = array( 'Emojify.js' );
+	$scripts = array( 'copy-clipboard', 'prism-plugin-copy-to-clipboard', 'Emojify.js' );
+	if ( ! is_singular() || ! $features['math'] ) {
+		$styles[]  = 'Katex';
+		$scripts[] = 'Katex';
 	}
-	$styles = array( 'Katex', 'Emojify.js' );
-	$scripts = array( 'Katex', 'copy-clipboard', 'prism-core-js', 'prism-plugin-autoloader', 'prism-plugin-toolbar', 'prism-plugin-line-numbers', 'prism-plugin-show-language', 'prism-plugin-copy-to-clipboard', 'Front_Style', 'Prism', 'Emojify.js', 'Mermaid', 'MindMap' );
+	if ( ! is_singular() || ! $features['code'] ) {
+		$scripts = array_merge( $scripts, array( 'prism-core-js', 'prism-plugin-autoloader', 'prism-plugin-toolbar', 'prism-plugin-line-numbers', 'prism-plugin-show-language', 'Prism' ) );
+	}
+	if ( ! is_singular() || ( ! $features['math'] && ! $features['code'] ) ) {
+		$scripts[] = 'Front_Style';
+	}
+	if ( ! is_singular() || ! $features['mermaid'] ) {
+		$scripts[] = 'Mermaid';
+	}
+	if ( ! is_singular() || ! $features['mindmap'] ) {
+		$scripts[] = 'MindMap';
+	}
 	foreach ( $styles as $handle ) {
 		wp_dequeue_style( $handle );
 	}
 	foreach ( $scripts as $handle ) {
 		wp_dequeue_script( $handle );
+	}
+	if ( ! is_singular() || ( ! $features['math'] && ! $features['code'] && ! $features['mermaid'] && ! $features['mindmap'] ) ) {
+		wp_dequeue_script( 'jquery' );
+		wp_dequeue_script( 'jquery-core' );
+		wp_dequeue_script( 'jquery-migrate' );
 	}
 }
 add_action( 'wp_enqueue_scripts', 'quietype_trim_editor_assets', 100 );
@@ -127,11 +148,38 @@ function quietype_resource_hints( $urls, $relation_type ) {
 }
 add_filter( 'wp_resource_hints', 'quietype_resource_hints', 10, 2 );
 
+/** WP Editor.md sets a session language cookie on every first front-end view. */
+function quietype_remove_public_editor_language_cookie() {
+	if ( is_admin() || is_user_logged_in() || headers_sent() ) {
+		return;
+	}
+	$set_cookies = array_values( array_filter( headers_list(), function ( $header ) {
+		return 0 === stripos( $header, 'Set-Cookie:' );
+	} ) );
+	if ( ! $set_cookies ) {
+		return;
+	}
+	$filtered = array_values( array_filter( $set_cookies, function ( $header ) {
+		return false === stripos( $header, 'Set-Cookie: wp-editormd-lang=' );
+	} ) );
+	if ( count( $filtered ) === count( $set_cookies ) ) {
+		return;
+	}
+	header_remove( 'Set-Cookie' );
+	foreach ( $filtered as $header ) {
+		header( $header, false );
+	}
+}
+add_action( 'send_headers', 'quietype_remove_public_editor_language_cookie', 100 );
+
 function quietype_cleanup_head() {
 	remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
 	remove_action( 'wp_print_styles', 'print_emoji_styles' );
 	remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );
 	remove_action( 'admin_print_styles', 'print_emoji_styles' );
+	remove_action( 'wp_head', 'wp_generator' );
+	remove_action( 'wp_head', 'rsd_link' );
+	remove_action( 'wp_head', 'wlwmanifest_link' );
 }
 add_action( 'init', 'quietype_cleanup_head' );
 
@@ -379,22 +427,20 @@ function quietype_comment_form_defaults( $defaults ) {
 }
 add_filter( 'comment_form_defaults', 'quietype_comment_form_defaults' );
 
-/** Add a signed four-digit challenge after the website comment field. */
+/** Add a short-lived, one-time four-digit challenge and an invisible honeypot. */
 function quietype_comment_captcha_field( $fields ) {
 	if ( is_user_logged_in() ) {
 		return $fields;
 	}
 	$challenge = (string) wp_rand( 1000, 9999 );
-	$expires   = time() + DAY_IN_SECONDS;
-	$nonce     = wp_generate_password( 16, false, false );
-	$payload   = $challenge . '|' . $expires . '|' . $nonce;
-	$signature = hash_hmac( 'sha256', $payload, wp_salt( 'nonce' ) );
-	$token     = base64_encode( $payload . '|' . $signature ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Signed transport token, not obfuscation.
+	$token     = wp_generate_uuid4();
+	set_transient( 'quietype_comment_captcha_' . md5( $token ), $challenge, 10 * MINUTE_IN_SECONDS );
 
 	$captcha  = '<p class="comment-form-captcha">';
 	$captcha .= '<label for="quietype_comment_captcha">验证 <span class="comment-captcha-code">' . esc_html( $challenge ) . '</span> <span class="required" aria-hidden="true">*</span></label>';
 	$captcha .= '<input id="quietype_comment_captcha" name="quietype_comment_captcha" type="text" inputmode="numeric" pattern="[0-9]{4}" minlength="4" maxlength="4" autocomplete="off" placeholder="填写上方四位数字" required>';
 	$captcha .= '<input name="quietype_comment_captcha_token" type="hidden" value="' . esc_attr( $token ) . '">';
+	$captcha .= '<span class="quietype-comment-honeypot" aria-hidden="true"><label for="quietype_comment_company">公司</label><input id="quietype_comment_company" name="quietype_comment_company" type="text" value="" tabindex="-1" autocomplete="off"></span>';
 	$captcha .= '</p>';
 
 	$ordered = array();
@@ -418,20 +464,22 @@ function quietype_validate_comment_captcha( $commentdata ) {
 	}
 	$token   = isset( $_POST['quietype_comment_captcha_token'] ) ? sanitize_text_field( wp_unslash( $_POST['quietype_comment_captcha_token'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 	$answer  = isset( $_POST['quietype_comment_captcha'] ) ? sanitize_text_field( wp_unslash( $_POST['quietype_comment_captcha'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
-	$decoded = $token ? base64_decode( $token, true ) : false; // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- Decoding a signed transport token.
-	$parts   = is_string( $decoded ) ? explode( '|', $decoded, 4 ) : array();
-	$valid   = 4 === count( $parts );
-	if ( $valid ) {
-		list( $expected, $expires, $nonce, $signature ) = $parts;
-		$payload   = $expected . '|' . $expires . '|' . $nonce;
-		$valid     = ctype_digit( $expected ) && 4 === strlen( $expected );
-		$valid     = $valid && ctype_digit( $expires ) && (int) $expires >= time() && (int) $expires <= time() + DAY_IN_SECONDS + 5 * MINUTE_IN_SECONDS;
-		$valid     = $valid && hash_equals( hash_hmac( 'sha256', $payload, wp_salt( 'nonce' ) ), $signature );
-		$valid     = $valid && hash_equals( $expected, trim( $answer ) );
+	$honeypot = isset( $_POST['quietype_comment_company'] ) ? trim( sanitize_text_field( wp_unslash( $_POST['quietype_comment_company'] ) ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+	$key       = $token ? 'quietype_comment_captcha_' . md5( $token ) : '';
+	$expected  = $key ? get_transient( $key ) : false;
+	if ( $key ) {
+		delete_transient( $key );
 	}
+	$valid = '' === $honeypot && false !== $expected && hash_equals( (string) $expected, trim( $answer ) );
 	if ( ! $valid ) {
 		wp_die( '验证数字不正确或已过期，请返回页面重新填写。', '评论验证失败', array( 'response' => 403, 'back_link' => true ) );
 	}
+	$address = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+	$rate_key = 'quietype_comment_rate_' . md5( absint( $commentdata['comment_post_ID'] ?? 0 ) . '|' . $address . '|' . wp_salt( 'nonce' ) );
+	if ( get_transient( $rate_key ) ) {
+		wp_die( '评论提交得太快了，请稍候再试。', '评论提交过于频繁', array( 'response' => 429, 'back_link' => true ) );
+	}
+	set_transient( $rate_key, 1, 20 );
 	return $commentdata;
 }
 add_filter( 'preprocess_comment', 'quietype_validate_comment_captcha' );
@@ -443,6 +491,26 @@ function quietype_search_posts_only( $query ) {
 	}
 }
 add_action( 'pre_get_posts', 'quietype_search_posts_only' );
+
+/** Keep public REST responses from becoming an account-enumeration endpoint. */
+function quietype_limit_public_user_rest_routes( $endpoints ) {
+	if ( ! is_user_logged_in() ) {
+		unset( $endpoints['/wp/v2/users'], $endpoints['/wp/v2/users/(?P<id>[\d]+)'] );
+	}
+	return $endpoints;
+}
+add_filter( 'rest_endpoints', 'quietype_limit_public_user_rest_routes' );
+
+/** A single-author site does not need public account-shaped author archives. */
+function quietype_disable_author_archives() {
+	if ( is_author() ) {
+		global $wp_query;
+		$wp_query->set_404();
+		status_header( 404 );
+		nocache_headers();
+	}
+}
+add_action( 'template_redirect', 'quietype_disable_author_archives' );
 
 function quietype_allowed_html( $tags ) {
 	if ( isset( $tags['a'] ) ) {

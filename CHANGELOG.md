@@ -4,6 +4,24 @@ All notable changes to Quietype will be documented in this file.
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-07-19
+
+### Added
+
+- Added content-aware loading for WP Editor.md, Prism, KaTeX, PhotoSwipe, Mermaid, MindMap, Plyr, and their jQuery dependency.
+- Added native image lazy loading, asynchronous remote dimension discovery, and editor warnings for missing or generic alternative text.
+- Added a configurable default social image and article-first-image fallback for Open Graph and structured data.
+
+### Security
+
+- Replaced replayable comment challenges with ten-minute one-time transients, a honeypot, and short submission throttling.
+- Exchanged the private login query for a signed, HttpOnly, SameSite cookie and removed it from subsequent URLs and forms.
+- Removed public REST user routes and single-author archives, the login language selector, generator metadata, and unnecessary editor cookies.
+
+### Changed
+
+- Raised meaningful small metadata from the faint decorative color to the accessible muted text color.
+
 ## [0.6.0] - 2026-07-19
 
 ### Added
@@ -33,7 +51,7 @@ All notable changes to Quietype will be documented in this file.
 ### Added
 
 - Added trusted-administrator Head and Footer code slots for analytics, verification markup, small styles, and deferred scripts.
-- Added a required signed four-digit challenge to the public comment form without affecting signed-in users or writing database state on page views.
+- Added a required four-digit challenge to the public comment form without affecting signed-in users.
 
 ### Changed
 

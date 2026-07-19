@@ -28,6 +28,7 @@ function quietype_register_admin_settings() {
 		'quietype_seo_enabled'                => array( 'boolean', true, 'quietype_sanitize_checkbox' ),
 		'quietype_seo_description'            => array( 'string', '', 'quietype_sanitize_seo_description' ),
 		'quietype_seo_keywords'               => array( 'string', '', 'quietype_sanitize_seo_keywords' ),
+		'quietype_social_image_url'           => array( 'string', '', 'esc_url_raw' ),
 		'quietype_gravatar_base_url'          => array( 'string', 'https://gravatar.loli.net/avatar/', 'quietype_sanitize_gravatar_base_url' ),
 		'quietype_login_gate_enabled'         => array( 'boolean', false, 'quietype_sanitize_checkbox' ),
 		'quietype_login_gate_key'             => array( 'string', 'user', 'quietype_sanitize_login_gate_key' ),
@@ -218,6 +219,7 @@ function quietype_render_settings_page() {
 					<tr><th>主题 SEO</th><td><?php quietype_settings_checkbox( 'quietype_seo_enabled', '启用轻量 SEO 元数据' ); ?><p class="description">检测到 Yoast SEO、Rank Math、All in One SEO、SEOPress 或 The SEO Framework 时自动停用输出，避免重复。</p></td></tr>
 					<tr><th><label for="quietype_seo_description">站点描述</label></th><td><textarea class="large-text" id="quietype_seo_description" name="quietype_seo_description" rows="3" maxlength="300"><?php echo esc_textarea( quietype_get_setting( 'quietype_seo_description', '' ) ); ?></textarea><p class="description">首页和无法提取独立摘要的页面使用；留空则使用 WordPress 站点副标题。</p></td></tr>
 					<tr><th><label for="quietype_seo_keywords">站点关键词</label></th><td><input class="large-text" id="quietype_seo_keywords" name="quietype_seo_keywords" type="text" value="<?php echo esc_attr( quietype_get_setting( 'quietype_seo_keywords', '' ) ); ?>"><p class="description">使用英文逗号分隔。搜索引擎通常不再依赖 keywords，但可为部分中文检索服务保留。</p></td></tr>
+					<tr><th><label for="quietype_social_image_url">默认分享图</label></th><td><input class="large-text code" id="quietype_social_image_url" name="quietype_social_image_url" type="url" value="<?php echo esc_attr( quietype_get_setting( 'quietype_social_image_url', '' ) ); ?>" placeholder="https://example.com/social-card.jpg"><p class="description">建议使用 1200×630 的 JPG 或 PNG。留空使用主题预览图；文章仍优先使用特色图和第一张正文图片。</p></td></tr>
 				</table>
 			</section>
 
@@ -228,11 +230,11 @@ function quietype_render_settings_page() {
 
 			<section class="quietype-settings__section" id="quietype-section-security">
 				<h2>登录与安全</h2>
-				<p>启用入口保护前请保存完整登录地址。入口参数名和值必须同时匹配。</p>
+				<p>入口参数仅在首次访问时换取 12 小时安全 Cookie，随后自动跳转到不含入口值的地址。启用前请保存完整入口。</p>
 				<table class="form-table" role="presentation">
 					<tr><th>自定义登录入口</th><td><?php quietype_settings_checkbox( 'quietype_login_gate_enabled', '启用入口保护' ); ?></td></tr>
 					<tr><th><label for="quietype_login_gate_key">入口参数名</label></th><td><input class="regular-text code" id="quietype_login_gate_key" name="quietype_login_gate_key" type="text" value="<?php echo esc_attr( quietype_get_setting( 'quietype_login_gate_key', 'user' ) ); ?>"><p class="description">仅支持字母、数字、下划线和短横线。</p></td></tr>
-					<tr><th><label for="quietype_login_gate_value">入口参数值</label></th><td><input class="regular-text code" id="quietype_login_gate_value" name="quietype_login_gate_value" type="text" value="<?php echo esc_attr( quietype_get_setting( 'quietype_login_gate_value', '' ) ); ?>" autocomplete="off"><p class="description">建议使用较长的随机字符串；请勿在截图或公开文档中暴露。</p></td></tr>
+					<tr><th><label for="quietype_login_gate_value">入口参数值</label></th><td><input class="regular-text code" id="quietype_login_gate_value" name="quietype_login_gate_value" type="text" value="<?php echo esc_attr( quietype_get_setting( 'quietype_login_gate_value', '' ) ); ?>" minlength="24" autocomplete="off"><p class="description">至少 24 位随机字符串；请勿在截图、分析平台或公开文档中暴露。</p></td></tr>
 					<tr><th>登录验证码</th><td><?php quietype_settings_checkbox( 'quietype_login_captcha_enabled', '启用一次性算术验证码' ); ?></td></tr>
 					<tr><th>XML-RPC</th><td><?php quietype_settings_checkbox( 'quietype_xmlrpc_auth_disabled', '禁用 XML-RPC 认证与 Pingback' ); ?><p class="description">启用后 WordPress App 等旧式客户端将不可用。</p></td></tr>
 				</table>

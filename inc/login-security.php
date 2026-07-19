@@ -41,6 +41,34 @@ function quietype_login_gate_value() {
 	return quietype_sanitize_login_gate_value( quietype_get_setting( 'quietype_login_gate_value', '' ) );
 }
 
+/** Return the short-lived cookie used after the entrance parameter is accepted. */
+function quietype_login_gate_cookie_name() {
+	return 'quietype_login_gate';
+}
+
+/** Sign a time-limited browser token without storing the entrance value in it. */
+function quietype_login_gate_cookie_value() {
+	$expires = time() + 12 * HOUR_IN_SECONDS;
+	$nonce   = wp_generate_password( 24, false, false );
+	$payload = $expires . '|' . $nonce;
+	return base64_encode( $payload . '|' . hash_hmac( 'sha256', $payload, wp_salt( 'auth' ) ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Signed transport token.
+}
+
+/** Validate an unexpired entrance cookie. */
+function quietype_login_gate_cookie_matches() {
+	$name    = quietype_login_gate_cookie_name();
+	$encoded = isset( $_COOKIE[ $name ] ) ? sanitize_text_field( wp_unslash( $_COOKIE[ $name ] ) ) : '';
+	$decoded = $encoded ? base64_decode( $encoded, true ) : false; // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- Signed transport token.
+	$parts   = is_string( $decoded ) ? explode( '|', $decoded, 3 ) : array();
+	if ( 3 !== count( $parts ) ) {
+		return false;
+	}
+	list( $expires, $nonce, $signature ) = $parts;
+	$payload = $expires . '|' . $nonce;
+	return ctype_digit( $expires ) && (int) $expires >= time() && (int) $expires <= time() + 13 * HOUR_IN_SECONDS
+		&& hash_equals( hash_hmac( 'sha256', $payload, wp_salt( 'auth' ) ), $signature );
+}
+
 /** The entrance gate is fail-open until both enabled and fully configured. */
 function quietype_login_gate_enabled() {
 	if ( defined( 'QUIETYPE_LOGIN_GATE_VALUE' ) ) {
@@ -51,6 +79,9 @@ function quietype_login_gate_enabled() {
 
 /** Return whether this request carries the configured entrance token. */
 function quietype_login_gate_matches() {
+	if ( quietype_login_gate_cookie_matches() ) {
+		return true;
+	}
 	$key = quietype_login_gate_key();
 	if ( ! isset( $_REQUEST[ $key ] ) || ! is_scalar( $_REQUEST[ $key ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		return false;
@@ -58,6 +89,37 @@ function quietype_login_gate_matches() {
 	$received = sanitize_text_field( wp_unslash( (string) $_REQUEST[ $key ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	return hash_equals( quietype_login_gate_value(), $received );
 }
+
+/** Exchange a valid query parameter for a secure cookie and a clean URL. */
+function quietype_login_gate_exchange_query() {
+	if ( ! quietype_login_gate_enabled() || 'GET' !== strtoupper( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
+		return;
+	}
+	$key = quietype_login_gate_key();
+	if ( ! isset( $_GET[ $key ] ) || ! quietype_login_gate_matches() ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- This is the entrance credential itself.
+		return;
+	}
+	$value = quietype_login_gate_cookie_value();
+	setcookie(
+		quietype_login_gate_cookie_name(),
+		$value,
+		array(
+			'expires'  => time() + 12 * HOUR_IN_SECONDS,
+			'path'     => '/',
+			'secure'   => is_ssl(),
+			'httponly' => true,
+			'samesite' => 'Strict',
+		)
+	);
+	$_COOKIE[ quietype_login_gate_cookie_name() ] = $value;
+	$query = wp_unslash( $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Query is preserved after removing the entrance credential.
+	unset( $query[ $key ] );
+	$query = array_filter( $query, 'is_scalar' );
+	$url   = add_query_arg( array_map( 'sanitize_text_field', $query ), site_url( 'wp-login.php', 'login' ) );
+	wp_safe_redirect( $url );
+	exit;
+}
+add_action( 'login_init', 'quietype_login_gate_exchange_query', -1 );
 
 /**
  * Password reset and signed recovery actions remain usable without exposing
@@ -123,19 +185,16 @@ function quietype_protect_admin_entry() {
 }
 add_action( 'init', 'quietype_protect_admin_entry', 0 );
 
-/** Keep the entrance token present when a protected form submits. */
+/** Legacy no-op retained for child themes that removed this callback by name. */
 function quietype_login_gate_hidden_field() {
-	if ( ! quietype_login_gate_enabled() ) {
-		return;
-	}
-	echo '<input type="hidden" name="' . esc_attr( quietype_login_gate_key() ) . '" value="' . esc_attr( quietype_login_gate_value() ) . '">';
+	return;
 }
 add_action( 'login_form', 'quietype_login_gate_hidden_field', 1 );
 add_action( 'lostpassword_form', 'quietype_login_gate_hidden_field', 1 );
 
 /** Add the entrance token to links rendered within the protected login flow. */
 function quietype_login_gate_url( $url ) {
-	if ( ! quietype_login_gate_enabled() ) {
+	if ( ! quietype_login_gate_enabled() || quietype_login_gate_cookie_matches() ) {
 		return $url;
 	}
 	return add_query_arg( quietype_login_gate_key(), quietype_login_gate_value(), $url );
@@ -166,14 +225,7 @@ add_filter( 'lostpassword_redirect', 'quietype_lostpassword_redirect' );
 
 /** Preserve the protected entrance in the password-reset email. */
 function quietype_gate_password_reset_message( $message, $key, $user_login ) {
-	if ( ! quietype_login_gate_enabled() ) {
-		return $message;
-	}
-	$original = network_site_url(
-		'wp-login.php?action=rp&key=' . rawurlencode( $key ) . '&login=' . rawurlencode( $user_login ),
-		'login'
-	);
-	return str_replace( $original, quietype_login_gate_url( $original ), $message );
+	return $message;
 }
 add_filter( 'retrieve_password_message', 'quietype_gate_password_reset_message', 10, 3 );
 
@@ -217,6 +269,9 @@ function quietype_validate_login_captcha( $user ) {
 	return $user;
 }
 add_filter( 'authenticate', 'quietype_validate_login_captcha', 100 );
+
+/** Keep the focused login surface free of WordPress's language selector. */
+add_filter( 'login_display_language_dropdown', '__return_false' );
 
 /** Disable legacy remote authentication when the site does not use it. */
 function quietype_xmlrpc_enabled( $enabled ) {

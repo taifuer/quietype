@@ -27,6 +27,7 @@ git clone git@github.com:taifuer/quietype.git
 - 纸白、米杏、浅绿三种亮色阅读背景
 - 低干扰亮色代码块、语法高亮、复制按钮和表格横向滚动
 - 图片边框、图注、引用、列表、脚注、KaTeX 与响应式媒体样式
+- 正文图片原生懒加载、远程图片宽高缓存和替代文字发布检查
 - 基于 PhotoSwipe 的图片预览，支持按钮、滚轮、双击和触屏缩放
 - 分类、标签、搜索、年度归档、友链、关于、评论与 404 页面
 - 与前台一致的登录、找回密码和重置密码界面
@@ -39,7 +40,7 @@ git clone git@github.com:taifuer/quietype.git
 - WordPress 6.4+
 - PHP 8.0+
 
-主题可独立使用。WP Editor.md、KaTeX 和 Prism 的兼容处理用于已有 Markdown 技术博客，并不是主题运行的强制依赖。
+主题可独立使用。WP Editor.md、KaTeX 和 Prism 的兼容处理用于已有 Markdown 技术博客，并不是主题运行的强制依赖。Quietype 会检查当前正文，仅在确实存在代码、公式、图片或图表时保留对应资源；普通页面和纯文本文章不会加载整套编辑器前端依赖。
 
 ## 菜单与页面
 
@@ -73,7 +74,7 @@ Quietype 自有配置集中在“外观 → Quietype 设置”，包括页脚联
 
 ## SEO
 
-主题在没有检测到 Yoast SEO、Rank Math、All in One SEO、SEOPress 或 The SEO Framework 时输出轻量元数据：description、keywords、Open Graph、社交摘要和 Schema.org JSON-LD。文章描述按“文章 SEO 自定义描述 → 手工摘要 → 自动摘要”取值，关键词按“文章 SEO 自定义关键词 → 标签 → 分类 → 站点关键词”取值。文章和页面编辑页中的“Quietype SEO”区域可以覆盖自动结果。
+主题在没有检测到 Yoast SEO、Rank Math、All in One SEO、SEOPress 或 The SEO Framework 时输出轻量元数据：description、keywords、Open Graph、社交摘要和 Schema.org JSON-LD。文章描述按“文章 SEO 自定义描述 → 手工摘要 → 自动摘要”取值，关键词按“文章 SEO 自定义关键词 → 标签 → 分类 → 站点关键词”取值。社交图片按“特色图 → 第一张正文图片 → 默认分享图”取值。文章和页面编辑页中的“Quietype SEO”区域可以覆盖自动结果。
 
 后台可填写站点级描述和关键词。`meta keywords` 对主流搜索引擎的作用已经很小，只作为兼容字段保留；描述、规范标题、结构化数据和可读内容更重要。启用专用 SEO 插件后，Quietype 会停止输出整组 SEO 元数据，避免重复。
 
@@ -91,11 +92,13 @@ Prism 只负责语法解析、语言标记和行号；Quietype 内置亮色 toke
 
 ## 登录入口与安全
 
-Quietype 会重设 WordPress 登录相关页面的视觉样式，并可在“外观 → Quietype 设置 → 安全”中启用自定义入口参数、一次性算术验证码和 XML-RPC 认证保护。例如参数名为 `entry`、参数值为一个私有随机字符串时，登录入口是 `wp-login.php?entry=<私有值>`；默认入口、错误参数和未登录的 `/wp-admin/` 均返回 404。请勿将真实入口值写入公开仓库、截图或文档。
+Quietype 会重设 WordPress 登录相关页面的视觉样式，并可在“外观 → Quietype 设置 → 安全”中启用自定义入口参数、一次性算术验证码和 XML-RPC 认证保护。例如参数名为 `entry`、参数值为一个至少 24 位的私有随机字符串时，初始入口是 `wp-login.php?entry=<私有值>`；验证成功后主题会换取一个 12 小时、HttpOnly、SameSite 的签名 Cookie，并跳转到不含入口值的登录地址。默认入口、错误参数和未登录的 `/wp-admin/` 均返回 404。请勿将真实入口值写入公开仓库、截图、统计平台或文档。
 
 启用前请先保存完整入口地址。参数值留空时入口保护保持关闭；需要文件级配置时，也可以在 `wp-config.php` 中定义 `QUIETYPE_LOGIN_GATE_KEY` 和 `QUIETYPE_LOGIN_GATE_VALUE`，常量优先于后台字段。找回密码、密码重置、退出登录和 WordPress 签名恢复链接均保留兼容处理。
 
 验证码和入口保护默认关闭，需由站点管理员明确启用。若站点不使用 WordPress App 或旧式远程发布，可以同时关闭 XML-RPC 认证与 Pingback，避免它绕过网页验证码。隐藏入口和简单验证码主要用于降低自动扫描噪声，不能替代强密码、双重验证和服务器限速。由于入口功能由主题提供，切换主题会恢复 WordPress 默认登录行为。
+
+公开评论使用十分钟有效、提交后立即作废的四位数字验证，并配有蜜罐和短时提交节流。服务器仍应对登录、评论和 XML-RPC 配置独立频率限制。
 
 ## SMTP 与通知
 

@@ -108,6 +108,25 @@ function quietype_get_meta_url() {
 	return get_pagenum_link();
 }
 
+/** Resolve a useful social preview without requiring every article to set a featured image. */
+function quietype_get_social_image() {
+	if ( is_singular() ) {
+		$post_id = get_queried_object_id();
+		if ( has_post_thumbnail( $post_id ) ) {
+			return (string) wp_get_attachment_image_url( get_post_thumbnail_id( $post_id ), 'full' );
+		}
+		$post = get_post( $post_id );
+		if ( $post instanceof WP_Post ) {
+			$images = quietype_remote_image_urls( $post->post_content );
+			if ( $images ) {
+				return $images[0];
+			}
+		}
+	}
+	$custom = (string) quietype_get_setting( 'quietype_social_image_url', '' );
+	return $custom ?: get_template_directory_uri() . '/screenshot.png';
+}
+
 /** Print concise metadata only when no dedicated SEO plugin owns the page. */
 function quietype_print_seo_meta() {
 	if ( is_admin() || is_feed() || is_robots() || ! quietype_get_setting( 'quietype_seo_enabled', true ) || quietype_has_dedicated_seo_plugin() ) {
@@ -118,10 +137,7 @@ function quietype_print_seo_meta() {
 	$title       = wp_get_document_title();
 	$url         = quietype_get_meta_url();
 	$type        = is_singular( 'post' ) ? 'article' : 'website';
-	$image       = '';
-	if ( is_singular() && has_post_thumbnail() ) {
-		$image = wp_get_attachment_image_url( get_post_thumbnail_id(), 'full' );
-	}
+	$image       = quietype_get_social_image();
 
 	if ( $description ) {
 		echo '<meta name="description" content="' . esc_attr( $description ) . '">' . "\n";
@@ -172,6 +188,10 @@ function quietype_print_seo_meta() {
 		$schema['mainEntityOfPage'] = array( '@type' => 'WebPage', '@id' => $url );
 		$schema['author']           = array( '@type' => 'Person', 'name' => get_the_author_meta( 'display_name', $post->post_author ) );
 		$schema['publisher']        = array( '@type' => 'Organization', 'name' => get_bloginfo( 'name' ) );
+		$site_icon                  = get_site_icon_url( 512 );
+		if ( $site_icon ) {
+			$schema['publisher']['logo'] = array( '@type' => 'ImageObject', 'url' => $site_icon );
+		}
 		if ( $image ) {
 			$schema['image'] = $image;
 		}
