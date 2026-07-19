@@ -83,7 +83,7 @@ Prism 只负责语法解析、语言标记和行号；Quietype 内置亮色 toke
 
 ## 登录入口与安全
 
-Quietype 会重设 WordPress 登录相关页面的视觉样式，并可在“外观 → 自定义 → 登录与安全”中启用自定义入口参数、一次性算术验证码和 XML-RPC 认证保护。例如参数名为 `user`、参数值为 `taifu` 时，登录入口是 `wp-login.php?user=taifu`；默认入口、错误参数和未登录的 `/wp-admin/` 均返回 404。
+Quietype 会重设 WordPress 登录相关页面的视觉样式，并可在“外观 → 自定义 → 登录与安全”中启用自定义入口参数、一次性算术验证码和 XML-RPC 认证保护。例如参数名为 `entry`、参数值为一个私有随机字符串时，登录入口是 `wp-login.php?entry=<私有值>`；默认入口、错误参数和未登录的 `/wp-admin/` 均返回 404。请勿将真实入口值写入公开仓库、截图或文档。
 
 启用前请先保存完整入口地址。参数值留空时入口保护保持关闭；需要文件级配置时，也可以在 `wp-config.php` 中定义 `QUIETYPE_LOGIN_GATE_KEY` 和 `QUIETYPE_LOGIN_GATE_VALUE`，常量优先于后台字段。找回密码、密码重置、退出登录和 WordPress 签名恢复链接均保留兼容处理。
 
