@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'QUIETYPE_VERSION', '0.5.1' );
+define( 'QUIETYPE_VERSION', '0.5.2' );
 
 require_once get_template_directory() . '/inc/login-security.php';
 
@@ -298,8 +298,74 @@ function quietype_customize_register( $wp_customize ) {
 			'type'        => 'checkbox',
 		)
 	);
+
+	$wp_customize->add_section(
+		'quietype_custom_code',
+		array(
+			'title'       => '自定义代码',
+			'description' => '仅粘贴可信代码。样式优先使用 WordPress“额外 CSS”；百度统计等异步统计脚本通常放在 Head，依赖页面内容的脚本放在 Footer。',
+			'priority'    => 167,
+		)
+	);
+	$wp_customize->add_setting(
+		'quietype_head_code',
+		array(
+			'default'           => '',
+			'sanitize_callback' => 'quietype_sanitize_custom_code',
+		)
+	);
+	$wp_customize->add_control(
+		'quietype_head_code',
+		array(
+			'label'       => 'Head 自定义代码',
+			'description' => '输出在 </head> 前，可填写 <script>、<style> 或统计平台验证代码。',
+			'section'     => 'quietype_custom_code',
+			'type'        => 'textarea',
+		)
+	);
+	$wp_customize->add_setting(
+		'quietype_footer_code',
+		array(
+			'default'           => '',
+			'sanitize_callback' => 'quietype_sanitize_custom_code',
+		)
+	);
+	$wp_customize->add_control(
+		'quietype_footer_code',
+		array(
+			'label'       => 'Footer 自定义代码',
+			'description' => '输出在 </body> 前，适合不要求提前加载的 JavaScript。',
+			'section'     => 'quietype_custom_code',
+			'type'        => 'textarea',
+		)
+	);
 }
 add_action( 'customize_register', 'quietype_customize_register' );
+
+/** Allow only trusted administrators to persist executable custom markup. */
+function quietype_sanitize_custom_code( $value ) {
+	if ( ! current_user_can( 'unfiltered_html' ) ) {
+		return '';
+	}
+	return trim( (string) $value );
+}
+
+/** Print administrator-supplied code at the selected document boundary. */
+function quietype_print_custom_head_code() {
+	$code = get_theme_mod( 'quietype_head_code', '' );
+	if ( $code ) {
+		echo "\n" . $code . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Explicit unfiltered_html administrator setting.
+	}
+}
+add_action( 'wp_head', 'quietype_print_custom_head_code', 99 );
+
+function quietype_print_custom_footer_code() {
+	$code = get_theme_mod( 'quietype_footer_code', '' );
+	if ( $code ) {
+		echo "\n" . $code . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Explicit unfiltered_html administrator setting.
+	}
+}
+add_action( 'wp_footer', 'quietype_print_custom_footer_code', 99 );
 
 /** Format the WP-PostViews value without depending on the plugin's display template. */
 function quietype_post_views( $post_id = null ) {
@@ -504,6 +570,71 @@ function quietype_comment_form_defaults( $defaults ) {
 	return $defaults;
 }
 add_filter( 'comment_form_defaults', 'quietype_comment_form_defaults' );
+
+/** Add a signed four-digit challenge after the website comment field. */
+function quietype_comment_captcha_field( $fields ) {
+	if ( is_user_logged_in() ) {
+		return $fields;
+	}
+	$challenge = (string) wp_rand( 1000, 9999 );
+	$expires   = time() + DAY_IN_SECONDS;
+	$nonce     = wp_generate_password( 16, false, false );
+	$payload   = $challenge . '|' . $expires . '|' . $nonce;
+	$signature = hash_hmac( 'sha256', $payload, wp_salt( 'nonce' ) );
+	$token     = base64_encode( $payload . '|' . $signature ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Signed transport token, not obfuscation.
+
+	$captcha  = '<p class="comment-form-captcha">';
+	$captcha .= '<label for="quietype_comment_captcha">验证 <span class="comment-captcha-code">' . esc_html( $challenge ) . '</span> <span class="required" aria-hidden="true">*</span></label>';
+	$captcha .= '<input id="quietype_comment_captcha" name="quietype_comment_captcha" type="text" inputmode="numeric" pattern="[0-9]{4}" minlength="4" maxlength="4" autocomplete="off" placeholder="填写左侧四位数字" required>';
+	$captcha .= '<input name="quietype_comment_captcha_token" type="hidden" value="' . esc_attr( $token ) . '">';
+	$captcha .= '</p>';
+
+	$ordered = array();
+	foreach ( $fields as $key => $field ) {
+		$ordered[ $key ] = $field;
+		if ( 'url' === $key ) {
+			$ordered['quietype_captcha'] = $captcha;
+		}
+	}
+	if ( ! isset( $ordered['quietype_captcha'] ) ) {
+		$ordered['quietype_captcha'] = $captcha;
+	}
+	return $ordered;
+}
+add_filter( 'comment_form_default_fields', 'quietype_comment_captcha_field' );
+
+/** Validate and consume the public comment challenge before insertion. */
+function quietype_validate_comment_captcha( $commentdata ) {
+	if ( is_user_logged_in() || in_array( $commentdata['comment_type'] ?? '', array( 'pingback', 'trackback' ), true ) ) {
+		return $commentdata;
+	}
+	$token   = isset( $_POST['quietype_comment_captcha_token'] ) ? sanitize_text_field( wp_unslash( $_POST['quietype_comment_captcha_token'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+	$answer  = isset( $_POST['quietype_comment_captcha'] ) ? sanitize_text_field( wp_unslash( $_POST['quietype_comment_captcha'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+	$decoded = $token ? base64_decode( $token, true ) : false; // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- Decoding a signed transport token.
+	$parts   = is_string( $decoded ) ? explode( '|', $decoded, 4 ) : array();
+	$valid   = 4 === count( $parts );
+	if ( $valid ) {
+		list( $expected, $expires, $nonce, $signature ) = $parts;
+		$payload   = $expected . '|' . $expires . '|' . $nonce;
+		$valid     = ctype_digit( $expected ) && 4 === strlen( $expected );
+		$valid     = $valid && ctype_digit( $expires ) && (int) $expires >= time() && (int) $expires <= time() + DAY_IN_SECONDS + 5 * MINUTE_IN_SECONDS;
+		$valid     = $valid && hash_equals( hash_hmac( 'sha256', $payload, wp_salt( 'nonce' ) ), $signature );
+		$valid     = $valid && hash_equals( $expected, trim( $answer ) );
+	}
+	if ( ! $valid ) {
+		wp_die( '验证数字不正确或已过期，请返回页面重新填写。', '评论验证失败', array( 'response' => 403, 'back_link' => true ) );
+	}
+	return $commentdata;
+}
+add_filter( 'preprocess_comment', 'quietype_validate_comment_captcha' );
+
+/** Keep public search focused on articles rather than utility pages. */
+function quietype_search_posts_only( $query ) {
+	if ( ! is_admin() && $query->is_main_query() && $query->is_search() ) {
+		$query->set( 'post_type', 'post' );
+	}
+}
+add_action( 'pre_get_posts', 'quietype_search_posts_only' );
 
 function quietype_allowed_html( $tags ) {
 	if ( isset( $tags['a'] ) ) {

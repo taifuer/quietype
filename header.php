@@ -13,7 +13,7 @@
 <header class="site-header">
 	<div class="site-header__inner">
 		<a class="site-brand" href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home" aria-label="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>，返回首页">
-			<span class="site-brand__wordmark">太傅博客</span>
+			<span class="site-brand__wordmark"><span class="site-brand__primary">太傅</span><span class="site-brand__suffix">博客</span></span>
 		</a>
 		<div class="mobile-header-actions">
 			<button class="icon-button nav-toggle" type="button" aria-expanded="false" aria-controls="site-navigation" aria-label="打开菜单"><?php echo quietype_icon( 'menu' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button>

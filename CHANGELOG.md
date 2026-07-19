@@ -4,6 +4,17 @@ All notable changes to Quietype will be documented in this file.
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-07-19
+
+### Added
+
+- Added trusted-administrator Head and Footer code slots for analytics, verification markup, small styles, and deferred scripts.
+- Added a required signed four-digit challenge to the public comment form without affecting signed-in users or writing database state on page views.
+
+### Changed
+
+- Limited front-end search results to posts, grouped mobile article dates and reading statistics into two clean lines, and refined the text masthead.
+
 ## [0.5.1] - 2026-07-19
 
 ### Fixed

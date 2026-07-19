@@ -4,7 +4,7 @@ Theme URI: https://github.com/taifuer/quietype
 Author: taifu
 Author URI: https://github.com/taifuer
 Description: A quiet WordPress theme for thoughtful reading, designed for Chinese long-form and technical writing.
-Version: 0.5.1
+Version: 0.5.2
 Requires at least: 6.4
 Requires PHP: 8.0
 License: GNU General Public License v2 or later
@@ -656,4 +656,25 @@ body{font-kerning:normal;font-variant-ligatures:common-ligatures}
   .icon-button:hover,.tool-button:hover{background:transparent;color:var(--muted)}
   .reading-background__toggle:hover{border-color:var(--line);background:color-mix(in srgb,var(--paper) 94%,transparent);color:var(--muted)}
   .reading-background__options button:hover:not(.active){background:transparent;color:var(--muted)}
+}
+
+/* Quietype 0.5.2: compact masthead, grouped metadata, and comment verification. */
+.site-brand__wordmark{display:inline-flex;align-items:baseline;font-family:var(--serif);letter-spacing:0}
+.site-brand__primary{color:var(--text);font-size:1em;font-weight:750;letter-spacing:.025em}
+.site-brand__suffix{margin-left:.42em;color:var(--muted)!important;font-family:var(--sans);font-size:.68em;font-weight:650;letter-spacing:.12em}
+.article-meta{display:flex;align-items:center;flex-wrap:wrap}
+.article-meta__group{display:inline-flex;align-items:center;flex-wrap:wrap}
+.article-meta__group>*+*:before,.article-meta>.article-meta__group+*:before{content:"·";display:inline-block;margin:0 9px;color:var(--faint)}
+.comment-form-url,.comment-form-captcha{grid-column:auto}
+.comment-captcha-code{display:inline-block;margin-left:3px;color:var(--accent);font-family:var(--mono);font-size:.95em;font-weight:700;letter-spacing:.08em;font-variant-numeric:tabular-nums}
+.comment-form-captcha input{font-variant-numeric:tabular-nums}
+
+@media(max-width:720px){
+  .site-brand__suffix{font-size:.7em}
+  .article-meta{display:grid;gap:3px}
+  .article-meta__group{display:flex;width:100%;line-height:1.7}
+  .article-meta>.article-meta__group+*:before{content:none;display:none!important}
+  .article-meta__group>*{display:inline}
+  .article-meta__group>*+*:before{display:inline-block!important;margin:0 7px}
+  .comment-form-url,.comment-form-captcha{grid-column:1}
 }
