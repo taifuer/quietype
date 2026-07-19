@@ -17,6 +17,12 @@
   const siteFooter = document.querySelector('.site-footer');
   const backgrounds = new Set(['paper', 'warm', 'green']);
 
+  const releasePointerFocus = (event) => {
+    if (event.detail > 0 && event.currentTarget instanceof HTMLElement) {
+      event.currentTarget.blur();
+    }
+  };
+
   const setExpanded = (button, expanded) => {
     if (button) button.setAttribute('aria-expanded', String(expanded));
   };
@@ -47,7 +53,7 @@
     navToggle.addEventListener('click', (event) => {
       const open = !nav.classList.contains('open');
       setNav(open);
-      if (!open && event.detail > 0) navToggle.blur();
+      releasePointerFocus(event);
     });
     navBackdrop?.addEventListener('click', () => setNav(false));
     nav.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => setNav(false)));
@@ -71,23 +77,25 @@
         button.innerHTML = '<span aria-hidden="true">＋</span>';
         item.insertBefore(button, submenu);
       }
-      button.addEventListener('click', () => {
+      button.addEventListener('click', (event) => {
         const open = !item.classList.contains('submenu-open');
         item.classList.toggle('submenu-open', open);
         button.setAttribute('aria-expanded', String(open));
         button.setAttribute('aria-label', `${open ? '收起' : '展开'}${link.textContent.trim()}子菜单`);
         button.querySelector('span').textContent = open ? '－' : '＋';
+        releasePointerFocus(event);
       });
     });
   }
 
   if (searchToggles.length && search) {
-    searchToggles.forEach((searchToggle) => searchToggle.addEventListener('click', () => {
+    searchToggles.forEach((searchToggle) => searchToggle.addEventListener('click', (event) => {
       const open = search.hasAttribute('hidden');
       search.toggleAttribute('hidden', !open);
       setSearchExpanded(open);
       if (open) setNav(false);
       if (open) search.querySelector('input')?.focus();
+      if (!open) releasePointerFocus(event);
     }));
   }
 
@@ -107,12 +115,14 @@
       backgroundOptions.toggleAttribute('hidden', !open);
       setExpanded(backgroundToggle, open);
     });
+    backgroundToggle.addEventListener('click', releasePointerFocus);
     backgroundButtons.forEach((button) => {
       button.addEventListener('click', () => setBackground(button.dataset.readingBg));
       button.addEventListener('click', () => {
         backgroundOptions.toggleAttribute('hidden', true);
         setExpanded(backgroundToggle, false);
       });
+      button.addEventListener('click', releasePointerFocus);
     });
   }
   setBackground(root.dataset.readingBg);
@@ -234,7 +244,13 @@
   };
   updateScrollState();
   window.addEventListener('scroll', updateScrollState, { passive: true });
-  topButton?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-  bottomButton?.addEventListener('click', () => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' }));
+  topButton?.addEventListener('click', (event) => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    releasePointerFocus(event);
+  });
+  bottomButton?.addEventListener('click', (event) => {
+    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+    releasePointerFocus(event);
+  });
 
 })();

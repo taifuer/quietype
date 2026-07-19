@@ -15,6 +15,12 @@ if ( $category instanceof WP_Term ) {
 		}
 	}
 	$category_path[] = $category;
+} elseif ( is_tag() ) {
+	$archive_title = single_tag_title( '', false );
+} elseif ( is_tax() ) {
+	$archive_title = single_term_title( '', false );
+} else {
+	$archive_title = wp_strip_all_tags( $archive_title );
 }
 ?>
 <section class="archive-index section-wrap">

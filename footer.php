@@ -1,7 +1,10 @@
 </main>
 <footer class="site-footer">
 	<div class="site-footer__inner">
-		<span class="footer-copyright">© 2017–<?php echo esc_html( gmdate( 'Y' ) ); ?> <a href="<?php echo esc_url( home_url( '/' ) ); ?>">太傅博客</a></span>
+		<div class="footer-legal">
+			<span class="footer-copyright">© 2017–<?php echo esc_html( gmdate( 'Y' ) ); ?> <a href="<?php echo esc_url( home_url( '/' ) ); ?>">太傅博客</a></span>
+			<a class="footer-icp" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">湘ICP备17002466号</a>
+		</div>
 		<?php $github_url = get_theme_mod( 'quietype_github_url', 'https://github.com/taifuer' ); ?>
 		<?php $contact_email = get_theme_mod( 'quietype_contact_email', 'taifu@taifua.com' ); ?>
 		<?php if ( $github_url || $contact_email ) : ?>
@@ -10,7 +13,6 @@
 				<?php if ( $github_url ) : ?><a href="<?php echo esc_url( $github_url ); ?>" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><?php echo quietype_icon( 'github' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></a><?php endif; ?>
 			</nav>
 		<?php endif; ?>
-		<a class="footer-icp" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">湘ICP备17002466号</a>
 	</div>
 </footer>
 <aside class="reading-tools" aria-label="阅读工具">

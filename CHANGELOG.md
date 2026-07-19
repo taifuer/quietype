@@ -4,6 +4,19 @@ All notable changes to Quietype will be documented in this file.
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-07-19
+
+### Fixed
+
+- Contained mobile article layout, reading tools, inline code, links, and rendered formulas without disabling pinch zoom.
+- Removed literal taxonomy markup from tag titles and restored article metadata separators on narrow screens.
+- Released sticky touch focus from mobile icon controls and hid the unused login language selector.
+
+### Changed
+
+- Replaced decorative links/archive copy with useful site totals and tightened home, term, footer, and mobile spacing.
+- Refined the local-first Chinese, Latin, and code font stacks plus restrained editorial category and tag marks.
+
 ## [0.5.0] - 2026-07-19
 
 ### Added

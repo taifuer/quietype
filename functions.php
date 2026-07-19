@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'QUIETYPE_VERSION', '0.5.0' );
+define( 'QUIETYPE_VERSION', '0.5.1' );
 
 require_once get_template_directory() . '/inc/login-security.php';
 
@@ -307,6 +307,31 @@ function quietype_post_views( $post_id = null ) {
 	return number_format_i18n( max( 0, (int) get_post_meta( $post_id, 'views', true ) ) );
 }
 
+/** Return published article, view, and approved-comment totals for archives. */
+function quietype_archive_stats() {
+	global $wpdb;
+
+	$post_count    = (int) wp_count_posts( 'post' )->publish;
+	$view_count    = (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		"SELECT COALESCE(SUM(CAST(pm.meta_value AS UNSIGNED)), 0)
+		FROM {$wpdb->posts} p
+		LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'views'
+		WHERE p.post_type = 'post' AND p.post_status = 'publish'"
+	);
+	$comment_count = (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		"SELECT COUNT(*)
+		FROM {$wpdb->comments} c
+		INNER JOIN {$wpdb->posts} p ON c.comment_post_ID = p.ID
+		WHERE c.comment_approved = '1' AND p.post_type = 'post' AND p.post_status = 'publish'"
+	);
+
+	return array(
+		'posts'    => $post_count,
+		'views'    => $view_count,
+		'comments' => $comment_count,
+	);
+}
+
 /** Custom home menu items in the imported database should follow each environment. */
 function quietype_normalize_home_menu_link( $items ) {
 	foreach ( $items as $item ) {
@@ -395,7 +420,7 @@ function quietype_post_terms( $post_id = null, $limit = 3 ) {
 			if ( count( $links ) >= $limit ) {
 				break;
 			}
-			$links[] = '<a class="post-tag" href="' . esc_url( get_tag_link( $tag ) ) . '">#' . esc_html( $tag->name ) . '</a>';
+			$links[] = '<a class="post-tag" href="' . esc_url( get_tag_link( $tag ) ) . '"><span class="post-tag__mark" aria-hidden="true">#</span><span>' . esc_html( $tag->name ) . '</span></a>';
 		}
 	}
 	return implode( ' ', $links );

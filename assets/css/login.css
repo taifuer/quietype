@@ -233,7 +233,7 @@ body.login::before {
 }
 
 .login .language-switcher {
-	margin-top: 22px;
+	display: none;
 }
 
 .login .language-switcher form {

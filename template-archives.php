@@ -6,13 +6,14 @@
  */
 get_header();
 the_post();
-$years = $wpdb->get_col( "SELECT DISTINCT YEAR(post_date) FROM {$wpdb->posts} WHERE post_type='post' AND post_status='publish' ORDER BY post_date DESC" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+$years         = $wpdb->get_col( "SELECT DISTINCT YEAR(post_date) FROM {$wpdb->posts} WHERE post_type='post' AND post_status='publish' ORDER BY post_date DESC" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+$archive_stats = quietype_archive_stats();
 ?>
 <section class="archive-page section-wrap">
 	<header class="page-hero">
 		<p class="eyebrow">ARCHIVE</p>
 		<h1><?php the_title(); ?></h1>
-		<p><?php echo esc_html( wp_count_posts()->publish ); ?> 篇文章，按时间安静地排好。</p>
+		<p><?php echo esc_html( number_format_i18n( $archive_stats['posts'] ) ); ?> 篇文章，<?php echo esc_html( number_format_i18n( $archive_stats['views'] ) ); ?> 次浏览，<?php echo esc_html( number_format_i18n( $archive_stats['comments'] ) ); ?> 条评论</p>
 	</header>
 	<?php $archive_tags = get_tags( array( 'orderby' => 'count', 'order' => 'DESC', 'hide_empty' => true ) ); ?>
 	<?php if ( $archive_tags ) : ?>
@@ -20,7 +21,7 @@ $years = $wpdb->get_col( "SELECT DISTINCT YEAR(post_date) FROM {$wpdb->posts} WH
 			<div class="archive-tags__heading"><h2>文章标签</h2><span><?php echo esc_html( count( $archive_tags ) ); ?> 个标签</span></div>
 			<div class="archive-tags__list">
 				<?php foreach ( $archive_tags as $archive_tag ) : ?>
-					<a href="<?php echo esc_url( get_tag_link( $archive_tag ) ); ?>" title="<?php echo esc_attr( '#' . $archive_tag->name . '，' . $archive_tag->count . ' 篇文章' ); ?>"><span>#<?php echo esc_html( $archive_tag->name ); ?></span><small><?php echo esc_html( $archive_tag->count ); ?></small></a>
+					<a href="<?php echo esc_url( get_tag_link( $archive_tag ) ); ?>" title="<?php echo esc_attr( '#' . $archive_tag->name . '，' . $archive_tag->count . ' 篇文章' ); ?>"><span><i aria-hidden="true">#</i><?php echo esc_html( $archive_tag->name ); ?></span><small><?php echo esc_html( $archive_tag->count ); ?></small></a>
 				<?php endforeach; ?>
 			</div>
 		</nav>

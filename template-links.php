@@ -12,7 +12,6 @@ $bookmarks = get_bookmarks( array( 'orderby' => 'rating', 'order' => 'DESC' ) );
 	<header class="page-hero">
 		<p class="eyebrow">LINKS</p>
 		<h1><?php the_title(); ?></h1>
-		<p>一些持续写作的人，以及愿意时常回去看看的地方。</p>
 	</header>
 	<?php if ( trim( wp_strip_all_tags( get_the_content() ) ) ) : ?><div class="article-content content-width links-intro"><?php the_content(); ?></div><?php endif; ?>
 	<?php if ( $bookmarks ) : ?>

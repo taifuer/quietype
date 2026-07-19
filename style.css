@@ -4,7 +4,7 @@ Theme URI: https://github.com/taifuer/quietype
 Author: taifu
 Author URI: https://github.com/taifuer
 Description: A quiet WordPress theme for thoughtful reading, designed for Chinese long-form and technical writing.
-Version: 0.5.0
+Version: 0.5.1
 Requires at least: 6.4
 Requires PHP: 8.0
 License: GNU General Public License v2 or later
@@ -608,4 +608,52 @@ html[data-reading-bg=green]{--page:#f2f7ef;--paper:#f2f7ef}
   .footer-contact{position:static;order:-1;margin:0 0 2px;gap:6px;transform:none}
   .footer-contact a{width:30px;height:30px}
   .footer-icp{margin-left:0}
+}
+
+/* Quietype 0.5.1: contained mobile reading and restrained editorial details. */
+:root{
+  --serif:"Source Han Serif SC","Noto Serif CJK SC","Noto Serif SC","Songti SC",STSong,SimSun,serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC","Source Han Sans SC","PingFang SC","Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif;
+  --mono:"JetBrains Mono","Sarasa Mono SC","Cascadia Code","SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace
+}
+body{font-kerning:normal;font-variant-ligatures:common-ligatures}
+.section-title h1,.post-row h2{font-family:var(--serif)}
+.section-title h1{letter-spacing:.04em}
+.post-row__date{font-family:var(--mono);font-size:12px!important;letter-spacing:-.015em}
+.post-category:before{margin-right:4px}
+.post-tag{display:inline-flex;align-items:baseline;gap:3px;color:var(--accent);font-weight:500}
+.post-tag__mark{font-family:var(--mono);font-size:.92em;font-weight:650;line-height:1;color:color-mix(in srgb,var(--accent) 82%,var(--muted))}
+.archive-tags__list a>span{display:flex;align-items:baseline;gap:3px}
+.archive-tags__list i{color:var(--accent);font-family:var(--mono);font-size:.92em;font-style:normal;font-weight:650}
+.article-meta>*+*:before{content:"·";display:inline-block;margin:0 9px;color:var(--faint)}
+.article-content :where(p,li,blockquote,td,th,figcaption){min-width:0;overflow-wrap:break-word}
+.article-content a{overflow-wrap:anywhere;word-break:break-word}
+.article-content :not(pre)>code{white-space:normal;overflow-wrap:anywhere;word-break:break-word;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.article-content p>.katex,.article-content li>.katex,.article-content td>.katex{max-width:100%;white-space:normal}
+.article-content p>.katex>.katex-html,.article-content li>.katex>.katex-html,.article-content td>.katex>.katex-html{display:inline;white-space:normal}
+.article-content p>.katex>.katex-html>.base,.article-content li>.katex>.katex-html>.base,.article-content td>.katex>.katex-html>.base{display:inline;white-space:normal}
+.article-content mjx-container:not([display=true]){display:inline;max-width:100%;overflow-wrap:anywhere;white-space:normal}
+.footer-legal{display:contents}
+
+@media(max-width:720px){
+  html,body{max-width:100%;overflow-x:hidden}
+  @supports(overflow:clip){html,body{overflow-x:clip}}
+  .site-main,.article,.article-header,.article-content,.article-end,.comments-area{min-width:0;max-width:100%}
+  .article-content .alignwide,.article-content .alignfull{width:100%;max-width:100%;margin-left:0;transform:none}
+  .article-content table{width:100%;max-width:100%;margin-left:0}
+  .article-content iframe,.article-content video,.article-content svg{max-width:100%}
+  .post-index--home{padding-top:30px}
+  .article-meta{display:block}
+  .article-meta>*{display:inline;margin-right:0}
+  .article-meta>*+*:before{display:inline-block!important;margin:0 7px}
+  .reading-tools{right:max(18px,calc(env(safe-area-inset-right) + 12px));bottom:calc(18px + env(safe-area-inset-bottom) + var(--footer-overlap,0px))}
+  .site-footer__inner{padding:12px 0 14px;gap:4px}
+  .footer-legal{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;white-space:nowrap}
+  .footer-contact{margin-bottom:0}
+}
+
+@media(hover:none){
+  .icon-button:hover,.tool-button:hover{background:transparent;color:var(--muted)}
+  .reading-background__toggle:hover{border-color:var(--line);background:color-mix(in srgb,var(--paper) 94%,transparent);color:var(--muted)}
+  .reading-background__options button:hover:not(.active){background:transparent;color:var(--muted)}
 }
