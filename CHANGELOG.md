@@ -4,6 +4,18 @@ All notable changes to Quietype will be documented in this file.
 
 ## [Unreleased]
 
+## [0.5.3] - 2026-07-19
+
+### Added
+
+- Added a dedicated Appearance settings screen with WordPress's code editor for trusted Head and Footer markup.
+- Added an editable Gravatar base URL with a mainland-friendly default and an opt-out path.
+
+### Fixed
+
+- Corrected the comment verification instruction and restored a single, consistent Chinese masthead style.
+- Escaped document-boundary examples so the Head and Footer setting descriptions render in full.
+
 ## [0.5.2] - 2026-07-19
 
 ### Added

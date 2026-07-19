@@ -9,9 +9,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'QUIETYPE_VERSION', '0.5.2' );
+define( 'QUIETYPE_VERSION', '0.5.3' );
 
 require_once get_template_directory() . '/inc/login-security.php';
+require_once get_template_directory() . '/inc/admin-settings.php';
 
 function quietype_setup() {
 	load_theme_textdomain( 'quietype', get_template_directory() . '/languages' );
@@ -137,7 +138,8 @@ function quietype_avatar_url( $url ) {
 	if ( ! is_string( $url ) || ! preg_match( '#^https?://[^/]*gravatar\.com/avatar/#i', $url ) ) {
 		return $url;
 	}
-	$base_url = apply_filters( 'quietype_avatar_base_url', 'https://gravatar.loli.net/avatar/' );
+	$base_url = get_option( 'quietype_gravatar_base_url', 'https://gravatar.loli.net/avatar/' );
+	$base_url = apply_filters( 'quietype_avatar_base_url', $base_url );
 	if ( ! $base_url ) {
 		return $url;
 	}
@@ -299,73 +301,8 @@ function quietype_customize_register( $wp_customize ) {
 		)
 	);
 
-	$wp_customize->add_section(
-		'quietype_custom_code',
-		array(
-			'title'       => '自定义代码',
-			'description' => '仅粘贴可信代码。样式优先使用 WordPress“额外 CSS”；百度统计等异步统计脚本通常放在 Head，依赖页面内容的脚本放在 Footer。',
-			'priority'    => 167,
-		)
-	);
-	$wp_customize->add_setting(
-		'quietype_head_code',
-		array(
-			'default'           => '',
-			'sanitize_callback' => 'quietype_sanitize_custom_code',
-		)
-	);
-	$wp_customize->add_control(
-		'quietype_head_code',
-		array(
-			'label'       => 'Head 自定义代码',
-			'description' => '输出在 </head> 前，可填写 <script>、<style> 或统计平台验证代码。',
-			'section'     => 'quietype_custom_code',
-			'type'        => 'textarea',
-		)
-	);
-	$wp_customize->add_setting(
-		'quietype_footer_code',
-		array(
-			'default'           => '',
-			'sanitize_callback' => 'quietype_sanitize_custom_code',
-		)
-	);
-	$wp_customize->add_control(
-		'quietype_footer_code',
-		array(
-			'label'       => 'Footer 自定义代码',
-			'description' => '输出在 </body> 前，适合不要求提前加载的 JavaScript。',
-			'section'     => 'quietype_custom_code',
-			'type'        => 'textarea',
-		)
-	);
 }
 add_action( 'customize_register', 'quietype_customize_register' );
-
-/** Allow only trusted administrators to persist executable custom markup. */
-function quietype_sanitize_custom_code( $value ) {
-	if ( ! current_user_can( 'unfiltered_html' ) ) {
-		return '';
-	}
-	return trim( (string) $value );
-}
-
-/** Print administrator-supplied code at the selected document boundary. */
-function quietype_print_custom_head_code() {
-	$code = get_theme_mod( 'quietype_head_code', '' );
-	if ( $code ) {
-		echo "\n" . $code . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Explicit unfiltered_html administrator setting.
-	}
-}
-add_action( 'wp_head', 'quietype_print_custom_head_code', 99 );
-
-function quietype_print_custom_footer_code() {
-	$code = get_theme_mod( 'quietype_footer_code', '' );
-	if ( $code ) {
-		echo "\n" . $code . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Explicit unfiltered_html administrator setting.
-	}
-}
-add_action( 'wp_footer', 'quietype_print_custom_footer_code', 99 );
 
 /** Format the WP-PostViews value without depending on the plugin's display template. */
 function quietype_post_views( $post_id = null ) {
@@ -585,7 +522,7 @@ function quietype_comment_captcha_field( $fields ) {
 
 	$captcha  = '<p class="comment-form-captcha">';
 	$captcha .= '<label for="quietype_comment_captcha">验证 <span class="comment-captcha-code">' . esc_html( $challenge ) . '</span> <span class="required" aria-hidden="true">*</span></label>';
-	$captcha .= '<input id="quietype_comment_captcha" name="quietype_comment_captcha" type="text" inputmode="numeric" pattern="[0-9]{4}" minlength="4" maxlength="4" autocomplete="off" placeholder="填写左侧四位数字" required>';
+	$captcha .= '<input id="quietype_comment_captcha" name="quietype_comment_captcha" type="text" inputmode="numeric" pattern="[0-9]{4}" minlength="4" maxlength="4" autocomplete="off" placeholder="填写上方四位数字" required>';
 	$captcha .= '<input name="quietype_comment_captcha_token" type="hidden" value="' . esc_attr( $token ) . '">';
 	$captcha .= '</p>';
 

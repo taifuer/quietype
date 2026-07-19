@@ -69,11 +69,11 @@ Quietype 目前只提供亮色阅读背景。
 
 页脚的 GitHub 和联系邮箱可在“外观 → 自定义 → 页脚联系方式”中修改；将字段留空即可隐藏对应图标。
 
-统计脚本、站点验证代码或少量自定义样式可在“外观 → 自定义 → 自定义代码”中分别添加到 Head 或 Footer。只有具备 `unfiltered_html` 权限的管理员可以保存可执行代码；样式仍建议优先使用 WordPress 原生“额外 CSS”。
+统计脚本和站点验证代码可在“外观 → Quietype 设置”中分别添加到 Head 或 Footer。该页面使用 WordPress 自带代码编辑器，避免脚本在 Customizer 实时预览中意外执行。只有具备 `unfiltered_html` 权限的管理员可以保存可执行代码；样式仍建议优先使用 WordPress 原生“额外 CSS”。
 
 ## 中国大陆访问优化
 
-评论头像默认将 WordPress 生成的 Gravatar 地址替换为 `https://gravatar.loli.net/avatar/`，不修改用户或评论数据。站点开发者可以通过过滤器更换头像入口；返回空值则保留 WordPress 原始地址：
+评论头像默认将 WordPress 生成的 Gravatar 地址替换为 `https://gravatar.loli.net/avatar/`，不修改用户或评论数据。可在“外观 → Quietype 设置”中修改地址或留空以保留 WordPress 原始地址；开发者也可继续通过过滤器覆盖：
 
 ```php
 add_filter( 'quietype_avatar_base_url', function () {
