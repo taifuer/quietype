@@ -4,7 +4,7 @@ Theme URI: https://github.com/taifuer/quietype
 Author: taifu
 Author URI: https://github.com/taifuer
 Description: A quiet WordPress theme for thoughtful reading, designed for Chinese long-form and technical writing.
-Version: 0.7.1
+Version: 0.7.2
 Requires at least: 6.4
 Requires PHP: 8.0
 License: GNU General Public License v2 or later
@@ -628,7 +628,7 @@ body{font-kerning:normal;font-variant-ligatures:common-ligatures}
 .article-meta>*+*:before{content:"·";display:inline-block;margin:0 9px;color:var(--faint)}
 .article-content :where(p,li,blockquote,td,th,figcaption){min-width:0;overflow-wrap:break-word}
 .article-content a{overflow-wrap:anywhere;word-break:break-word}
-.article-content :not(pre)>code{white-space:normal;overflow-wrap:anywhere;word-break:break-word;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.article-content :not(pre)>code{white-space:normal;overflow-wrap:anywhere;word-break:break-all;line-break:anywhere;-webkit-box-decoration-break:clone;box-decoration-break:clone}
 .article-content p>.katex,.article-content li>.katex,.article-content td>.katex{max-width:100%;white-space:normal}
 .article-content p>.katex>.katex-html,.article-content li>.katex>.katex-html,.article-content td>.katex>.katex-html{display:inline;white-space:normal}
 .article-content p>.katex>.katex-html>.base,.article-content li>.katex>.katex-html>.base,.article-content td>.katex>.katex-html>.base{display:inline;white-space:normal}
@@ -680,3 +680,6 @@ body{font-kerning:normal;font-variant-ligatures:common-ligatures}
   .article-meta__group>*+*:before{display:inline-block!important;margin:0 7px}
   .comment-form-url,.comment-form-captcha{grid-column:1}
 }
+
+/* Quietype 0.7.2: let long inline identifiers use the current line. */
+.article-content li>p:only-child{margin-top:0;margin-bottom:0}

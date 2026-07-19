@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'QUIETYPE_VERSION', '0.7.1' );
+define( 'QUIETYPE_VERSION', '0.7.2' );
 
 require_once get_template_directory() . '/inc/admin-settings.php';
 require_once get_template_directory() . '/inc/login-security.php';
@@ -395,6 +395,23 @@ function quietype_prepare_article( $content ) {
 	$content = preg_replace(
 		'/<pre(?![^>]*\bdata-prismjs-copy=)([^>]*)>/i',
 		'<pre$1 data-prismjs-copy="复制" data-prismjs-copy-success="已复制" data-prismjs-copy-error="复制失败">',
+		$content
+	);
+	$content = preg_replace_callback(
+		'~<pre\b[^>]*>.*?</pre>(*SKIP)(*F)|<code\b([^>]*)>(.*?)</code>~isu',
+		function ( $matches ) {
+			$text = html_entity_decode( wp_strip_all_tags( $matches[2] ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+			$text = esc_html( $text );
+			$text = preg_replace_callback(
+				'/[A-Za-z0-9_]{16,}/',
+				function ( $token_match ) {
+					$token = preg_replace( '/(?<=[a-z0-9])(?=[A-Z])|(?<=_)/', '<wbr>', $token_match[0] );
+					return $token === $token_match[0] ? preg_replace( '/(.{10})(?=.)/', '$1<wbr>', $token ) : $token;
+				},
+				$text
+			);
+			return '<code' . $matches[1] . '>' . $text . '</code>';
+		},
 		$content
 	);
 	return array( 'content' => $content, 'items' => $items );

@@ -4,6 +4,13 @@ All notable changes to Quietype will be documented in this file.
 
 ## [Unreleased]
 
+## [0.7.2] - 2026-07-19
+
+### Fixed
+
+- Added semantic soft-break opportunities to long inline-code identifiers so they use the current line instead of moving as a whole.
+- Removed duplicated paragraph margins from single-paragraph list items emitted by Markdown renderers.
+
 ## [0.7.1] - 2026-07-19
 
 ### Added
