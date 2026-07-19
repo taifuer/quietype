@@ -3,13 +3,13 @@
   "version": 3,
   "settings": {
     "appearanceTools": true,
-    "layout": { "contentSize": "800px", "wideSize": "1080px" },
+    "layout": { "contentSize": "800px", "wideSize": "960px" },
     "color": {
       "defaultPalette": false,
       "palette": [
         { "slug": "ink", "name": "墨色", "color": "#282722" },
-        { "slug": "paper", "name": "纸白", "color": "#faf9f5" },
-        { "slug": "ochre", "name": "赭石", "color": "#8b5a3c" }
+        { "slug": "paper", "name": "纸白", "color": "#fdfdfb" },
+        { "slug": "ochre", "name": "赭石", "color": "#795844" }
       ]
     },
     "typography": {
@@ -22,7 +22,7 @@
     "spacing": { "units": ["px", "em", "rem", "%", "vw"] }
   },
   "styles": {
-    "color": { "background": "#f3f1eb", "text": "#282722" },
+    "color": { "background": "#fdfdfb", "text": "#262724" },
     "typography": { "fontFamily": "var(--wp--preset--font-family--sans)", "fontSize": "17px", "lineHeight": "1.9" }
   }
 }

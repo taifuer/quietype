@@ -1,8 +1,39 @@
-<?php get_header(); ?>
+<?php
+get_header();
+
+$archive_title = get_the_archive_title();
+$category      = is_category() ? get_queried_object() : null;
+$category_path = array();
+
+if ( $category instanceof WP_Term ) {
+	$archive_title = single_cat_title( '', false );
+	$ancestor_ids  = array_reverse( get_ancestors( $category->term_id, 'category', 'taxonomy' ) );
+	foreach ( $ancestor_ids as $ancestor_id ) {
+		$ancestor = get_term( $ancestor_id, 'category' );
+		if ( $ancestor instanceof WP_Term ) {
+			$category_path[] = $ancestor;
+		}
+	}
+	$category_path[] = $category;
+}
+?>
 <section class="archive-index section-wrap">
 	<header class="page-hero">
-		<p class="eyebrow">COLLECTION</p>
-		<h1><?php the_archive_title(); ?></h1>
+		<?php if ( count( $category_path ) > 1 ) : ?>
+			<nav class="taxonomy-path" aria-label="分类层级">
+				<?php foreach ( $category_path as $path_index => $path_term ) : ?>
+					<?php if ( $path_index > 0 ) : ?><span aria-hidden="true">/</span><?php endif; ?>
+					<?php if ( $path_term->term_id === $category->term_id ) : ?>
+						<span aria-current="page"><?php echo esc_html( $path_term->name ); ?></span>
+					<?php else : ?>
+						<a href="<?php echo esc_url( get_category_link( $path_term->term_id ) ); ?>"><?php echo esc_html( $path_term->name ); ?></a>
+					<?php endif; ?>
+				<?php endforeach; ?>
+			</nav>
+		<?php else : ?>
+			<p class="eyebrow">COLLECTION</p>
+		<?php endif; ?>
+		<h1><?php echo esc_html( $archive_title ); ?></h1>
 		<?php the_archive_description( '<div class="page-description">', '</div>' ); ?>
 	</header>
 	<?php if ( have_posts() ) : ?>

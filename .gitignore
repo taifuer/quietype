@@ -4,5 +4,8 @@ Thumbs.db
 .vscode/
 node_modules/
 vendor/
+!assets/vendor/
+!assets/vendor/photoswipe/
+!assets/vendor/photoswipe/**
 *.zip
 *.log

@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'QUIETYPE_VERSION', '0.2.3' );
+define( 'QUIETYPE_VERSION', '0.4.0' );
 
 function quietype_setup() {
 	load_theme_textdomain( 'quietype', get_template_directory() . '/languages' );
@@ -30,20 +30,41 @@ function quietype_setup() {
 add_action( 'after_setup_theme', 'quietype_setup' );
 
 function quietype_assets() {
-	wp_enqueue_style( 'quietype', get_stylesheet_uri(), array(), QUIETYPE_VERSION );
+	$style_dependencies = array();
+	if ( is_singular() ) {
+		wp_enqueue_style( 'quietype-photoswipe', get_template_directory_uri() . '/assets/vendor/photoswipe/photoswipe.css', array(), '5.4.4' );
+		$style_dependencies[] = 'quietype-photoswipe';
+	}
+	wp_enqueue_style( 'quietype', get_stylesheet_uri(), $style_dependencies, QUIETYPE_VERSION );
 	wp_enqueue_script( 'quietype', get_template_directory_uri() . '/assets/js/theme.js', array(), QUIETYPE_VERSION, true );
+	if ( is_singular() ) {
+		wp_enqueue_script( 'quietype-lightbox', get_template_directory_uri() . '/assets/js/lightbox.js', array(), QUIETYPE_VERSION, true );
+	}
 }
 add_action( 'wp_enqueue_scripts', 'quietype_assets', 20 );
+
+/** Load the dependency-free lightbox entry point as an ES module. */
+function quietype_module_script( $tag, $handle, $src ) {
+	if ( 'quietype-lightbox' !== $handle ) {
+		return $tag;
+	}
+	return '<script type="module" src="' . esc_url( $src ) . '"></script>';
+}
+add_filter( 'script_loader_tag', 'quietype_module_script', 10, 3 );
 
 /**
  * WP Editor.md registers its reading assets globally. Keep them on singular
  * content pages, but do not make archive and search pages pay that cost.
  */
 function quietype_trim_editor_assets() {
+	$prism_styles = array( 'prism-theme-style', 'prism-plugin-toolbar', 'prism-plugin-line-numbers', 'Prism' );
+	foreach ( $prism_styles as $handle ) {
+		wp_dequeue_style( $handle );
+	}
 	if ( is_singular() ) {
 		return;
 	}
-	$styles = array( 'Katex', 'prism-theme-style', 'prism-plugin-toolbar', 'prism-plugin-line-numbers', 'Prism', 'Emojify.js' );
+	$styles = array( 'Katex', 'Emojify.js' );
 	$scripts = array( 'Katex', 'copy-clipboard', 'prism-core-js', 'prism-plugin-autoloader', 'prism-plugin-toolbar', 'prism-plugin-line-numbers', 'prism-plugin-show-language', 'prism-plugin-copy-to-clipboard', 'Front_Style', 'Prism', 'Emojify.js', 'Mermaid', 'MindMap' );
 	foreach ( $styles as $handle ) {
 		wp_dequeue_style( $handle );
@@ -91,6 +112,84 @@ function quietype_body_classes( $classes ) {
 }
 add_filter( 'body_class', 'quietype_body_classes' );
 
+/** Return one of Quietype's small, consistent interface icons. */
+function quietype_icon( $name ) {
+	$icons = array(
+		'search'  => '<circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4.2 4.2"></path>',
+		'palette' => '<path d="M12 3.5a8.5 8.5 0 1 0 0 17h1.2a1.8 1.8 0 0 0 1.2-3.15 1.8 1.8 0 0 1 1.2-3.15H18a2.5 2.5 0 0 0 2.5-2.5A8.2 8.2 0 0 0 12 3.5Z"></path><circle cx="8" cy="9" r=".8"></circle><circle cx="12" cy="7" r=".8"></circle><circle cx="16" cy="9" r=".8"></circle>',
+		'up'      => '<path d="m6 14 6-6 6 6"></path><path d="M12 8v11"></path>',
+		'down'    => '<path d="m6 10 6 6 6-6"></path><path d="M12 5v11"></path>',
+		'menu'    => '<path d="M4 7h16"></path><path d="M4 12h16"></path><path d="M4 17h16"></path>',
+		'eye'     => '<path d="M3.5 12s3-5 8.5-5 8.5 5 8.5 5-3 5-8.5 5-8.5-5-8.5-5Z"></path><circle cx="12" cy="12" r="2"></circle>',
+		'github'  => '<path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3.28-.36 6.72-1.61 6.72-7A5.4 5.4 0 0 0 20.22 4 5 5 0 0 0 20.08.5S18.9.14 16 1.84a13.38 13.38 0 0 0-7 0C6.1.14 4.92.5 4.92.5A5 5 0 0 0 4.78 4a5.4 5.4 0 0 0-1.5 3.75c0 5.42 3.44 6.67 6.72 7A4.8 4.8 0 0 0 9 18v4"></path><path d="M9 18c-3 .9-3-1.5-4-2"></path>',
+		'mail'    => '<rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m4 7 8 6 8-6"></path>',
+	);
+	if ( ! isset( $icons[ $name ] ) ) {
+		return '';
+	}
+	return '<svg class="quietype-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' . $icons[ $name ] . '</svg>';
+}
+
+/** Footer contact links belong to the active theme and live in the Customizer. */
+function quietype_customize_register( $wp_customize ) {
+	$wp_customize->add_section(
+		'quietype_footer',
+		array(
+			'title'       => '页脚联系方式',
+			'description' => '留空即可隐藏对应图标。',
+			'priority'    => 165,
+		)
+	);
+	$wp_customize->add_setting(
+		'quietype_github_url',
+		array(
+			'default'           => 'https://github.com/taifuer',
+			'sanitize_callback' => 'esc_url_raw',
+		)
+	);
+	$wp_customize->add_control(
+		'quietype_github_url',
+		array(
+			'label'   => 'GitHub 地址',
+			'section' => 'quietype_footer',
+			'type'    => 'url',
+		)
+	);
+	$wp_customize->add_setting(
+		'quietype_contact_email',
+		array(
+			'default'           => 'taifu@taifua.com',
+			'sanitize_callback' => 'sanitize_email',
+		)
+	);
+	$wp_customize->add_control(
+		'quietype_contact_email',
+		array(
+			'label'   => '联系邮箱',
+			'section' => 'quietype_footer',
+			'type'    => 'email',
+		)
+	);
+}
+add_action( 'customize_register', 'quietype_customize_register' );
+
+/** Format the WP-PostViews value without depending on the plugin's display template. */
+function quietype_post_views( $post_id = null ) {
+	$post_id = $post_id ?: get_the_ID();
+	return number_format_i18n( max( 0, (int) get_post_meta( $post_id, 'views', true ) ) );
+}
+
+/** Custom home menu items in the imported database should follow each environment. */
+function quietype_normalize_home_menu_link( $items ) {
+	foreach ( $items as $item ) {
+		if ( '首页' === trim( wp_strip_all_tags( $item->title ) ) ) {
+			$item->url = home_url( '/' );
+		}
+	}
+	return $items;
+}
+add_filter( 'wp_nav_menu_objects', 'quietype_normalize_home_menu_link' );
+
 function quietype_menu_fallback() {
 	echo '<ul class="menu">';
 	echo '<li><a href="' . esc_url( home_url( '/' ) ) . '">首页</a></li>';
@@ -99,6 +198,20 @@ function quietype_menu_fallback() {
 	echo '<li><a href="' . esc_url( home_url( '/about/' ) ) . '">关于</a></li>';
 	echo '</ul>';
 }
+
+/** Add an explicit mobile submenu control to top-level primary menu items. */
+function quietype_primary_submenu_toggle( $item_output, $item, $depth, $args ) {
+	if ( 0 !== (int) $depth || empty( $args->theme_location ) || 'primary' !== $args->theme_location ) {
+		return $item_output;
+	}
+	if ( ! in_array( 'menu-item-has-children', (array) $item->classes, true ) ) {
+		return $item_output;
+	}
+	$label = wp_strip_all_tags( $item->title );
+	$item_output .= '<button class="submenu-toggle" type="button" aria-expanded="false" aria-label="' . esc_attr( '展开' . $label . '子菜单' ) . '"><span aria-hidden="true">＋</span></button>';
+	return $item_output;
+}
+add_filter( 'walker_nav_menu_start_el', 'quietype_primary_submenu_toggle', 10, 4 );
 
 function quietype_reading_stats( $post_id = null ) {
 	$post = get_post( $post_id );
@@ -117,21 +230,36 @@ function quietype_reading_stats( $post_id = null ) {
 	);
 }
 
-function quietype_primary_category( $post_id = null ) {
+function quietype_specific_category( $post_id = null ) {
 	$categories = get_the_category( $post_id );
 	if ( empty( $categories ) ) {
+		return null;
+	}
+	usort(
+		$categories,
+		function ( $first, $second ) {
+			$first_depth  = count( get_ancestors( $first->term_id, 'category', 'taxonomy' ) );
+			$second_depth = count( get_ancestors( $second->term_id, 'category', 'taxonomy' ) );
+			$depth_compare = $second_depth <=> $first_depth;
+			return 0 !== $depth_compare ? $depth_compare : $second->term_id <=> $first->term_id;
+		}
+	);
+	return $categories[0];
+}
+
+function quietype_primary_category( $post_id = null ) {
+	$category = quietype_specific_category( $post_id );
+	if ( ! $category ) {
 		return '';
 	}
-	$category = end( $categories );
-	return '<a class="post-category" href="' . esc_url( get_category_link( $category ) ) . '">#' . esc_html( $category->name ) . '</a>';
+	return '<a class="post-category" href="' . esc_url( get_category_link( $category ) ) . '">' . esc_html( $category->name ) . '</a>';
 }
 
 function quietype_post_terms( $post_id = null, $limit = 3 ) {
 	$links = array();
-	$categories = get_the_category( $post_id );
-	if ( $categories ) {
-		$category = end( $categories );
-		$links[] = '<a class="post-category" href="' . esc_url( get_category_link( $category ) ) . '">#' . esc_html( $category->name ) . '</a>';
+	$category = quietype_specific_category( $post_id );
+	if ( $category ) {
+		$links[] = '<a class="post-category" href="' . esc_url( get_category_link( $category ) ) . '">' . esc_html( $category->name ) . '</a>';
 	}
 	$tags = get_the_tags( $post_id );
 	if ( $tags ) {
@@ -188,14 +316,18 @@ function quietype_prepare_article( $content ) {
 		},
 		$content
 	);
+	$content = preg_replace(
+		'/<pre(?![^>]*\bdata-prismjs-copy=)([^>]*)>/i',
+		'<pre$1 data-prismjs-copy="复制" data-prismjs-copy-success="已复制" data-prismjs-copy-error="复制失败">',
+		$content
+	);
 	return array( 'content' => $content, 'items' => $items );
 }
 
 function quietype_pagination() {
 	$links = paginate_links(
 		array(
-			'prev_text' => '← 较新文章',
-			'next_text' => '更早文章 →',
+			'prev_next' => false,
 			'type'      => 'array',
 		)
 	);

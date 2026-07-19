@@ -1,22 +1,31 @@
 </main>
 <footer class="site-footer">
 	<div class="site-footer__inner">
-		<span>© <?php echo esc_html( gmdate( 'Y' ) ); ?> <?php bloginfo( 'name' ); ?></span>
-		<?php if ( has_nav_menu( 'footer' ) ) : ?>
-			<?php wp_nav_menu( array( 'theme_location' => 'footer', 'container' => false, 'menu_class' => 'footer-menu', 'depth' => 1 ) ); ?>
-		<?php else : ?>
-			<span>以文字保存思考，以留白安放阅读。</span>
+		<span class="footer-copyright">© 2017–<?php echo esc_html( gmdate( 'Y' ) ); ?> <a href="<?php echo esc_url( home_url( '/' ) ); ?>">太傅博客</a></span>
+		<?php $github_url = get_theme_mod( 'quietype_github_url', 'https://github.com/taifuer' ); ?>
+		<?php $contact_email = get_theme_mod( 'quietype_contact_email', 'taifu@taifua.com' ); ?>
+		<?php if ( $github_url || $contact_email ) : ?>
+			<nav class="footer-contact" aria-label="联系方式">
+				<?php if ( $contact_email ) : ?><a href="mailto:<?php echo esc_attr( antispambot( $contact_email ) ); ?>" aria-label="发送邮件"><?php echo quietype_icon( 'mail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></a><?php endif; ?>
+				<?php if ( $github_url ) : ?><a href="<?php echo esc_url( $github_url ); ?>" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><?php echo quietype_icon( 'github' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></a><?php endif; ?>
+			</nav>
 		<?php endif; ?>
+		<a class="footer-icp" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">湘ICP备17002466号</a>
 	</div>
 </footer>
-<aside class="reading-background" aria-label="阅读背景">
-	<button class="reading-background__toggle" type="button" aria-expanded="false" aria-controls="reading-background-options">背景</button>
-	<div class="reading-background__options" id="reading-background-options" hidden>
-		<span>阅读背景</span>
-		<button type="button" data-reading-bg="paper" title="纸白"><i></i><b>纸白</b></button>
-		<button type="button" data-reading-bg="warm" title="米白"><i></i><b>米白</b></button>
-		<button type="button" data-reading-bg="green" title="浅绿"><i></i><b>浅绿</b></button>
-		<button type="button" data-reading-bg="gray" title="青灰"><i></i><b>青灰</b></button>
+<aside class="reading-tools" aria-label="阅读工具">
+	<div class="reading-background">
+		<button class="tool-button reading-background__toggle" type="button" aria-expanded="false" aria-controls="reading-background-options" aria-label="切换阅读背景" data-label="背景"><?php echo quietype_icon( 'palette' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button>
+		<div class="reading-background__options" id="reading-background-options" hidden>
+			<span>阅读背景</span>
+			<button type="button" data-reading-bg="paper"><i></i><b>纸白</b><small>清透暖白</small></button>
+			<button type="button" data-reading-bg="warm"><i></i><b>米杏</b><small>柔和温暖</small></button>
+			<button type="button" data-reading-bg="green"><i></i><b>浅绿</b><small>舒缓自然</small></button>
+		</div>
+	</div>
+	<div class="reading-tools__navigation">
+		<button class="tool-button top-button" type="button" aria-label="返回顶部" data-label="顶部" hidden><?php echo quietype_icon( 'up' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button>
+		<button class="tool-button bottom-button" type="button" aria-label="前往页面底部" data-label="底部"><?php echo quietype_icon( 'down' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button>
 	</div>
 </aside>
 <?php wp_footer(); ?>

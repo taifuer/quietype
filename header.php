@@ -3,8 +3,8 @@
 <head>
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="theme-color" content="#f3f1eb">
-	<script>try{document.documentElement.dataset.readingBg=localStorage.getItem('quietype-reading-bg')||'paper'}catch(e){}</script>
+	<meta name="theme-color" content="#fdfdfb">
+	<script>document.documentElement.classList.add('js');try{document.documentElement.dataset.readingBg=localStorage.getItem('quietype-reading-bg')||'paper'}catch(e){}</script>
 	<?php wp_head(); ?>
 </head>
 <body <?php body_class(); ?>>
@@ -12,16 +12,12 @@
 <a class="skip-link" href="#content">跳到正文</a>
 <header class="site-header">
 	<div class="site-header__inner">
-		<a class="site-brand" href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home">
-			<span class="site-brand__mark" aria-hidden="true">傅</span>
-			<span class="site-brand__copy">
-				<strong><?php bloginfo( 'name' ); ?></strong>
-				<small><?php bloginfo( 'description' ); ?></small>
-			</span>
+		<a class="site-brand" href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home" aria-label="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>，返回首页">
+			<span class="site-brand__wordmark">太傅博客</span>
 		</a>
 		<div class="mobile-header-actions">
-			<button class="top-button" type="button" aria-label="返回顶部" hidden>顶部</button>
-			<button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-navigation">菜单</button>
+			<button class="icon-button nav-toggle" type="button" aria-expanded="false" aria-controls="site-navigation" aria-label="打开菜单"><?php echo quietype_icon( 'menu' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button>
+			<button class="icon-button search-toggle search-toggle--mobile" type="button" aria-expanded="false" aria-controls="site-search" aria-label="搜索"><?php echo quietype_icon( 'search' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button>
 		</div>
 		<nav class="site-nav" id="site-navigation" aria-label="主导航">
 			<?php
@@ -35,7 +31,7 @@
 				)
 			);
 			?>
-			<button class="search-toggle" type="button" aria-expanded="false" aria-controls="site-search" aria-label="搜索">搜索</button>
+			<button class="icon-button search-toggle search-toggle--desktop" type="button" aria-expanded="false" aria-controls="site-search" aria-label="搜索" data-label="搜索"><?php echo quietype_icon( 'search' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button>
 		</nav>
 		<button class="nav-backdrop" type="button" aria-label="关闭菜单" hidden></button>
 	</div>
