@@ -3,7 +3,8 @@
 	<div class="site-footer__inner">
 		<div class="footer-legal">
 			<span class="footer-copyright">© 2017–<?php echo esc_html( gmdate( 'Y' ) ); ?> <a href="<?php echo esc_url( home_url( '/' ) ); ?>">太傅博客</a></span>
-			<a class="footer-icp" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">湘ICP备17002466号</a>
+			<?php $icp_number = quietype_get_setting( 'quietype_icp_number', '湘ICP备17002466号' ); ?>
+			<?php if ( $icp_number ) : ?><a class="footer-icp" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $icp_number ); ?></a><?php endif; ?>
 		</div>
 		<?php $github_url = quietype_get_setting( 'quietype_github_url', 'https://github.com/taifuer' ); ?>
 		<?php $contact_email = quietype_get_setting( 'quietype_contact_email', 'taifu@taifua.com' ); ?>

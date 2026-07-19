@@ -36,6 +36,28 @@ function quietype_configure_phpmailer( $phpmailer ) {
 }
 add_action( 'phpmailer_init', 'quietype_configure_phpmailer' );
 
+/** Keep the latest transport error visible without exposing SMTP credentials. */
+function quietype_record_mail_error( $error ) {
+	if ( ! is_wp_error( $error ) ) {
+		return;
+	}
+	set_transient(
+		'quietype_last_mail_error',
+		array(
+			'message' => quietype_normalize_meta_text( $error->get_error_message(), 500 ),
+			'time'    => wp_date( 'Y-m-d H:i:s' ),
+		),
+		DAY_IN_SECONDS
+	);
+}
+add_action( 'wp_mail_failed', 'quietype_record_mail_error' );
+
+/** Clear a stale error once WordPress successfully hands a message to SMTP. */
+function quietype_clear_mail_error() {
+	delete_transient( 'quietype_last_mail_error' );
+}
+add_action( 'wp_mail_succeeded', 'quietype_clear_mail_error' );
+
 /** Send notification mail only to the validated WordPress administrator address. */
 function quietype_send_admin_notification( $subject, $message ) {
 	$recipient = get_option( 'admin_email' );

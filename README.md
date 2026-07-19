@@ -27,6 +27,7 @@ git clone git@github.com:taifuer/quietype.git
 - 纸白、米杏、浅绿三种亮色阅读背景
 - 低干扰亮色代码块、语法高亮、复制按钮和表格横向滚动
 - 图片边框、图注、引用、列表、脚注、KaTeX 与响应式媒体样式
+- 可配置的文章末尾 CC BY-NC-SA 4.0 署名与来源声明
 - 正文图片原生懒加载、远程图片宽高缓存和替代文字发布检查
 - 基于 PhotoSwipe 的图片预览，支持按钮、滚轮、双击和触屏缩放
 - 分类、标签、搜索、年度归档、友链、关于、评论与 404 页面
@@ -68,7 +69,7 @@ git clone git@github.com:taifuer/quietype.git
 
 Quietype 目前只提供亮色阅读背景。
 
-Quietype 自有配置集中在“外观 → Quietype 设置”，包括页脚联系方式、SEO、国内访问、登录安全、SMTP 通知和自定义代码。WordPress 原生的站点标题、菜单和额外 CSS 仍使用各自原生界面。旧版本保存在 Customizer 中的 Quietype 配置会自动迁移。
+Quietype 自有配置集中在“外观 → Quietype 设置”，包括页脚联系方式与备案号、文章版权声明、SEO、国内访问、WordPress 优化、登录安全、SMTP 通知和自定义代码。WordPress 原生的站点标题、菜单和额外 CSS 仍使用各自原生界面。旧版本保存在 Customizer 中的 Quietype 配置会自动迁移。
 
 统计脚本和站点验证代码可在“外观 → Quietype 设置”中分别添加到 Head 或 Footer。该页面使用 WordPress 自带代码编辑器，避免脚本在 Customizer 实时预览中意外执行。只有具备 `unfiltered_html` 权限的管理员可以保存可执行代码；样式仍建议优先使用 WordPress 原生“额外 CSS”。
 
@@ -104,7 +105,11 @@ Quietype 会重设 WordPress 登录相关页面的视觉样式，并可在“外
 
 “外观 → Quietype 设置 → 邮件”可以让 WordPress 内置 `wp_mail()` 使用 SMTP，并发送测试邮件。支持 TLS、SMTPS 和无加密连接、可选身份验证、自定义发件地址，以及管理员成功登录和新评论通知。登录通知仅针对拥有站点管理权限的账户并设有五分钟防重复；评论通知忽略垃圾评论、Pingback 和 Trackback，也会避开 WordPress 已发送给同一管理员的通知。
 
-SMTP 密码会以原值保存在 WordPress 数据库中。优先使用邮箱服务商提供的独立授权码；若不希望密码进入数据库，可在 `wp-config.php` 定义 `QUIETYPE_SMTP_PASSWORD`。SMTP 只负责把邮件交给服务器，正式使用前仍应配置 SPF、DKIM 和 DMARC，并通过测试邮件确认投递。
+SMTP 密码会以原值保存在 WordPress 数据库中。优先使用邮箱服务商提供的独立授权码；若不希望密码进入数据库，可在 `wp-config.php` 定义 `QUIETYPE_SMTP_PASSWORD`。设置页会保留最近一次发信错误一天，但不会记录密码。SMTP 只负责把邮件交给服务器，正式使用前仍应配置 SPF、DKIM 和 DMARC，并通过测试邮件确认投递。
+
+## WordPress 优化
+
+“外观 → Quietype 设置 → WordPress”可以隐藏登录用户在网站前台看到的管理工具栏，以及停止为文章和页面创建新的历史版本；后台工具栏和自动保存不受影响。历史版本开关不会静默删除已有数据，需要管理员在同一设置页核对数量并单独确认删除。
 
 ## 内容兼容
 

@@ -25,6 +25,11 @@ function quietype_register_admin_settings() {
 	$settings = array(
 		'quietype_github_url'                 => array( 'string', 'https://github.com/taifuer', 'esc_url_raw' ),
 		'quietype_contact_email'              => array( 'string', 'taifu@taifua.com', 'sanitize_email' ),
+		'quietype_icp_number'                 => array( 'string', '湘ICP备17002466号', 'sanitize_text_field' ),
+		'quietype_article_copyright_enabled'  => array( 'boolean', true, 'quietype_sanitize_checkbox' ),
+		'quietype_article_author_name'        => array( 'string', '小傅', 'sanitize_text_field' ),
+		'quietype_hide_admin_bar'             => array( 'boolean', false, 'quietype_sanitize_checkbox' ),
+		'quietype_disable_revisions'          => array( 'boolean', false, 'quietype_sanitize_checkbox' ),
 		'quietype_seo_enabled'                => array( 'boolean', true, 'quietype_sanitize_checkbox' ),
 		'quietype_seo_description'            => array( 'string', '', 'quietype_sanitize_seo_description' ),
 		'quietype_seo_keywords'               => array( 'string', '', 'quietype_sanitize_seo_keywords' ),
@@ -190,6 +195,7 @@ function quietype_render_settings_page() {
 	}
 	$can_edit_code = current_user_can( 'unfiltered_html' );
 	$smtp_password_saved = '' !== quietype_get_setting( 'quietype_smtp_password', '' ) || defined( 'QUIETYPE_SMTP_PASSWORD' );
+	$mail_error = get_transient( 'quietype_last_mail_error' );
 	?>
 	<div class="wrap quietype-settings">
 		<h1>Quietype 设置</h1>
@@ -198,8 +204,11 @@ function quietype_render_settings_page() {
 		<?php if ( isset( $_GET['quietype_mail'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
 			<div class="notice <?php echo 'sent' === $_GET['quietype_mail'] ? 'notice-success' : 'notice-error'; ?> is-dismissible"><p><?php echo 'sent' === $_GET['quietype_mail'] ? '测试邮件已交给 SMTP 服务器。' : '测试邮件发送失败，请检查 SMTP 参数和服务器日志。'; ?></p></div>
 		<?php endif; ?>
+		<?php if ( isset( $_GET['quietype_revisions_deleted'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
+			<div class="notice notice-success is-dismissible"><p>已永久删除 <?php echo esc_html( absint( $_GET['quietype_revisions_deleted'] ) ); ?> 条文章与页面历史版本。</p></div>
+		<?php endif; ?>
 		<nav class="quietype-settings__nav" aria-label="设置分区">
-			<a href="#quietype-section-site">站点</a><a href="#quietype-section-seo">SEO</a><a href="#quietype-section-access">访问</a><a href="#quietype-section-security">安全</a><a href="#quietype-section-mail">邮件</a><a href="#quietype-section-code">代码</a>
+			<a href="#quietype-section-site">站点</a><a href="#quietype-section-seo">SEO</a><a href="#quietype-section-access">访问</a><a href="#quietype-section-wordpress">WordPress</a><a href="#quietype-section-security">安全</a><a href="#quietype-section-mail">邮件</a><a href="#quietype-section-code">代码</a>
 		</nav>
 		<form action="options.php" method="post">
 			<?php settings_fields( 'quietype_settings' ); ?>
@@ -209,6 +218,9 @@ function quietype_render_settings_page() {
 				<table class="form-table" role="presentation">
 					<tr><th><label for="quietype_contact_email">联系邮箱</label></th><td><input class="regular-text" id="quietype_contact_email" name="quietype_contact_email" type="email" value="<?php echo esc_attr( quietype_get_setting( 'quietype_contact_email', 'taifu@taifua.com' ) ); ?>"><p class="description">留空可隐藏页脚邮件图标。</p></td></tr>
 					<tr><th><label for="quietype_github_url">GitHub 地址</label></th><td><input class="regular-text" id="quietype_github_url" name="quietype_github_url" type="url" value="<?php echo esc_attr( quietype_get_setting( 'quietype_github_url', 'https://github.com/taifuer' ) ); ?>"><p class="description">留空可隐藏页脚 GitHub 图标。</p></td></tr>
+					<tr><th><label for="quietype_icp_number">备案号</label></th><td><input class="regular-text" id="quietype_icp_number" name="quietype_icp_number" type="text" value="<?php echo esc_attr( quietype_get_setting( 'quietype_icp_number', '湘ICP备17002466号' ) ); ?>"><p class="description">留空可隐藏页脚备案信息，填写后自动链接至工信部备案系统。</p></td></tr>
+					<tr><th>文章版权声明</th><td><?php quietype_settings_checkbox( 'quietype_article_copyright_enabled', '在文章正文末尾显示 CC BY-NC-SA 4.0 声明' ); ?></td></tr>
+					<tr><th><label for="quietype_article_author_name">版权署名</label></th><td><input class="regular-text" id="quietype_article_author_name" name="quietype_article_author_name" type="text" value="<?php echo esc_attr( quietype_get_setting( 'quietype_article_author_name', '小傅' ) ); ?>"><p class="description">留空时使用文章作者的 WordPress 显示名称，署名链接回本站首页。</p></td></tr>
 				</table>
 			</section>
 
@@ -226,6 +238,14 @@ function quietype_render_settings_page() {
 			<section class="quietype-settings__section" id="quietype-section-access">
 				<h2>中国大陆访问</h2>
 				<table class="form-table" role="presentation"><tr><th><label for="quietype_gravatar_base_url">Gravatar 地址</label></th><td><input class="regular-text code" id="quietype_gravatar_base_url" name="quietype_gravatar_base_url" type="url" value="<?php echo esc_attr( quietype_get_setting( 'quietype_gravatar_base_url', 'https://gravatar.loli.net/avatar/' ) ); ?>" placeholder="https://gravatar.loli.net/avatar/"><p class="description">留空则保留 WordPress 原始 Gravatar 地址。</p></td></tr></table>
+			</section>
+
+			<section class="quietype-settings__section" id="quietype-section-wordpress">
+				<h2>WordPress 优化</h2>
+				<table class="form-table" role="presentation">
+					<tr><th>前台工具栏</th><td><?php quietype_settings_checkbox( 'quietype_hide_admin_bar', '登录后隐藏网站前台顶部管理工具栏' ); ?><p class="description">仅影响网站前台，WordPress 后台工具栏保持不变。</p></td></tr>
+					<tr><th>内容历史版本</th><td><?php quietype_settings_checkbox( 'quietype_disable_revisions', '停止为文章和页面保存新的历史版本' ); ?><p class="description">自动保存仍然保留；此开关不会自动删除数据库中已有的历史版本。</p></td></tr>
+				</table>
 			</section>
 
 			<section class="quietype-settings__section" id="quietype-section-security">
@@ -253,6 +273,7 @@ function quietype_render_settings_page() {
 					<tr><th><label for="quietype_smtp_from_name">发件名称</label></th><td><input class="regular-text" id="quietype_smtp_from_name" name="quietype_smtp_from_name" type="text" value="<?php echo esc_attr( quietype_get_setting( 'quietype_smtp_from_name', '' ) ); ?>" placeholder="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>"></td></tr>
 					<tr><th>通知事件</th><td><?php quietype_settings_checkbox( 'quietype_login_notification_enabled', '管理员成功登录时通知' ); ?><br><?php quietype_settings_checkbox( 'quietype_comment_notification_enabled', '收到新评论时通知管理员' ); ?><p class="description">登录通知仅针对拥有站点管理权限的账户，并为同一账户设置 5 分钟防重复；垃圾评论、Pingback 和 Trackback 不通知。</p></td></tr>
 				</table>
+				<?php if ( is_array( $mail_error ) && ! empty( $mail_error['message'] ) ) : ?><div class="notice notice-error inline"><p><strong>最近一次发信错误：</strong><?php echo esc_html( $mail_error['message'] ); ?> <span class="description"><?php echo esc_html( $mail_error['time'] ?? '' ); ?></span></p></div><?php endif; ?>
 			</section>
 
 			<section class="quietype-settings__section" id="quietype-section-code">
@@ -269,6 +290,12 @@ function quietype_render_settings_page() {
 		<section class="quietype-settings__section">
 			<h2>发送测试邮件</h2><p>先保存 SMTP 参数，再向 WordPress 管理员邮箱 <code><?php echo esc_html( get_option( 'admin_email' ) ); ?></code> 发送测试邮件。</p>
 			<form action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="post"><input type="hidden" name="action" value="quietype_send_test_email"><?php wp_nonce_field( 'quietype_send_test_email' ); ?><?php $test_button_attributes = quietype_get_setting( 'quietype_smtp_enabled', false ) ? array() : array( 'disabled' => 'disabled' ); ?><?php submit_button( '发送测试邮件', 'secondary', 'submit', false, $test_button_attributes ); ?></form>
+		</section>
+
+		<section class="quietype-settings__section" id="quietype-section-revision-cleanup">
+			<h2>历史版本清理</h2>
+			<p>当前数据库中有 <strong><?php echo esc_html( quietype_revision_count() ); ?></strong> 条文章或页面历史版本。删除不可撤销，但不会删除已发布内容和自动草稿。</p>
+			<form action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="post" onsubmit="return confirm('确定永久删除全部文章和页面历史版本吗？此操作不可撤销。');"><input type="hidden" name="action" value="quietype_delete_revisions"><?php wp_nonce_field( 'quietype_delete_revisions' ); ?><?php submit_button( '删除现有历史版本', 'delete', 'submit', false ); ?></form>
 		</section>
 	</div>
 	<?php
@@ -290,3 +317,29 @@ function quietype_print_custom_footer_code() {
 	}
 }
 add_action( 'wp_footer', 'quietype_print_custom_footer_code', 99 );
+
+/** Count only revisions belonging to posts and pages. */
+function quietype_revision_count() {
+	global $wpdb;
+	return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} revisions INNER JOIN {$wpdb->posts} parents ON parents.ID = revisions.post_parent WHERE revisions.post_type = 'revision' AND parents.post_type IN ('post','page')" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Static query without user input.
+}
+
+/** Permanently remove existing post/page revisions after explicit confirmation. */
+function quietype_handle_delete_revisions() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( '无权执行此操作。' );
+	}
+	check_admin_referer( 'quietype_delete_revisions' );
+	global $wpdb;
+	$revision_ids = $wpdb->get_col( "SELECT revisions.ID FROM {$wpdb->posts} revisions INNER JOIN {$wpdb->posts} parents ON parents.ID = revisions.post_parent WHERE revisions.post_type = 'revision' AND parents.post_type IN ('post','page')" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Static query without user input.
+	$deleted = 0;
+	foreach ( $revision_ids as $revision_id ) {
+		if ( wp_delete_post_revision( (int) $revision_id ) ) {
+			++$deleted;
+		}
+	}
+	$url = add_query_arg( 'quietype_revisions_deleted', $deleted, admin_url( 'themes.php?page=quietype-settings#quietype-section-revision-cleanup' ) );
+	wp_safe_redirect( $url );
+	exit;
+}
+add_action( 'admin_post_quietype_delete_revisions', 'quietype_handle_delete_revisions' );

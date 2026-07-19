@@ -9,13 +9,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'QUIETYPE_VERSION', '0.7.0' );
+define( 'QUIETYPE_VERSION', '0.7.1' );
 
 require_once get_template_directory() . '/inc/admin-settings.php';
 require_once get_template_directory() . '/inc/login-security.php';
 require_once get_template_directory() . '/inc/seo.php';
 require_once get_template_directory() . '/inc/mail.php';
 require_once get_template_directory() . '/inc/content-performance.php';
+require_once get_template_directory() . '/inc/wordpress-tweaks.php';
 
 function quietype_setup() {
 	load_theme_textdomain( 'quietype', get_template_directory() . '/languages' );

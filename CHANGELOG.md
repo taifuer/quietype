@@ -4,6 +4,18 @@ All notable changes to Quietype will be documented in this file.
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-07-19
+
+### Added
+
+- Added configurable footer ICP text and an optional article-end CC BY-NC-SA 4.0 attribution panel.
+- Added front-end admin-bar and post/page revision controls, plus an explicit existing-revision cleanup tool.
+- Added a one-day, credential-safe record of the latest SMTP transport error to the theme settings screen.
+
+### Fixed
+
+- Made SMTP authentication failures actionable instead of returning only a generic test-mail failure.
+
 ## [0.7.0] - 2026-07-19
 
 ### Added

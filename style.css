@@ -4,7 +4,7 @@ Theme URI: https://github.com/taifuer/quietype
 Author: taifu
 Author URI: https://github.com/taifuer
 Description: A quiet WordPress theme for thoughtful reading, designed for Chinese long-form and technical writing.
-Version: 0.7.0
+Version: 0.7.1
 Requires at least: 6.4
 Requires PHP: 8.0
 License: GNU General Public License v2 or later
@@ -125,6 +125,14 @@ html[data-reading-bg=gray]{--page:#e9edef;--paper:#f3f6f6;--text:#263033;--text-
   .article-content pre,.article-content pre[class*=language-]{padding:18px 16px;font-size:12.5px}
   .archive-year li{grid-template-columns:48px minmax(0,1fr);gap:12px}
   .archive-year li>span.archive-terms{display:flex;grid-column:2;justify-content:flex-start;margin-top:-5px}
+}
+
+/* Quietype 0.7.1: compact, attributable article licensing. */
+.article-license{margin-top:42px;padding:18px 20px;border:1px solid var(--line);border-left:3px solid var(--accent);background:color-mix(in srgb,var(--paper) 72%,var(--page));color:var(--muted);font:13px/1.65 var(--sans)}
+.article-license dl{margin:0}.article-license dl>div{display:grid;grid-template-columns:68px minmax(0,1fr);gap:10px}.article-license dl>div+div{margin-top:4px}.article-license dt{color:var(--text);font-weight:600}.article-license dd{min-width:0;margin:0;overflow-wrap:anywhere}.article-license a{color:var(--accent);text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--accent) 38%,transparent);text-underline-offset:.16em}
+@media(max-width:720px){
+  .article-license{margin-top:32px;padding:15px 16px;font-size:12px}
+  .article-license dl>div{grid-template-columns:64px minmax(0,1fr);gap:7px}
 }
 
 /* Quietype 0.3.1: restrained controls, denser reading rhythm, richer metadata. */
