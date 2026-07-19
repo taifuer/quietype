@@ -4,6 +4,18 @@ All notable changes to Quietype will be documented in this file.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-07-19
+
+### Added
+
+- Added a Quietype-styled WordPress authentication surface for login, lost-password, reset-password, and related core states.
+- Added a responsive 420px login card with accessible focus states and a site-linked wordmark.
+- Added configurable query-parameter login gating, unauthenticated wp-admin shielding, a one-time arithmetic challenge, and optional XML-RPC authentication protection without external dependencies.
+
+### Security
+
+- Preserved password-reset, logout, post-password, and signed WordPress recovery flows while returning 404 for unrecognized login requests.
+
 ## [0.4.1] - 2026-07-19
 
 ### Fixed

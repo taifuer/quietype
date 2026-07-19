@@ -1,0 +1,287 @@
+:root {
+	--quietype-login-page: #f3f1eb;
+	--quietype-login-paper: #faf9f5;
+	--quietype-login-text: #292822;
+	--quietype-login-muted: #716d64;
+	--quietype-login-line: #d9d5cb;
+	--quietype-login-accent: #80583f;
+	--quietype-login-error: #a2473f;
+	--quietype-login-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", SimSun, serif;
+	--quietype-login-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK SC", "Source Han Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+html,
+body.login {
+	min-height: 100%;
+	background: var(--quietype-login-page);
+}
+
+body.login {
+	display: grid;
+	place-items: center;
+	box-sizing: border-box;
+	min-width: 320px;
+	padding: 40px 20px;
+	color: var(--quietype-login-text);
+	font: 15px/1.65 var(--quietype-login-sans);
+}
+
+body.login::before {
+	content: "";
+	position: fixed;
+	inset: 0;
+	pointer-events: none;
+	background: linear-gradient(90deg, transparent, rgb(255 255 255 / 18%) 50%, transparent);
+}
+
+.login #login {
+	position: relative;
+	z-index: 1;
+	box-sizing: border-box;
+	width: min(100%, 420px);
+	padding: 0;
+}
+
+.login h1 {
+	margin: 0 0 24px;
+	text-align: left;
+}
+
+.login h1 a {
+	width: auto;
+	height: auto;
+	margin: 0;
+	padding: 0;
+	background: none;
+	color: var(--quietype-login-text);
+	font: 0/1 var(--quietype-login-serif);
+	text-indent: 0;
+}
+
+.login h1 a::before {
+	content: "太傅博客";
+	display: inline-block;
+	font: 600 25px/1.25 var(--quietype-login-serif);
+	letter-spacing: .08em;
+}
+
+.login h1 a::after {
+	content: "QUIETYPE";
+	display: block;
+	margin-top: 7px;
+	color: var(--quietype-login-muted);
+	font: 600 10px/1 var(--quietype-login-sans);
+	letter-spacing: .2em;
+}
+
+.login form {
+	margin: 0;
+	padding: 30px 32px 28px;
+	border: 1px solid var(--quietype-login-line);
+	border-radius: 4px;
+	background: var(--quietype-login-paper);
+	box-shadow: 0 18px 60px rgb(49 43 34 / 7%);
+}
+
+.login label {
+	color: var(--quietype-login-muted);
+	font-size: 13px;
+}
+
+.login form .input,
+.login input[type="text"],
+.login input[type="password"],
+.login input[type="email"] {
+	box-sizing: border-box;
+	min-height: 46px;
+	margin: 6px 0 18px;
+	padding: 8px 11px;
+	border: 1px solid var(--quietype-login-line);
+	border-radius: 3px;
+	background: #fffefb;
+	color: var(--quietype-login-text);
+	font: 16px/1.4 var(--quietype-login-sans);
+	box-shadow: none;
+}
+
+.login .quietype-login-captcha {
+	display: grid;
+	grid-template-columns: 1fr 94px;
+	align-items: center;
+	gap: 14px;
+	margin: 1px 0 18px;
+	padding-bottom: 8px;
+}
+
+.login .quietype-login-captcha label {
+	color: var(--quietype-login-text);
+	font-variant-numeric: tabular-nums;
+}
+
+.login .quietype-login-captcha .input {
+	min-height: 40px;
+	margin: 0;
+	text-align: center;
+}
+
+.login form .input:focus,
+.login input[type="text"]:focus,
+.login input[type="password"]:focus,
+.login input[type="email"]:focus,
+.login input[type="checkbox"]:focus {
+	border-color: var(--quietype-login-accent);
+	box-shadow: 0 0 0 2px rgb(128 88 63 / 14%);
+	outline: 0;
+}
+
+.login .button.wp-hide-pw {
+	top: 7px;
+	min-width: 42px;
+	min-height: 42px;
+	color: var(--quietype-login-muted);
+}
+
+.login .button.wp-hide-pw:focus {
+	border: 0;
+	box-shadow: none;
+	outline: 2px solid var(--quietype-login-accent);
+	outline-offset: -5px;
+}
+
+.login .forgetmenot {
+	margin-top: 7px;
+}
+
+.login input[type="checkbox"] {
+	width: 17px;
+	height: 17px;
+	margin: 0 5px 0 0;
+	border-color: var(--quietype-login-line);
+	border-radius: 2px;
+	box-shadow: none;
+}
+
+.login input[type="checkbox"]:checked::before {
+	width: 20px;
+	height: 20px;
+	margin: -2px 0 0 -3px;
+	color: var(--quietype-login-accent);
+}
+
+.login .button-primary {
+	min-height: 40px;
+	padding: 0 18px;
+	border: 1px solid var(--quietype-login-text);
+	border-radius: 3px;
+	background: var(--quietype-login-text);
+	color: var(--quietype-login-paper);
+	font-weight: 500;
+	text-shadow: none;
+	box-shadow: none;
+}
+
+.login .button-primary:hover,
+.login .button-primary:focus {
+	border-color: var(--quietype-login-accent);
+	background: var(--quietype-login-accent);
+	color: #fff;
+	box-shadow: 0 0 0 2px rgb(128 88 63 / 15%);
+}
+
+.login #nav,
+.login #backtoblog {
+	padding: 0 2px;
+	font-size: 13px;
+}
+
+.login #nav {
+	margin: 20px 0 0;
+}
+
+.login #backtoblog {
+	margin: 9px 0 0;
+}
+
+.login #nav a,
+.login #backtoblog a,
+.login .privacy-policy-page-link a {
+	color: var(--quietype-login-muted);
+}
+
+.login #nav a:hover,
+.login #backtoblog a:hover,
+.login .privacy-policy-page-link a:hover {
+	color: var(--quietype-login-accent);
+}
+
+.login .message,
+.login .notice,
+.login #login_error {
+	margin: 0 0 18px;
+	padding: 11px 14px;
+	border: 1px solid var(--quietype-login-line);
+	border-left: 3px solid var(--quietype-login-accent);
+	background: var(--quietype-login-paper);
+	color: var(--quietype-login-muted);
+	font-size: 13px;
+	box-shadow: none;
+}
+
+.login #login_error,
+.login .notice-error {
+	border-left-color: var(--quietype-login-error);
+}
+
+.login .language-switcher {
+	margin-top: 22px;
+}
+
+.login .language-switcher form {
+	display: flex;
+	justify-content: center;
+	gap: 6px;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	box-shadow: none;
+}
+
+.login .language-switcher select {
+	min-height: 34px;
+	border-color: var(--quietype-login-line);
+	background-color: var(--quietype-login-paper);
+	color: var(--quietype-login-muted);
+	font-size: 12px;
+}
+
+.login .language-switcher .button {
+	min-height: 34px;
+	border-color: var(--quietype-login-line);
+	background: var(--quietype-login-paper);
+	color: var(--quietype-login-muted);
+	box-shadow: none;
+}
+
+@media (max-width: 480px) {
+	body.login {
+		display: block;
+		padding: 46px 16px 28px;
+	}
+
+	.login form {
+		padding: 25px 22px 23px;
+	}
+
+	.login h1 {
+		margin-bottom: 20px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.login *,
+	.login *::before,
+	.login *::after {
+		scroll-behavior: auto !important;
+		transition: none !important;
+	}
+}

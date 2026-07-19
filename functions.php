@@ -9,7 +9,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'QUIETYPE_VERSION', '0.4.1' );
+define( 'QUIETYPE_VERSION', '0.5.0' );
+
+require_once get_template_directory() . '/inc/login-security.php';
 
 function quietype_setup() {
 	load_theme_textdomain( 'quietype', get_template_directory() . '/languages' );
@@ -42,6 +44,29 @@ function quietype_assets() {
 	}
 }
 add_action( 'wp_enqueue_scripts', 'quietype_assets', 20 );
+
+/** Give WordPress authentication screens the same quiet reading surface. */
+function quietype_login_assets() {
+	wp_enqueue_style(
+		'quietype-login',
+		get_template_directory_uri() . '/assets/css/login.css',
+		array(),
+		QUIETYPE_VERSION
+	);
+}
+add_action( 'login_enqueue_scripts', 'quietype_login_assets' );
+
+/** Point the login wordmark back to the site instead of wordpress.org. */
+function quietype_login_header_url() {
+	return home_url( '/' );
+}
+add_filter( 'login_headerurl', 'quietype_login_header_url' );
+
+/** Use the site name as the accessible label for the login wordmark. */
+function quietype_login_header_text() {
+	return get_bloginfo( 'name' );
+}
+add_filter( 'login_headertext', 'quietype_login_header_text' );
 
 /** Load the dependency-free lightbox entry point as an ES module. */
 function quietype_module_script( $tag, $handle, $src ) {
@@ -184,6 +209,93 @@ function quietype_customize_register( $wp_customize ) {
 			'label'   => '联系邮箱',
 			'section' => 'quietype_footer',
 			'type'    => 'email',
+		)
+	);
+
+	$wp_customize->add_section(
+		'quietype_login_security',
+		array(
+			'title'       => '登录与安全',
+			'description' => '启用前请先保存完整的自定义登录地址。参数名和值都匹配时才显示登录页。',
+			'priority'    => 166,
+		)
+	);
+	$wp_customize->add_setting(
+		'quietype_login_gate_enabled',
+		array(
+			'default'           => false,
+			'sanitize_callback' => 'quietype_sanitize_checkbox',
+		)
+	);
+	$wp_customize->add_control(
+		'quietype_login_gate_enabled',
+		array(
+			'label'   => '启用自定义登录入口',
+			'section' => 'quietype_login_security',
+			'type'    => 'checkbox',
+		)
+	);
+	$wp_customize->add_setting(
+		'quietype_login_gate_key',
+		array(
+			'default'           => 'user',
+			'sanitize_callback' => 'quietype_sanitize_login_gate_key',
+		)
+	);
+	$wp_customize->add_control(
+		'quietype_login_gate_key',
+		array(
+			'label'       => '入口参数名',
+			'description' => '仅支持字母、数字、下划线和短横线，例如 user。',
+			'section'     => 'quietype_login_security',
+			'type'        => 'text',
+		)
+	);
+	$wp_customize->add_setting(
+		'quietype_login_gate_value',
+		array(
+			'default'           => '',
+			'sanitize_callback' => 'quietype_sanitize_login_gate_value',
+		)
+	);
+	$wp_customize->add_control(
+		'quietype_login_gate_value',
+		array(
+			'label'       => '入口参数值',
+			'description' => '建议使用不易猜测的字符串。留空时不会隐藏默认入口。',
+			'section'     => 'quietype_login_security',
+			'type'        => 'text',
+		)
+	);
+	$wp_customize->add_setting(
+		'quietype_login_captcha_enabled',
+		array(
+			'default'           => false,
+			'sanitize_callback' => 'quietype_sanitize_checkbox',
+		)
+	);
+	$wp_customize->add_control(
+		'quietype_login_captcha_enabled',
+		array(
+			'label'   => '启用一次性算术验证码',
+			'section' => 'quietype_login_security',
+			'type'    => 'checkbox',
+		)
+	);
+	$wp_customize->add_setting(
+		'quietype_xmlrpc_auth_disabled',
+		array(
+			'default'           => false,
+			'sanitize_callback' => 'quietype_sanitize_checkbox',
+		)
+	);
+	$wp_customize->add_control(
+		'quietype_xmlrpc_auth_disabled',
+		array(
+			'label'       => '禁用 XML-RPC 认证与 Pingback',
+			'description' => '可阻止绕过网页验证码的旧式登录请求；启用后 WordPress App 等 XML-RPC 客户端将不可用。',
+			'section'     => 'quietype_login_security',
+			'type'        => 'checkbox',
 		)
 	);
 }

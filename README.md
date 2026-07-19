@@ -29,6 +29,7 @@ git clone git@github.com:taifuer/quietype.git
 - 图片边框、图注、引用、列表、脚注、KaTeX 与响应式媒体样式
 - 基于 PhotoSwipe 的图片预览，支持按钮、滚轮、双击和触屏缩放
 - 分类、标签、搜索、年度归档、友链、关于、评论与 404 页面
+- 与前台一致的登录、找回密码和重置密码界面
 - 固定移动 Header、抽屉菜单、遮罩关闭与返回顶部
 - 打印样式、键盘焦点与 `prefers-reduced-motion` 支持
 - 不写入主题私有短代码，避免内容锁定
@@ -79,6 +80,14 @@ add_filter( 'quietype_avatar_base_url', function () {
 ```
 
 Prism 只负责语法解析、语言标记和行号；Quietype 内置亮色 token 配色与中文复制按钮，不依赖远程代码样式或剪贴板 CDN。
+
+## 登录入口与安全
+
+Quietype 会重设 WordPress 登录相关页面的视觉样式，并可在“外观 → 自定义 → 登录与安全”中启用自定义入口参数、一次性算术验证码和 XML-RPC 认证保护。例如参数名为 `user`、参数值为 `taifu` 时，登录入口是 `wp-login.php?user=taifu`；默认入口、错误参数和未登录的 `/wp-admin/` 均返回 404。
+
+启用前请先保存完整入口地址。参数值留空时入口保护保持关闭；需要文件级配置时，也可以在 `wp-config.php` 中定义 `QUIETYPE_LOGIN_GATE_KEY` 和 `QUIETYPE_LOGIN_GATE_VALUE`，常量优先于后台字段。找回密码、密码重置、退出登录和 WordPress 签名恢复链接均保留兼容处理。
+
+验证码和入口保护默认关闭，需由站点管理员明确启用。若站点不使用 WordPress App 或旧式远程发布，可以同时关闭 XML-RPC 认证与 Pingback，避免它绕过网页验证码。隐藏入口和简单验证码主要用于降低自动扫描噪声，不能替代强密码、双重验证和服务器限速。由于入口功能由主题提供，切换主题会恢复 WordPress 默认登录行为。
 
 ## 内容兼容
 
