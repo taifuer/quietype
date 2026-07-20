@@ -19,6 +19,15 @@ function quietype_has_dedicated_seo_plugin() {
 		|| class_exists( 'The_SEO_Framework\Load' );
 }
 
+/** Keep disabled single-author archives out of the WordPress sitemap index. */
+function quietype_filter_sitemap_provider( $provider, $name ) {
+	if ( 'users' === $name ) {
+		return false;
+	}
+	return $provider;
+}
+add_filter( 'wp_sitemaps_add_provider', 'quietype_filter_sitemap_provider', 10, 2 );
+
 /** Normalize text for a search-result description. */
 function quietype_normalize_meta_text( $value, $length = 180 ) {
 	$value = html_entity_decode( wp_strip_all_tags( strip_shortcodes( (string) $value ) ), ENT_QUOTES, get_bloginfo( 'charset' ) );

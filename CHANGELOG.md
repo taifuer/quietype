@@ -4,6 +4,16 @@ All notable changes to Quietype will be documented in this file.
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-07-20
+
+### Changed
+
+- Reworded the 404 page in a clearer, quieter voice and widened its desktop guidance line.
+
+### Fixed
+
+- Removed the disabled single-author archive provider from WordPress's XML sitemap index.
+
 ## [0.8.0] - 2026-07-20
 
 ### Changed
