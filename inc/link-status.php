@@ -44,6 +44,112 @@ function quietype_link_state( $link_id ) {
 	);
 }
 
+/** Return the optional administrator-defined order for a link category. */
+function quietype_link_category_order( $term_id ) {
+	$value = get_term_meta( $term_id, 'quietype_link_category_order', true );
+	return '' === $value ? PHP_INT_MAX : absint( $value );
+}
+
+/** Return visible bookmarks grouped by every configured non-empty category. */
+function quietype_link_groups() {
+	$terms = get_terms(
+		array(
+			'taxonomy'   => 'link_category',
+			'hide_empty' => false,
+		)
+	);
+	if ( is_wp_error( $terms ) || ! $terms ) {
+		return array();
+	}
+	usort(
+		$terms,
+		function ( $left, $right ) {
+			$order = quietype_link_category_order( $left->term_id ) <=> quietype_link_category_order( $right->term_id );
+			return 0 !== $order ? $order : strnatcasecmp( $left->name, $right->name );
+		}
+	);
+	$groups = array();
+	foreach ( $terms as $term ) {
+		$links = get_bookmarks(
+			array(
+				'category'       => (string) $term->term_id,
+				'hide_invisible' => true,
+				'orderby'        => 'rating',
+				'order'          => 'DESC',
+			)
+		);
+		if ( ! $links ) {
+			continue;
+		}
+		usort(
+			$links,
+			function ( $left, $right ) {
+				$rating = (int) $right->link_rating <=> (int) $left->link_rating;
+				return 0 !== $rating ? $rating : strnatcasecmp( $left->link_name, $right->link_name );
+			}
+		);
+		$groups[] = array( 'term' => $term, 'links' => $links );
+	}
+	return $groups;
+}
+
+/** Add an optional display order to WordPress's native link-category forms. */
+function quietype_link_category_add_order_field() {
+	wp_nonce_field( 'quietype_save_link_category_order', 'quietype_link_category_order_nonce' );
+	?>
+	<div class="form-field term-order-wrap">
+		<label for="quietype-link-category-order">显示顺序</label>
+		<input id="quietype-link-category-order" name="quietype_link_category_order" type="number" min="0" max="9999" step="1" value="">
+		<p>数字越小越靠前；留空时按分类名称排列。</p>
+	</div>
+	<?php
+}
+add_action( 'link_category_add_form_fields', 'quietype_link_category_add_order_field' );
+
+function quietype_link_category_edit_order_field( $term ) {
+	$value = get_term_meta( $term->term_id, 'quietype_link_category_order', true );
+	wp_nonce_field( 'quietype_save_link_category_order', 'quietype_link_category_order_nonce' );
+	?>
+	<tr class="form-field term-order-wrap">
+		<th scope="row"><label for="quietype-link-category-order">显示顺序</label></th>
+		<td><input id="quietype-link-category-order" name="quietype_link_category_order" type="number" min="0" max="9999" step="1" value="<?php echo esc_attr( $value ); ?>"><p class="description">数字越小越靠前；留空时按分类名称排列。</p></td>
+	</tr>
+	<?php
+}
+add_action( 'link_category_edit_form_fields', 'quietype_link_category_edit_order_field' );
+
+/** Save or clear a link category's display order. */
+function quietype_save_link_category_order( $term_id ) {
+	$taxonomy = get_taxonomy( 'link_category' );
+	if ( ! $taxonomy || ! current_user_can( $taxonomy->cap->manage_terms ) || empty( $_POST['quietype_link_category_order_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['quietype_link_category_order_nonce'] ) ), 'quietype_save_link_category_order' ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		return;
+	}
+	$value = isset( $_POST['quietype_link_category_order'] ) ? trim( sanitize_text_field( wp_unslash( $_POST['quietype_link_category_order'] ) ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+	if ( '' === $value ) {
+		delete_term_meta( $term_id, 'quietype_link_category_order' );
+		return;
+	}
+	update_term_meta( $term_id, 'quietype_link_category_order', min( 9999, absint( $value ) ) );
+}
+add_action( 'created_link_category', 'quietype_save_link_category_order' );
+add_action( 'edited_link_category', 'quietype_save_link_category_order' );
+
+/** Show category order in the native taxonomy overview. */
+function quietype_link_category_order_column( $columns ) {
+	$columns['quietype_order'] = '显示顺序';
+	return $columns;
+}
+add_filter( 'manage_edit-link_category_columns', 'quietype_link_category_order_column' );
+
+function quietype_link_category_order_column_value( $content, $column_name, $term_id ) {
+	if ( 'quietype_order' !== $column_name ) {
+		return $content;
+	}
+	$value = get_term_meta( $term_id, 'quietype_link_category_order', true );
+	return '' === $value ? '—' : esc_html( $value );
+}
+add_filter( 'manage_link_category_custom_column', 'quietype_link_category_order_column_value', 10, 3 );
+
 /** Persist one bookmark state without autoloading the collection. */
 function quietype_update_link_state( $link_id, $state ) {
 	$link_id = absint( $link_id );

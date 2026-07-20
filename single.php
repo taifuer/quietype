@@ -24,7 +24,7 @@ $article  = quietype_prepare_article( $rendered );
 
 	<?php if ( count( $article['items'] ) >= 2 ) : ?>
 		<details class="mobile-toc content-width">
-			<summary>文章目录 <span><?php echo esc_html( count( $article['items'] ) ); ?> 节</span></summary>
+			<summary>文章目录</summary>
 			<nav aria-label="文章目录">
 				<?php foreach ( $article['items'] as $item ) : ?><a class="toc-level-<?php echo esc_attr( $item['level'] ); ?>" href="#<?php echo esc_attr( $item['id'] ); ?>"><?php echo esc_html( $item['label'] ); ?></a><?php endforeach; ?>
 			</nav>

@@ -4,6 +4,17 @@ All notable changes to Quietype will be documented in this file.
 
 ## [Unreleased]
 
+## [0.7.8] - 2026-07-20
+
+### Added
+
+- Rendered friend links from administrator-created WordPress link categories with optional numeric display order.
+- Added link-category order fields and an overview column to WordPress's native taxonomy screen.
+
+### Changed
+
+- Simplified the collapsed mobile article TOC label and close it after a section is selected.
+
 ## [0.7.7] - 2026-07-20
 
 ### Fixed

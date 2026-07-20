@@ -200,6 +200,10 @@
   }
 
   const tocLinks = [...document.querySelectorAll('.article-toc a')];
+  const mobileToc = document.querySelector('.mobile-toc');
+  mobileToc?.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => {
+    mobileToc.open = false;
+  }));
   const headings = tocLinks.map((link) => document.getElementById(decodeURIComponent(link.hash.slice(1)))).filter(Boolean);
   if (tocLinks.length && headings.length && 'IntersectionObserver' in window) {
     const observer = new IntersectionObserver((entries) => {
