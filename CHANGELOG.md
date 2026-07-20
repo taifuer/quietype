@@ -4,6 +4,15 @@ All notable changes to Quietype will be documented in this file.
 
 ## [Unreleased]
 
+## [0.7.6] - 2026-07-20
+
+### Added
+
+- Added manual normal, pending, and offline states to WordPress's native link editor and overview table.
+- Added SSRF-safe, batched daily availability checks that require three consecutive failures before suggesting review.
+- Added a restrained, manually confirmed offline badge to friend-link cards.
+- Restored WordPress's native Links screen for administrators while Quietype is active without permanently changing role data.
+
 ## [0.7.5] - 2026-07-20
 
 ### Added

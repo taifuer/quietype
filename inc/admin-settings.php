@@ -27,6 +27,7 @@ function quietype_register_admin_settings() {
 		'quietype_contact_email'              => array( 'string', 'taifu@taifua.com', 'sanitize_email' ),
 		'quietype_icp_number'                 => array( 'string', '湘ICP备17002466号', 'sanitize_text_field' ),
 		'quietype_start_year'                 => array( 'integer', 2017, 'quietype_sanitize_start_year' ),
+		'quietype_link_check_enabled'         => array( 'boolean', true, 'quietype_sanitize_checkbox' ),
 		'quietype_article_copyright_enabled'  => array( 'boolean', true, 'quietype_sanitize_checkbox' ),
 		'quietype_article_author_name'        => array( 'string', '小傅', 'sanitize_text_field' ),
 		'quietype_hide_admin_bar'             => array( 'boolean', false, 'quietype_sanitize_checkbox' ),
@@ -227,6 +228,7 @@ function quietype_render_settings_page() {
 					<tr><th><label for="quietype_github_url">GitHub 地址</label></th><td><input class="regular-text" id="quietype_github_url" name="quietype_github_url" type="url" value="<?php echo esc_attr( quietype_get_setting( 'quietype_github_url', 'https://github.com/taifuer' ) ); ?>"><p class="description">留空可隐藏页脚 GitHub 图标。</p></td></tr>
 					<tr><th><label for="quietype_icp_number">备案号</label></th><td><input class="regular-text" id="quietype_icp_number" name="quietype_icp_number" type="text" value="<?php echo esc_attr( quietype_get_setting( 'quietype_icp_number', '湘ICP备17002466号' ) ); ?>"><p class="description">留空可隐藏页脚备案信息，填写后自动链接至工信部备案系统。</p></td></tr>
 					<tr><th><label for="quietype_start_year">建站年份</label></th><td><input class="small-text" id="quietype_start_year" name="quietype_start_year" type="number" min="1990" max="<?php echo esc_attr( gmdate( 'Y' ) ); ?>" value="<?php echo esc_attr( quietype_get_setting( 'quietype_start_year', 2017 ) ); ?>"><p class="description">用于页脚版权年份范围。</p></td></tr>
+					<tr><th>友链检测</th><td><?php quietype_settings_checkbox( 'quietype_link_check_enabled', '每天分批检测友链可达性' ); ?><p class="description">每天最多检测五条；连续失败三次只会进入“待确认”，不会自动在前台标记失联。</p></td></tr>
 					<tr><th>文章版权声明</th><td><?php quietype_settings_checkbox( 'quietype_article_copyright_enabled', '在文章正文末尾显示 CC BY-NC-SA 4.0 声明' ); ?></td></tr>
 					<tr><th><label for="quietype_article_author_name">版权署名</label></th><td><input class="regular-text" id="quietype_article_author_name" name="quietype_article_author_name" type="text" value="<?php echo esc_attr( quietype_get_setting( 'quietype_article_author_name', '小傅' ) ); ?>"><p class="description">留空时使用文章作者的 WordPress 显示名称，署名链接回本站首页。</p></td></tr>
 				</table>

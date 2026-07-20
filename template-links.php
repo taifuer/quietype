@@ -17,9 +17,11 @@ $bookmarks = get_bookmarks( array( 'orderby' => 'rating', 'order' => 'DESC' ) );
 	<?php if ( $bookmarks ) : ?>
 		<div class="link-grid">
 			<?php foreach ( $bookmarks as $bookmark ) : ?>
-				<a href="<?php echo esc_url( $bookmark->link_url ); ?>" target="<?php echo esc_attr( $bookmark->link_target ?: '_blank' ); ?>" rel="noopener friend">
+				<?php $link_state = quietype_link_state( $bookmark->link_id ); ?>
+				<a class="link-card<?php echo 'offline' === $link_state['status'] ? ' is-offline' : ''; ?>" href="<?php echo esc_url( $bookmark->link_url ); ?>" target="<?php echo esc_attr( $bookmark->link_target ?: '_blank' ); ?>" rel="noopener friend"<?php echo 'offline' === $link_state['status'] ? ' title="该友链当前标记为失联，仍可尝试访问"' : ''; ?>>
 					<strong><?php echo esc_html( $bookmark->link_name ); ?></strong>
-					<span><?php echo esc_html( $bookmark->link_description ?: wp_parse_url( $bookmark->link_url, PHP_URL_HOST ) ); ?></span>
+					<span class="link-card__description"><?php echo esc_html( $bookmark->link_description ?: wp_parse_url( $bookmark->link_url, PHP_URL_HOST ) ); ?></span>
+					<?php if ( 'offline' === $link_state['status'] ) : ?><span class="link-card__status">失联</span><?php endif; ?>
 				</a>
 			<?php endforeach; ?>
 		</div>
