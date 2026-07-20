@@ -4,6 +4,13 @@ All notable changes to Quietype will be documented in this file.
 
 ## [Unreleased]
 
+## [0.7.4] - 2026-07-20
+
+### Fixed
+
+- Removed WP Editor.md's orphan KaTeX, Mermaid, and MindMap footer initializers on pages that do not load their matching libraries.
+- Added semantic path and hostname break opportunities to visibly printed URLs without splitting ordinary linked labels.
+
 ## [0.7.3] - 2026-07-20
 
 ### Fixed

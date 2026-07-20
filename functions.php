@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'QUIETYPE_VERSION', '0.7.3' );
+define( 'QUIETYPE_VERSION', '0.7.4' );
 
 require_once get_template_directory() . '/inc/admin-settings.php';
 require_once get_template_directory() . '/inc/login-security.php';
@@ -127,6 +127,41 @@ function quietype_trim_editor_assets() {
 	}
 }
 add_action( 'wp_enqueue_scripts', 'quietype_trim_editor_assets', 100 );
+
+/**
+ * Remove a plugin footer callback by class and method without depending on the
+ * plugin's private object instance.
+ */
+function quietype_remove_object_action( $hook_name, $class_name, $method_name ) {
+	global $wp_filter;
+	if ( empty( $wp_filter[ $hook_name ] ) || empty( $wp_filter[ $hook_name ]->callbacks ) ) {
+		return;
+	}
+	foreach ( $wp_filter[ $hook_name ]->callbacks as $priority => $callbacks ) {
+		foreach ( $callbacks as $callback ) {
+			$function = $callback['function'] ?? null;
+			if ( is_array( $function ) && is_object( $function[0] ) && is_a( $function[0], $class_name ) && $method_name === $function[1] ) {
+				remove_action( $hook_name, $function, $priority );
+			}
+		}
+	}
+}
+
+/** Stop WP Editor.md from printing initializers whose libraries were removed. */
+function quietype_trim_editor_footer_scripts() {
+	$features = quietype_content_features();
+	$footer_scripts = array(
+		'math'     => array( 'EditormdApp\\KaTeX', 'katex_wp_footer_scripts' ),
+		'mermaid'  => array( 'EditormdApp\\Mermaid', 'mermaid_wp_footer_script' ),
+		'mindmap'  => array( 'EditormdApp\\MindMap', 'mindmap_wp_footer_script' ),
+	);
+	foreach ( $footer_scripts as $feature => $callback ) {
+		if ( ! is_singular() || empty( $features[ $feature ] ) ) {
+			quietype_remove_object_action( 'wp_print_footer_scripts', $callback[0], $callback[1] );
+		}
+	}
+}
+add_action( 'wp', 'quietype_trim_editor_footer_scripts', 20 );
 
 /** Remove the legacy Plyr plugin's global footer payload when no media exists. */
 function quietype_conditionally_disable_plyr() {
@@ -423,7 +458,13 @@ function quietype_prepare_article( $content ) {
 			if ( null !== $hyphenated_text ) {
 				$text = $hyphenated_text;
 			}
-			return preg_replace( '/(?<=[A-Za-z0-9])\((?=[A-Za-z0-9])/', '(<wbr>', $text );
+			$text = preg_replace( '/(?<=[A-Za-z0-9])\((?=[A-Za-z0-9])/', '(<wbr>', $text );
+			if ( preg_match( '~(?:https?://|www\.)~i', $text ) ) {
+				// Visible URLs should use the current line before wrapping at a path boundary.
+				$text = preg_replace( '~(?<=/)(?=[^/\s<])|(?<=[?#=])(?=[^\s<])~u', '<wbr>', $text );
+				$text = preg_replace( '~(?<=[A-Za-z0-9])\.(?=[A-Za-z0-9])~u', '.<wbr>', $text );
+			}
+			return $text;
 		},
 		$content
 	);
