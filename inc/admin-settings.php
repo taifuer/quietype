@@ -189,10 +189,10 @@ function quietype_settings_assets( $hook_suffix ) {
 add_action( 'admin_enqueue_scripts', 'quietype_settings_assets' );
 
 /** Print a settings checkbox with an explicit unchecked value. */
-function quietype_settings_checkbox( $option_name, $label ) {
+function quietype_settings_checkbox( $option_name, $label, $default = false ) {
 	?>
 	<input type="hidden" name="<?php echo esc_attr( $option_name ); ?>" value="0">
-	<label><input type="checkbox" name="<?php echo esc_attr( $option_name ); ?>" value="1" <?php checked( quietype_get_setting( $option_name, false ) ); ?>> <?php echo esc_html( $label ); ?></label>
+	<label><input type="checkbox" name="<?php echo esc_attr( $option_name ); ?>" value="1" <?php checked( quietype_get_setting( $option_name, $default ) ); ?>> <?php echo esc_html( $label ); ?></label>
 	<?php
 }
 
@@ -228,8 +228,8 @@ function quietype_render_settings_page() {
 					<tr><th><label for="quietype_github_url">GitHub 地址</label></th><td><input class="regular-text" id="quietype_github_url" name="quietype_github_url" type="url" value="<?php echo esc_attr( quietype_get_setting( 'quietype_github_url', 'https://github.com/taifuer' ) ); ?>"><p class="description">留空可隐藏页脚 GitHub 图标。</p></td></tr>
 					<tr><th><label for="quietype_icp_number">备案号</label></th><td><input class="regular-text" id="quietype_icp_number" name="quietype_icp_number" type="text" value="<?php echo esc_attr( quietype_get_setting( 'quietype_icp_number', '湘ICP备17002466号' ) ); ?>"><p class="description">留空可隐藏页脚备案信息，填写后自动链接至工信部备案系统。</p></td></tr>
 					<tr><th><label for="quietype_start_year">建站年份</label></th><td><input class="small-text" id="quietype_start_year" name="quietype_start_year" type="number" min="1990" max="<?php echo esc_attr( gmdate( 'Y' ) ); ?>" value="<?php echo esc_attr( quietype_get_setting( 'quietype_start_year', 2017 ) ); ?>"><p class="description">用于页脚版权年份范围。</p></td></tr>
-					<tr><th>友链检测</th><td><?php quietype_settings_checkbox( 'quietype_link_check_enabled', '每天分批检测友链可达性' ); ?><p class="description">每天最多检测五条；连续失败三次只会进入“待确认”，不会自动在前台标记失联。</p></td></tr>
-					<tr><th>文章版权声明</th><td><?php quietype_settings_checkbox( 'quietype_article_copyright_enabled', '在文章正文末尾显示 CC BY-NC-SA 4.0 声明' ); ?></td></tr>
+					<tr><th>友链检测</th><td><?php quietype_settings_checkbox( 'quietype_link_check_enabled', '每天分批检测友链可达性', true ); ?><p class="description">每天最多检测五条；连续失败三次只会进入“待确认”，不会自动在前台标记失联。</p></td></tr>
+					<tr><th>文章版权声明</th><td><?php quietype_settings_checkbox( 'quietype_article_copyright_enabled', '在文章正文末尾显示 CC BY-NC-SA 4.0 声明', true ); ?></td></tr>
 					<tr><th><label for="quietype_article_author_name">版权署名</label></th><td><input class="regular-text" id="quietype_article_author_name" name="quietype_article_author_name" type="text" value="<?php echo esc_attr( quietype_get_setting( 'quietype_article_author_name', '小傅' ) ); ?>"><p class="description">留空时使用文章作者的 WordPress 显示名称，署名链接回本站首页。</p></td></tr>
 				</table>
 			</section>
@@ -238,7 +238,7 @@ function quietype_render_settings_page() {
 				<h2>搜索引擎优化</h2>
 				<p>未检测到常见 SEO 插件时，Quietype 输出描述、关键词和基础 Open Graph。文章优先使用自定义摘要，否则自动提取正文；关键词优先使用文章标签。</p>
 				<table class="form-table" role="presentation">
-					<tr><th>主题 SEO</th><td><?php quietype_settings_checkbox( 'quietype_seo_enabled', '启用轻量 SEO 元数据' ); ?><p class="description">检测到 Yoast SEO、Rank Math、All in One SEO、SEOPress 或 The SEO Framework 时自动停用输出，避免重复。</p></td></tr>
+					<tr><th>主题 SEO</th><td><?php quietype_settings_checkbox( 'quietype_seo_enabled', '启用轻量 SEO 元数据', true ); ?><p class="description">检测到 Yoast SEO、Rank Math、All in One SEO、SEOPress 或 The SEO Framework 时自动停用输出，避免重复。</p></td></tr>
 					<tr><th><label for="quietype_seo_description">站点描述</label></th><td><textarea class="large-text" id="quietype_seo_description" name="quietype_seo_description" rows="3" maxlength="300"><?php echo esc_textarea( quietype_get_setting( 'quietype_seo_description', '' ) ); ?></textarea><p class="description">首页和无法提取独立摘要的页面使用；留空则使用 WordPress 站点副标题。</p></td></tr>
 					<tr><th><label for="quietype_seo_keywords">站点关键词</label></th><td><input class="large-text" id="quietype_seo_keywords" name="quietype_seo_keywords" type="text" value="<?php echo esc_attr( quietype_get_setting( 'quietype_seo_keywords', '' ) ); ?>"><p class="description">使用英文逗号分隔。搜索引擎通常不再依赖 keywords，但可为部分中文检索服务保留。</p></td></tr>
 					<tr><th><label for="quietype_social_image_url">默认分享图</label></th><td><input class="large-text code" id="quietype_social_image_url" name="quietype_social_image_url" type="url" value="<?php echo esc_attr( quietype_get_setting( 'quietype_social_image_url', '' ) ); ?>" placeholder="https://example.com/social-card.jpg"><p class="description">建议使用 1200×630 的 JPG 或 PNG。留空使用主题预览图；文章仍优先使用特色图和第一张正文图片。</p></td></tr>
@@ -276,7 +276,7 @@ function quietype_render_settings_page() {
 				<table class="form-table" role="presentation">
 					<tr><th>SMTP</th><td><?php quietype_settings_checkbox( 'quietype_smtp_enabled', '启用 SMTP 发信' ); ?></td></tr>
 					<tr><th><label for="quietype_smtp_host">服务器</label></th><td><input class="regular-text code" id="quietype_smtp_host" name="quietype_smtp_host" type="text" value="<?php echo esc_attr( quietype_get_setting( 'quietype_smtp_host', '' ) ); ?>" placeholder="smtp.example.com"></td></tr>
-					<tr><th>连接</th><td><div class="quietype-settings__inline"><label>端口 <input id="quietype_smtp_port" name="quietype_smtp_port" type="number" min="1" max="65535" value="<?php echo esc_attr( quietype_get_setting( 'quietype_smtp_port', 587 ) ); ?>"></label><label>加密 <select name="quietype_smtp_encryption"><option value="tls" <?php selected( quietype_get_setting( 'quietype_smtp_encryption', 'tls' ), 'tls' ); ?>>TLS / STARTTLS</option><option value="ssl" <?php selected( quietype_get_setting( 'quietype_smtp_encryption', 'tls' ), 'ssl' ); ?>>SSL / SMTPS</option><option value="none" <?php selected( quietype_get_setting( 'quietype_smtp_encryption', 'tls' ), 'none' ); ?>>无</option></select></label><?php quietype_settings_checkbox( 'quietype_smtp_auth', '需要身份验证' ); ?></div></td></tr>
+					<tr><th>连接</th><td><div class="quietype-settings__inline"><label>端口 <input id="quietype_smtp_port" name="quietype_smtp_port" type="number" min="1" max="65535" value="<?php echo esc_attr( quietype_get_setting( 'quietype_smtp_port', 587 ) ); ?>"></label><label>加密 <select name="quietype_smtp_encryption"><option value="tls" <?php selected( quietype_get_setting( 'quietype_smtp_encryption', 'tls' ), 'tls' ); ?>>TLS / STARTTLS</option><option value="ssl" <?php selected( quietype_get_setting( 'quietype_smtp_encryption', 'tls' ), 'ssl' ); ?>>SSL / SMTPS</option><option value="none" <?php selected( quietype_get_setting( 'quietype_smtp_encryption', 'tls' ), 'none' ); ?>>无</option></select></label><?php quietype_settings_checkbox( 'quietype_smtp_auth', '需要身份验证', true ); ?></div></td></tr>
 					<tr><th><label for="quietype_smtp_username">用户名</label></th><td><input class="regular-text code" id="quietype_smtp_username" name="quietype_smtp_username" type="text" value="<?php echo esc_attr( quietype_get_setting( 'quietype_smtp_username', '' ) ); ?>" autocomplete="off"></td></tr>
 					<tr><th><label for="quietype_smtp_password">密码/授权码</label></th><td><input class="regular-text code" id="quietype_smtp_password" name="quietype_smtp_password" type="password" value="" autocomplete="new-password" placeholder="留空保持现有密码"> <label><input type="checkbox" name="quietype_smtp_password_clear" value="1"> 清除已保存密码</label><p class="description">当前：<?php echo $smtp_password_saved ? '已配置' : '未配置'; ?>。推荐使用独立授权码；也可在 <code>wp-config.php</code> 定义 <code>QUIETYPE_SMTP_PASSWORD</code>，常量优先且不会显示在数据库中。</p></td></tr>
 					<tr><th><label for="quietype_smtp_from_email">发件地址</label></th><td><input class="regular-text" id="quietype_smtp_from_email" name="quietype_smtp_from_email" type="email" value="<?php echo esc_attr( quietype_get_setting( 'quietype_smtp_from_email', '' ) ); ?>" placeholder="<?php echo esc_attr( get_option( 'admin_email' ) ); ?>"></td></tr>

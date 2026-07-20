@@ -4,6 +4,12 @@ All notable changes to Quietype will be documented in this file.
 
 ## [Unreleased]
 
+## [0.7.7] - 2026-07-20
+
+### Fixed
+
+- Kept default-enabled checkboxes visibly checked when WordPress optimizes away an option equal to its registered default.
+
 ## [0.7.6] - 2026-07-20
 
 ### Added
