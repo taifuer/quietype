@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'QUIETYPE_VERSION', '0.7.2' );
+define( 'QUIETYPE_VERSION', '0.7.3' );
 
 require_once get_template_directory() . '/inc/admin-settings.php';
 require_once get_template_directory() . '/inc/login-security.php';
@@ -411,6 +411,19 @@ function quietype_prepare_article( $content ) {
 				$text
 			);
 			return '<code' . $matches[1] . '>' . $text . '</code>';
+		},
+		$content
+	);
+	$content = preg_replace_callback(
+		'~<(pre|code|script|style|kbd|math|svg)\b[^>]*>.*?</\1>(*SKIP)(*F)|(?<=>)([^<]+)(?=<)~isu',
+		function ( $matches ) {
+			$text = $matches[2];
+			$text = preg_replace( '/(?<=[a-z0-9])(?=[A-Z])|(?<=_)(?=[A-Za-z0-9])/', '<wbr>', $text );
+			$hyphenated_text = preg_replace( '/(?<=[A-Za-z0-9])([\x{2010}-\x{2015}-])(?=[A-Za-z0-9])/u', '$1<wbr>', $text );
+			if ( null !== $hyphenated_text ) {
+				$text = $hyphenated_text;
+			}
+			return preg_replace( '/(?<=[A-Za-z0-9])\((?=[A-Za-z0-9])/', '(<wbr>', $text );
 		},
 		$content
 	);

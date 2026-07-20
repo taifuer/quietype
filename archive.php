@@ -37,7 +37,7 @@ if ( $category instanceof WP_Term ) {
 				<?php endforeach; ?>
 			</nav>
 		<?php else : ?>
-			<p class="eyebrow">COLLECTION</p>
+			<p class="eyebrow">CATALOGUE</p>
 		<?php endif; ?>
 		<h1><?php echo esc_html( $archive_title ); ?></h1>
 		<?php the_archive_description( '<div class="page-description">', '</div>' ); ?>

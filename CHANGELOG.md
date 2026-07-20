@@ -4,6 +4,13 @@ All notable changes to Quietype will be documented in this file.
 
 ## [Unreleased]
 
+## [0.7.3] - 2026-07-20
+
+### Fixed
+
+- Renamed the taxonomy eyebrow from `COLLECTION` to `CATALOGUE`.
+- Added unobtrusive semantic break opportunities to mixed Chinese/Latin prose without applying indiscriminate `break-all` to every English word.
+
 ## [0.7.2] - 2026-07-19
 
 ### Fixed
