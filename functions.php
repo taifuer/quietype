@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'QUIETYPE_VERSION', '0.7.4' );
+define( 'QUIETYPE_VERSION', '0.7.5' );
 
 require_once get_template_directory() . '/inc/admin-settings.php';
 require_once get_template_directory() . '/inc/login-security.php';
@@ -504,6 +504,10 @@ function quietype_comment_captcha_field( $fields ) {
 	if ( is_user_logged_in() ) {
 		return $fields;
 	}
+	if ( isset( $fields['url'] ) ) {
+		$fields['url'] = preg_replace( '/\btype=(["\'])url\1/i', 'type="text" inputmode="url"', $fields['url'] );
+		$fields['url'] = str_replace( 'autocomplete="url"', 'autocomplete="url" placeholder="example.com 或 https://example.com"', $fields['url'] );
+	}
 	$challenge = (string) wp_rand( 1000, 9999 );
 	$token     = wp_generate_uuid4();
 	set_transient( 'quietype_comment_captcha_' . md5( $token ), $challenge, 10 * MINUTE_IN_SECONDS );
@@ -528,6 +532,27 @@ function quietype_comment_captcha_field( $fields ) {
 	return $ordered;
 }
 add_filter( 'comment_form_default_fields', 'quietype_comment_captcha_field' );
+
+/** Accept a bare public domain in the optional comment website field. */
+function quietype_normalize_comment_author_url( $commentdata ) {
+	$url = trim( (string) ( $commentdata['comment_author_url'] ?? '' ) );
+	if ( '' === $url ) {
+		return $commentdata;
+	}
+	if ( str_starts_with( $url, '//' ) ) {
+		$url = 'https:' . $url;
+	} elseif ( ! preg_match( '~^https?://~i', $url ) ) {
+		$url = 'https://' . $url;
+	}
+	$url   = esc_url_raw( $url, array( 'http', 'https' ) );
+	$parts = $url ? wp_parse_url( $url ) : false;
+	if ( ! is_array( $parts ) || empty( $parts['host'] ) || ! in_array( strtolower( $parts['scheme'] ?? '' ), array( 'http', 'https' ), true ) ) {
+		wp_die( '网址格式不正确，请填写 example.com 或完整的 http(s) 地址。', '评论网址无效', array( 'response' => 400, 'back_link' => true ) );
+	}
+	$commentdata['comment_author_url'] = $url;
+	return $commentdata;
+}
+add_filter( 'preprocess_comment', 'quietype_normalize_comment_author_url', 5 );
 
 /** Validate and consume the public comment challenge before insertion. */
 function quietype_validate_comment_captcha( $commentdata ) {

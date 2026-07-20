@@ -4,6 +4,19 @@ All notable changes to Quietype will be documented in this file.
 
 ## [Unreleased]
 
+## [0.7.5] - 2026-07-20
+
+### Added
+
+- Added a configurable site start year for the footer copyright range.
+- Accepted bare domains in the optional comment website field and normalized them to HTTPS.
+
+### Fixed
+
+- Removed the redundant search-icon tooltip and corrected tag archive eyebrows to `TAG`.
+- Aligned the desktop TOC with the article title and bounded long lists with independent scrolling.
+- Replaced hard-coded masthead and footer names with the WordPress site title.
+
 ## [0.7.4] - 2026-07-20
 
 ### Fixed

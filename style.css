@@ -4,7 +4,7 @@ Theme URI: https://github.com/taifuer/quietype
 Author: taifu
 Author URI: https://github.com/taifuer
 Description: A quiet WordPress theme for thoughtful reading, designed for Chinese long-form and technical writing.
-Version: 0.7.4
+Version: 0.7.5
 Requires at least: 6.4
 Requires PHP: 8.0
 License: GNU General Public License v2 or later
@@ -683,3 +683,13 @@ body{font-kerning:normal;font-variant-ligatures:common-ligatures}
 
 /* Quietype 0.7.2: let long inline identifiers use the current line. */
 .article-content li>p:only-child{margin-top:0;margin-bottom:0}
+
+/* Quietype 0.7.5: a bounded desktop TOC aligned with the article rail. */
+.article-toc{top:142px;max-height:calc(100vh - 166px);overflow:hidden}
+.article-toc nav{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding-right:8px;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+.article-toc nav::-webkit-scrollbar{width:4px}.article-toc nav::-webkit-scrollbar-thumb{background:var(--line);border-radius:999px}
+.admin-bar .article-toc{top:174px;max-height:calc(100vh - 198px)}
+@media(min-width:1121px){
+  .single-post .article--with-toc>.content-width{max-width:760px;margin-left:calc(50% - 480px);margin-right:0}
+  .single-post .article--with-toc .article-toc{left:calc(50% + 300px);width:180px}
+}

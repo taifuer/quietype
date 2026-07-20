@@ -26,6 +26,7 @@ function quietype_register_admin_settings() {
 		'quietype_github_url'                 => array( 'string', 'https://github.com/taifuer', 'esc_url_raw' ),
 		'quietype_contact_email'              => array( 'string', 'taifu@taifua.com', 'sanitize_email' ),
 		'quietype_icp_number'                 => array( 'string', '湘ICP备17002466号', 'sanitize_text_field' ),
+		'quietype_start_year'                 => array( 'integer', 2017, 'quietype_sanitize_start_year' ),
 		'quietype_article_copyright_enabled'  => array( 'boolean', true, 'quietype_sanitize_checkbox' ),
 		'quietype_article_author_name'        => array( 'string', '小傅', 'sanitize_text_field' ),
 		'quietype_hide_admin_bar'             => array( 'boolean', false, 'quietype_sanitize_checkbox' ),
@@ -120,6 +121,12 @@ function quietype_sanitize_seo_keywords( $value ) {
 	$value = preg_replace( '/[\r\n，、]+/u', ',', wp_strip_all_tags( (string) $value ) );
 	$parts = array_filter( array_map( 'trim', explode( ',', $value ) ) );
 	return mb_substr( implode( ',', array_unique( $parts ) ), 0, 500 );
+}
+
+/** Keep the copyright range plausible and never later than the current year. */
+function quietype_sanitize_start_year( $value ) {
+	$year = absint( $value );
+	return max( 1990, min( (int) gmdate( 'Y' ), $year ?: 2017 ) );
 }
 
 /** Accept an HTTP(S) avatar base URL, or an empty value to disable rewriting. */
@@ -219,6 +226,7 @@ function quietype_render_settings_page() {
 					<tr><th><label for="quietype_contact_email">联系邮箱</label></th><td><input class="regular-text" id="quietype_contact_email" name="quietype_contact_email" type="email" value="<?php echo esc_attr( quietype_get_setting( 'quietype_contact_email', 'taifu@taifua.com' ) ); ?>"><p class="description">留空可隐藏页脚邮件图标。</p></td></tr>
 					<tr><th><label for="quietype_github_url">GitHub 地址</label></th><td><input class="regular-text" id="quietype_github_url" name="quietype_github_url" type="url" value="<?php echo esc_attr( quietype_get_setting( 'quietype_github_url', 'https://github.com/taifuer' ) ); ?>"><p class="description">留空可隐藏页脚 GitHub 图标。</p></td></tr>
 					<tr><th><label for="quietype_icp_number">备案号</label></th><td><input class="regular-text" id="quietype_icp_number" name="quietype_icp_number" type="text" value="<?php echo esc_attr( quietype_get_setting( 'quietype_icp_number', '湘ICP备17002466号' ) ); ?>"><p class="description">留空可隐藏页脚备案信息，填写后自动链接至工信部备案系统。</p></td></tr>
+					<tr><th><label for="quietype_start_year">建站年份</label></th><td><input class="small-text" id="quietype_start_year" name="quietype_start_year" type="number" min="1990" max="<?php echo esc_attr( gmdate( 'Y' ) ); ?>" value="<?php echo esc_attr( quietype_get_setting( 'quietype_start_year', 2017 ) ); ?>"><p class="description">用于页脚版权年份范围。</p></td></tr>
 					<tr><th>文章版权声明</th><td><?php quietype_settings_checkbox( 'quietype_article_copyright_enabled', '在文章正文末尾显示 CC BY-NC-SA 4.0 声明' ); ?></td></tr>
 					<tr><th><label for="quietype_article_author_name">版权署名</label></th><td><input class="regular-text" id="quietype_article_author_name" name="quietype_article_author_name" type="text" value="<?php echo esc_attr( quietype_get_setting( 'quietype_article_author_name', '小傅' ) ); ?>"><p class="description">留空时使用文章作者的 WordPress 显示名称，署名链接回本站首页。</p></td></tr>
 				</table>

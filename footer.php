@@ -2,7 +2,8 @@
 <footer class="site-footer">
 	<div class="site-footer__inner">
 		<div class="footer-legal">
-			<span class="footer-copyright">© 2017–<?php echo esc_html( gmdate( 'Y' ) ); ?> <a href="<?php echo esc_url( home_url( '/' ) ); ?>">太傅博客</a></span>
+			<?php $start_year = (int) quietype_get_setting( 'quietype_start_year', 2017 ); ?>
+			<span class="footer-copyright">© <?php echo esc_html( $start_year ); ?>–<?php echo esc_html( gmdate( 'Y' ) ); ?> <a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( get_bloginfo( 'name' ) ); ?></a></span>
 			<?php $icp_number = quietype_get_setting( 'quietype_icp_number', '湘ICP备17002466号' ); ?>
 			<?php if ( $icp_number ) : ?><a class="footer-icp" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $icp_number ); ?></a><?php endif; ?>
 		</div>

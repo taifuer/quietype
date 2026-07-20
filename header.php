@@ -13,7 +13,7 @@
 <header class="site-header">
 	<div class="site-header__inner">
 		<a class="site-brand" href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home" aria-label="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>，返回首页">
-			<span class="site-brand__wordmark">太傅博客</span>
+			<span class="site-brand__wordmark"><?php echo esc_html( get_bloginfo( 'name' ) ); ?></span>
 		</a>
 		<div class="mobile-header-actions">
 			<button class="icon-button nav-toggle" type="button" aria-expanded="false" aria-controls="site-navigation" aria-label="打开菜单"><?php echo quietype_icon( 'menu' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button>
@@ -31,7 +31,7 @@
 				)
 			);
 			?>
-			<button class="icon-button search-toggle search-toggle--desktop" type="button" aria-expanded="false" aria-controls="site-search" aria-label="搜索" data-label="搜索"><?php echo quietype_icon( 'search' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button>
+			<button class="icon-button search-toggle search-toggle--desktop" type="button" aria-expanded="false" aria-controls="site-search" aria-label="搜索"><?php echo quietype_icon( 'search' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button>
 		</nav>
 		<button class="nav-backdrop" type="button" aria-label="关闭菜单" hidden></button>
 	</div>
