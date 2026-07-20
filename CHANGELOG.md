@@ -4,6 +4,17 @@ All notable changes to Quietype will be documented in this file.
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-07-20
+
+### Changed
+
+- Consolidated the historical CSS patch layers into a single component-oriented stylesheet without changing the established design.
+- Raised meaningful secondary text to the accessible muted color while keeping decorative separators visually quiet.
+
+### Fixed
+
+- Offset article heading anchors below the sticky header on desktop and mobile.
+
 ## [0.7.9] - 2026-07-20
 
 ### Fixed
