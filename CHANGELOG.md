@@ -4,6 +4,13 @@ All notable changes to Quietype will be documented in this file.
 
 ## [Unreleased]
 
+## [0.7.9] - 2026-07-20
+
+### Fixed
+
+- Let each friend-link card draw its own border so an incomplete row keeps the page background instead of exposing the grid-line color.
+- Removed the redundant category underline and separated category headings from cards with restrained whitespace.
+
 ## [0.7.8] - 2026-07-20
 
 ### Added
