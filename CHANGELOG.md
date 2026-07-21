@@ -4,6 +4,17 @@ All notable changes to Quietype will be documented in this file.
 
 ## [Unreleased]
 
+## [0.8.2] - 2026-07-21
+
+### Added
+
+- Added a theme-owned AJAX view counter that updates article totals independently of full-page caching.
+- Added six-hour browser and server-side deduplication with common crawler exclusion.
+
+### Changed
+
+- Continued using the existing `views` post metadata while preventing duplicate increments if WP-PostViews is reactivated.
+
 ## [0.8.1] - 2026-07-20
 
 ### Changed

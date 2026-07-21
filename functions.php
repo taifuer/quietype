@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'QUIETYPE_VERSION', '0.8.1' );
+define( 'QUIETYPE_VERSION', '0.8.2' );
 
 require_once get_template_directory() . '/inc/admin-settings.php';
 require_once get_template_directory() . '/inc/login-security.php';
@@ -18,6 +18,7 @@ require_once get_template_directory() . '/inc/mail.php';
 require_once get_template_directory() . '/inc/content-performance.php';
 require_once get_template_directory() . '/inc/wordpress-tweaks.php';
 require_once get_template_directory() . '/inc/link-status.php';
+require_once get_template_directory() . '/inc/view-count.php';
 
 function quietype_setup() {
 	load_theme_textdomain( 'quietype', get_template_directory() . '/languages' );
@@ -46,6 +47,18 @@ function quietype_assets() {
 	}
 	wp_enqueue_style( 'quietype', get_stylesheet_uri(), $style_dependencies, QUIETYPE_VERSION );
 	wp_enqueue_script( 'quietype', get_template_directory_uri() . '/assets/js/theme.js', array(), QUIETYPE_VERSION, true );
+	if ( is_singular( 'post' ) ) {
+		wp_localize_script(
+			'quietype',
+			'quietypeViewConfig',
+			array(
+				'endpoint'        => admin_url( 'admin-ajax.php' ),
+				'postId'          => get_queried_object_id(),
+				'token'           => quietype_view_token( get_queried_object_id() ),
+				'cooldownSeconds' => 6 * HOUR_IN_SECONDS,
+			)
+		);
+	}
 	if ( is_singular() && $features['images'] ) {
 		wp_enqueue_script( 'quietype-lightbox', get_template_directory_uri() . '/assets/js/lightbox.js', array(), QUIETYPE_VERSION, true );
 	}
@@ -260,7 +273,7 @@ function quietype_icon( $name ) {
 	return '<svg class="quietype-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' . $icons[ $name ] . '</svg>';
 }
 
-/** Format the WP-PostViews value without depending on the plugin's display template. */
+/** Format the persisted article view count. */
 function quietype_post_views( $post_id = null ) {
 	$post_id = $post_id ?: get_the_ID();
 	return number_format_i18n( max( 0, (int) get_post_meta( $post_id, 'views', true ) ) );

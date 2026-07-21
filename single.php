@@ -17,7 +17,7 @@ $article  = quietype_prepare_article( $rendered );
 			<div class="article-meta__group article-meta__stats">
 				<span><?php echo esc_html( number_format_i18n( $stats['characters'] ) ); ?> 字</span>
 				<span>约 <?php echo esc_html( $stats['minutes'] ); ?> 分钟</span>
-				<span><?php echo esc_html( quietype_post_views() ); ?> 次浏览</span>
+				<span><span data-quietype-view-count><?php echo esc_html( quietype_post_views() ); ?></span> 次浏览</span>
 			</div>
 		</div>
 	</header>

@@ -17,6 +17,42 @@
   const siteFooter = document.querySelector('.site-footer');
   const backgrounds = new Set(['paper', 'warm', 'green']);
 
+  const viewCount = document.querySelector('[data-quietype-view-count]');
+  const viewConfig = window.quietypeViewConfig;
+  if (viewCount && viewConfig?.endpoint && viewConfig?.postId && viewConfig?.token) {
+    const storageKey = `quietype-viewed-${viewConfig.postId}`;
+    const cooldown = Math.max(0, Number(viewConfig.cooldownSeconds) || 21600) * 1000;
+    let shouldIncrement = true;
+    try {
+      const lastViewed = Number(localStorage.getItem(storageKey) || 0);
+      shouldIncrement = !lastViewed || Date.now() - lastViewed >= cooldown;
+    } catch (error) {}
+
+    fetch(viewConfig.endpoint, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Cache-Control': 'no-cache'
+      },
+      body: new URLSearchParams({
+        action: 'quietype_record_view',
+        token: viewConfig.token,
+        post_id: String(viewConfig.postId),
+        increment: shouldIncrement ? '1' : '0'
+      })
+    })
+      .then((response) => response.ok ? response.json() : Promise.reject(new Error('View request failed')))
+      .then((payload) => {
+        if (!payload?.success || !payload.data?.formatted) return;
+        viewCount.textContent = payload.data.formatted;
+        if (shouldIncrement) {
+          try { localStorage.setItem(storageKey, String(Date.now())); } catch (error) {}
+        }
+      })
+      .catch(() => {});
+  }
+
   const releasePointerFocus = (event) => {
     if (event.detail > 0 && event.currentTarget instanceof HTMLElement) {
       event.currentTarget.blur();
