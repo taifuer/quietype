@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'QUIETYPE_VERSION', '0.8.3' );
+define( 'QUIETYPE_VERSION', '0.9.0' );
 
 require_once get_template_directory() . '/inc/admin-settings.php';
 require_once get_template_directory() . '/inc/login-security.php';

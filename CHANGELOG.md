@@ -4,6 +4,14 @@ All notable changes to Quietype will be documented in this file.
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-07-22
+
+### Added
+
+- Added a disposable Docker-based WordPress fixture with deterministic long-form test content.
+- Added Playwright interaction, console, markup, axe accessibility, and desktop/mobile visual regression coverage.
+- Added Lighthouse CI budgets and a GitHub Actions quality gate across PHP 8.0, 8.2, and 8.4.
+
 ## [0.8.3] - 2026-07-22
 
 ### Changed

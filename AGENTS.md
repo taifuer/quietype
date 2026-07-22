@@ -13,11 +13,11 @@ There is no asset compilation step. Develop against a local WordPress installati
 ```bash
 php -l functions.php
 find . -maxdepth 2 -name '*.php' -exec php -l {} \;
-node --check assets/js/theme.js
+npm run test:js
 git diff --check
 ```
 
-These commands check PHP syntax, JavaScript syntax, and whitespace errors. Before release, package from a clean tagged commit:
+These commands check PHP syntax, JavaScript syntax, and whitespace errors. For the isolated WordPress regression suite, run `npm ci`, `npm run env:start`, `npm run env:seed`, `npm run test:e2e`, and `npm run test:performance`; always finish with `npm run env:stop`. Before release, package from a clean tagged commit:
 
 ```bash
 git archive --format=zip --prefix=quietype/ -o quietype.zip <tag>
@@ -29,7 +29,7 @@ Follow WordPress PHP conventions: tabs for indentation, escaped output, and snak
 
 ## Testing Guidelines
 
-No automated test suite is configured. Manually verify home, article, category, archive, search, comments, links, and 404 views. Check 360px, 390px, 768px, 1280px, and 1440px widths, plus Markdown code, formulas, tables, nested lists, images, keyboard navigation, and print output.
+Playwright covers home, article, archive, search, links, about, and 404 views in desktop and mobile Chromium. It also runs axe checks, structural HTML rules, interaction assertions, and committed screenshots under `tests/e2e/visual.spec.js-snapshots/`. Update snapshots only after visually reviewing the intended change. Lighthouse budgets cover the home and representative article. Continue manual checks at 360px, 768px, and 1280px, plus formulas, historical Markdown, keyboard navigation, and print output.
 
 ## Commit & Pull Request Guidelines
 

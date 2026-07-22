@@ -126,9 +126,9 @@ SMTP 密码会以原值保存在 WordPress 数据库中。优先使用邮箱服�
 
 文章目录由渲染后的 H2/H3 自动生成，不要求修改历史文章，也不会把锚点写回数据库。
 
-## 开发
+## 开发与自动化回归
 
-当前主题不需要 Node.js 构建步骤。修改 PHP、CSS 或 JavaScript 后，可直接在本地 WordPress 环境中预览。
+当前主题没有前端构建步骤。修改 PHP、CSS 或 JavaScript 后，可直接在本地 WordPress 环境中预览。仓库同时提供独立于真实博客数据的自动化回归环境；运行它需要 Node.js 22、Docker Compose 和 Chromium 所需的系统依赖。
 
 - 根目录 PHP 文件：WordPress 模板层级与主题功能
 - `template-parts/`：可复用的文章列表组件
@@ -137,6 +137,30 @@ SMTP 密码会以原值保存在 WordPress 数据库中。优先使用邮箱服�
 - `style.css`：主题声明与前台样式
 - `theme.json`：编辑器基础设置
 - `screenshot.png`：WordPress 后台主题预览图
+- `tests/`：固定 WordPress 种子内容、浏览器测试与桌面/移动视觉基线
+- `.github/workflows/quality.yml`：PHP 兼容性和完整浏览器质量门禁
+
+首次运行：
+
+```bash
+npm ci
+npx playwright install --with-deps chromium
+npm run env:start
+npm run env:seed
+npm run test:e2e
+npm run test:performance
+npm run env:stop
+```
+
+测试站默认使用 `http://localhost:8888`，停止时会删除它的 WordPress 和数据库卷，不读取或修改现有博客。Playwright 覆盖首页、文章、归档、友链、关于、搜索和 404，检查控制台错误、关键交互、结构化 HTML、axe 严重无障碍问题，以及 390px/1440px 的已批准截图。Lighthouse 对首页和代表文章执行两轮性能、无障碍、最佳实践、SEO 与资源体积预算。
+
+只有在确认视觉变化符合预期时才更新基线：
+
+```bash
+npm run test:e2e:update
+```
+
+失败截图、trace、HTML 报告和 Lighthouse 报告输出到 `artifacts/`；GitHub Actions 会保留这些文件 14 天。
 
 发布前建议至少回归以下内容：
 

@@ -1,0 +1,51 @@
+name: quietype-regression
+
+services:
+  database:
+    image: ${QUIETYPE_DB_IMAGE:-mysql:8.0}
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+      MYSQL_ROOT_PASSWORD: wordpress-root
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 3s
+      timeout: 3s
+      retries: 40
+    volumes:
+      - database-data:/var/lib/mysql
+
+  wordpress:
+    image: ${QUIETYPE_WORDPRESS_IMAGE:-wordpress:6.8.2-php8.2-fpm}
+    environment:
+      WORDPRESS_DB_HOST: database:3306
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DEBUG: "true"
+      QUIETYPE_TEST_PORT: ${QUIETYPE_TEST_PORT:-8888}
+    depends_on:
+      database:
+        condition: service_healthy
+    volumes:
+      - wordpress-data:/var/www/html
+      - ../:/var/www/html/wp-content/themes/quietype:ro
+
+  nginx:
+    image: ${QUIETYPE_NGINX_IMAGE:-nginx:1.27-alpine}
+    ports:
+      - "${QUIETYPE_TEST_PORT:-8888}:80"
+    depends_on:
+      - wordpress
+    volumes:
+      - wordpress-data:/var/www/html:ro
+      - ../:/var/www/html/wp-content/themes/quietype:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
+volumes:
+  database-data:
+  wordpress-data:

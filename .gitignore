@@ -9,3 +9,7 @@ vendor/
 !assets/vendor/photoswipe/**
 *.zip
 *.log
+.lighthouseci/
+artifacts/
+playwright-report/
+test-results/
