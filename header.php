@@ -16,8 +16,8 @@
 			<span class="site-brand__wordmark"><?php echo esc_html( get_bloginfo( 'name' ) ); ?></span>
 		</a>
 		<div class="mobile-header-actions">
-			<button class="icon-button nav-toggle" type="button" aria-expanded="false" aria-controls="site-navigation" aria-label="打开菜单"><?php echo quietype_icon( 'menu' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button>
 			<button class="icon-button search-toggle search-toggle--mobile" type="button" aria-expanded="false" aria-controls="site-search" aria-label="搜索"><?php echo quietype_icon( 'search' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button>
+			<button class="icon-button nav-toggle" type="button" aria-expanded="false" aria-controls="site-navigation" aria-label="打开菜单"><?php echo quietype_icon( 'menu' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button>
 		</div>
 		<nav class="site-nav" id="site-navigation" aria-label="主导航">
 			<?php

@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'QUIETYPE_VERSION', '0.8.2' );
+define( 'QUIETYPE_VERSION', '0.8.3' );
 
 require_once get_template_directory() . '/inc/admin-settings.php';
 require_once get_template_directory() . '/inc/login-security.php';
@@ -466,14 +466,30 @@ function quietype_prepare_article( $content ) {
 	$content = preg_replace_callback(
 		'~<(pre|code|script|style|kbd|math|svg)\b[^>]*>.*?</\1>(*SKIP)(*F)|(?<=>)([^<]+)(?=<)~isu',
 		function ( $matches ) {
-			$text = $matches[2];
+			$text            = $matches[2];
+			$has_visible_url = preg_match( '~(?:https?://|www\.)~i', $text );
+			if ( $has_visible_url ) {
+				$text = preg_replace_callback(
+					'~(?:https?://|www\.)[^\s<]+~iu',
+					function ( $url_match ) {
+						return preg_replace_callback(
+							'/[A-Za-z0-9]{16,}/',
+							function ( $token_match ) {
+								return preg_replace( '/(.{10})(?=.)/', '$1<wbr>', $token_match[0] );
+							},
+							$url_match[0]
+						);
+					},
+					$text
+				);
+			}
 			$text = preg_replace( '/(?<=[a-z0-9])(?=[A-Z])|(?<=_)(?=[A-Za-z0-9])/', '<wbr>', $text );
 			$hyphenated_text = preg_replace( '/(?<=[A-Za-z0-9])([\x{2010}-\x{2015}-])(?=[A-Za-z0-9])/u', '$1<wbr>', $text );
 			if ( null !== $hyphenated_text ) {
 				$text = $hyphenated_text;
 			}
 			$text = preg_replace( '/(?<=[A-Za-z0-9])\((?=[A-Za-z0-9])/', '(<wbr>', $text );
-			if ( preg_match( '~(?:https?://|www\.)~i', $text ) ) {
+			if ( $has_visible_url ) {
 				// Visible URLs should use the current line before wrapping at a path boundary.
 				$text = preg_replace( '~(?<=/)(?=[^/\s<])|(?<=[?#=])(?=[^\s<])~u', '<wbr>', $text );
 				$text = preg_replace( '~(?<=[A-Za-z0-9])\.(?=[A-Za-z0-9])~u', '.<wbr>', $text );

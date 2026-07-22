@@ -112,7 +112,7 @@ Quietype 会重设 WordPress 登录相关页面的视觉样式，并可在“外
 
 ## SMTP 与通知
 
-“外观 → Quietype 设置 → 邮件”可以让 WordPress 内置 `wp_mail()` 使用 SMTP，并发送测试邮件。支持 TLS、SMTPS 和无加密连接、可选身份验证、自定义发件地址，以及管理员成功登录和新评论通知。登录通知仅针对拥有站点管理权限的账户并设有五分钟防重复；评论通知忽略垃圾评论、Pingback 和 Trackback，也会避开 WordPress 已发送给同一管理员的通知。
+“外观 → Quietype 设置 → 邮件”可以让 WordPress 内置 `wp_mail()` 使用 SMTP，并发送测试邮件。支持 TLS、SMTPS 和无加密连接、可选身份验证、自定义发件地址，以及管理员成功登录和新评论通知。Quietype 自有通知使用无外部资源的响应式 HTML 模板，并在邮件底部明确标注系统自动发出、无需回复。登录通知仅针对拥有站点管理权限的账户并设有五分钟防重复；评论通知忽略垃圾评论、Pingback 和 Trackback，也会避开 WordPress 已发送给同一管理员的通知。
 
 SMTP 密码会以原值保存在 WordPress 数据库中。优先使用邮箱服务商提供的独立授权码；若不希望密码进入数据库，可在 `wp-config.php` 定义 `QUIETYPE_SMTP_PASSWORD`。设置页会保留最近一次发信错误一天，但不会记录密码。SMTP 只负责把邮件交给服务器，正式使用前仍应配置 SPF、DKIM 和 DMARC，并通过测试邮件确认投递。
 

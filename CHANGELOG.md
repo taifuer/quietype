@@ -4,6 +4,15 @@ All notable changes to Quietype will be documented in this file.
 
 ## [Unreleased]
 
+## [0.8.3] - 2026-07-22
+
+### Changed
+
+- Reworked Quietype administrative emails into a compact HTML template with structured details, action buttons, and a clear no-reply notice.
+- Moved the mobile menu control to the outer edge with search immediately to its left.
+- Matched the left-aligned 760px article layout to the breakpoint where the fixed table of contents is actually visible.
+- Added soft break opportunities inside long URL identifiers so links use the remaining line before wrapping.
+
 ## [0.8.2] - 2026-07-21
 
 ### Added
