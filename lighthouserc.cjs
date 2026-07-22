@@ -26,7 +26,8 @@ module.exports = {
         'total-blocking-time': ['error', { maxNumericValue: 250, aggregationMethod: 'median' }],
         'resource-summary:font:count': ['error', { maxNumericValue: 0 }],
         'resource-summary:script:size': ['error', { maxNumericValue: 40000 }],
-        'resource-summary:stylesheet:size': ['error', { maxNumericValue: 80000 }]
+        // Includes WordPress core block styles as well as the theme stylesheet.
+        'resource-summary:stylesheet:size': ['error', { maxNumericValue: 190000 }]
       }
     },
     upload: {
