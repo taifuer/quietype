@@ -263,6 +263,7 @@ function quietype_icon( $name ) {
 		'up'      => '<path d="m6 14 6-6 6 6"></path><path d="M12 8v11"></path>',
 		'down'    => '<path d="m6 10 6 6 6-6"></path><path d="M12 5v11"></path>',
 		'menu'    => '<path d="M4 7h16"></path><path d="M4 12h16"></path><path d="M4 17h16"></path>',
+		'link'    => '<path d="M9 17H7A5 5 0 0 1 7 7h3"></path><path d="M15 7h2a5 5 0 0 1 0 10h-3"></path><path d="M8 12h8"></path>',
 		'eye'     => '<path d="M3.5 12s3-5 8.5-5 8.5 5 8.5 5-3 5-8.5 5-8.5-5-8.5-5Z"></path><circle cx="12" cy="12" r="2"></circle>',
 		'github'  => '<path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3.28-.36 6.72-1.61 6.72-7A5.4 5.4 0 0 0 20.22 4 5 5 0 0 0 20.08.5S18.9.14 16 1.84a13.38 13.38 0 0 0-7 0C6.1.14 4.92.5 4.92.5A5 5 0 0 0 4.78 4a5.4 5.4 0 0 0-1.5 3.75c0 5.42 3.44 6.67 6.72 7A4.8 4.8 0 0 0 9 18v4"></path><path d="M9 18c-3 .9-3-1.5-4-2"></path>',
 		'mail'    => '<rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m4 7 8 6 8-6"></path>',
@@ -437,7 +438,9 @@ function quietype_prepare_article( $content ) {
 			}
 			$used[ $id ] = true;
 			$items[] = array( 'level' => $level, 'id' => $id, 'label' => $label );
-			return '<h' . $level . $attrs . '>' . $matches[3] . '</h' . $level . '>';
+			$permalink_label = $label ? sprintf( '复制“%s”章节链接', $label ) : '复制章节链接';
+			$permalink       = '<a class="heading-permalink" href="#' . esc_attr( $id ) . '" aria-label="' . esc_attr( $permalink_label ) . '" data-heading-permalink>' . quietype_icon( 'link' ) . '</a>';
+			return '<h' . $level . $attrs . '>' . $matches[3] . $permalink . '</h' . $level . '>';
 		},
 		$content
 	);

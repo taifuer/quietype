@@ -4,6 +4,14 @@ All notable changes to Quietype will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Added unobtrusive, copy-aware permalinks to rendered H2 and H3 article headings.
+
+### Changed
+
+- Polished code-block keyboard focus and horizontal scroll affordances without changing the established light syntax palette.
+
 ## [0.9.0] - 2026-07-22
 
 ### Added

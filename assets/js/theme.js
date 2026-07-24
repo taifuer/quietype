@@ -235,6 +235,22 @@
     window.setTimeout(enhanceCodeBlocks);
   }
 
+  document.querySelectorAll('[data-heading-permalink]').forEach((link) => {
+    const defaultLabel = link.getAttribute('aria-label') || '复制章节链接';
+    link.addEventListener('click', async () => {
+      const sectionUrl = new URL(link.getAttribute('href'), window.location.href).href;
+      try {
+        await navigator.clipboard.writeText(sectionUrl);
+        link.dataset.copyState = 'success';
+        link.setAttribute('aria-label', '章节链接已复制');
+        window.setTimeout(() => {
+          delete link.dataset.copyState;
+          link.setAttribute('aria-label', defaultLabel);
+        }, 1500);
+      } catch (error) {}
+    });
+  });
+
   const tocLinks = [...document.querySelectorAll('.article-toc a')];
   const mobileToc = document.querySelector('.mobile-toc');
   mobileToc?.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => {

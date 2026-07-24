@@ -44,6 +44,17 @@ test('article table of contents clears the sticky header', async ({ page }) => {
   expect(headingBox.y).toBeGreaterThanOrEqual(headerBox.height);
 });
 
+test('article headings expose stable permalinks without polluting the table of contents', async ({ page }) => {
+  await page.goto('/quietype-reading-test/');
+  const heading = page.locator('.article-content h2').first();
+  const permalink = heading.locator('.heading-permalink');
+  await expect(permalink).toHaveAttribute('href', '#section-1');
+  await expect(permalink).toHaveAttribute('aria-label', '复制“排版与长内容”章节链接');
+  await expect(page.locator('.article-toc a').first()).toHaveText('排版与长内容');
+  await permalink.click();
+  await expect(page).toHaveURL(/#section-1$/);
+});
+
 test('reading background persists after navigation', async ({ page }) => {
   await page.goto('/');
   await page.locator('.reading-background__toggle').click();
