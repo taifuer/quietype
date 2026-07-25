@@ -40,7 +40,11 @@ test('reading archive groups compact book records by year', async ({ page }) => 
   await expect(page.locator('.book-title-row h3 a').first()).toHaveAttribute('href', /^https:\/\/book\.douban\.com\/subject\/[0-9]+\/$/);
   await expect(page.locator('.book-terms .post-category').first()).toBeVisible();
   await expect(page.locator('.book-terms .post-tag').first()).toContainText('#');
-  await expect(page.locator('.personal-rating').first()).toHaveAttribute('aria-label', /满分 5 星/);
+  await expect(page.locator('.book-cover__fallback').first()).toBeVisible();
+  await expect(page.locator('.book-status')).toContainText(['已读', '在读', '待读', '已读', '已读', '已读', '已读', '已读']);
+  await expect(page.locator('.personal-rating').first()).toContainText('评分');
+  await expect(page.locator('.personal-rating').first()).toHaveAttribute('aria-label', /^评分 .*满分 5 星$/);
+  await expect(page.locator('.book-read-date').first()).toHaveText(/^20[0-9]{2}\.[0-9]{2}$/);
 });
 
 test('standalone book routes defer to the confirmed Douban source', async ({ request }) => {

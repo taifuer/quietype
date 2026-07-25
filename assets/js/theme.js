@@ -17,6 +17,12 @@
   const siteFooter = document.querySelector('.site-footer');
   const backgrounds = new Set(['paper', 'warm', 'green']);
 
+  document.querySelectorAll('.book-cover.has-cover img').forEach((cover) => {
+    const revealFallback = () => cover.closest('.book-cover')?.classList.add('is-cover-missing');
+    cover.addEventListener('error', revealFallback, { once: true });
+    if (cover.complete && cover.naturalWidth === 0) revealFallback();
+  });
+
   const viewCount = document.querySelector('[data-quietype-view-count]');
   const viewConfig = window.quietypeViewConfig;
   if (viewCount && viewConfig?.endpoint && viewConfig?.postId && viewConfig?.token) {

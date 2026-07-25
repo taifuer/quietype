@@ -29,9 +29,9 @@ $book_count = array_sum( array_map( 'count', $books_by_year ) );
 		<?php if ( $book_count ) : ?>
 			<div class="books-hero__meta">
 				<?php if ( count( $years ) > 1 ) : ?>
-					<p>从 <?php echo esc_html( min( $years ) ); ?> 到 <?php echo esc_html( max( $years ) ); ?>，读过 <?php echo esc_html( number_format_i18n( $book_count ) ); ?> 本书。</p>
+					<p>从 <?php echo esc_html( min( $years ) ); ?> 到 <?php echo esc_html( max( $years ) ); ?>，记录 <?php echo esc_html( number_format_i18n( $book_count ) ); ?> 本书。</p>
 				<?php else : ?>
-					<p><?php echo esc_html( $years[0] ); ?> 年，读过 <?php echo esc_html( number_format_i18n( $book_count ) ); ?> 本书。</p>
+					<p><?php echo esc_html( $years[0] ); ?> 年，记录 <?php echo esc_html( number_format_i18n( $book_count ) ); ?> 本书。</p>
 				<?php endif; ?>
 			</div>
 		<?php endif; ?>

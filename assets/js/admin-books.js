@@ -15,12 +15,22 @@
   };
   const setTitle = (title) => {
     if (!title) return;
-    if (window.wp?.data?.dispatch && window.wp.data.select('core/editor')) {
-      window.wp.data.dispatch('core/editor').editPost({ title });
-      return;
+
+    const editor = window.wp?.data?.dispatch?.('core/editor');
+    if (editor?.editPost) editor.editPost({ title });
+
+    document.querySelectorAll('#title, .editor-post-title__input').forEach((titleField) => {
+      if ('value' in titleField) titleField.value = title;
+      else titleField.textContent = title;
+      titleField.dispatchEvent(new Event('input', { bubbles: true }));
+      titleField.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    const titlePrompt = document.querySelector('#title-prompt-text');
+    if (titlePrompt) {
+      titlePrompt.classList.add('screen-reader-text');
+      titlePrompt.hidden = true;
     }
-    const titleField = document.querySelector('#title');
-    if (titleField) titleField.value = title;
   };
   const showPreview = (book) => {
     const cover = field('quietype-book-preview-cover');
@@ -28,6 +38,12 @@
     field('quietype-book-preview-meta').textContent = [book.authors, book.publisher, book.publication_year].filter(Boolean).join(' · ');
     field('quietype-book-preview-extra').textContent = [book.douban_rating ? `豆瓣 ${book.douban_rating}` : '', book.isbn ? `ISBN ${book.isbn}` : ''].filter(Boolean).join(' · ');
     if (book.cover_url) {
+      cover.addEventListener('error', () => {
+        if (pendingBook) pendingBook.cover_url = '';
+        cover.removeAttribute('src');
+        cover.hidden = true;
+        status.textContent = '书籍资料已读取，封面暂时不可用；保存后将使用默认文字封面。';
+      }, { once: true });
       cover.src = book.cover_url;
       cover.alt = `《${book.title}》封面预览`;
       cover.hidden = false;
@@ -94,6 +110,6 @@
     } else {
       importPanel.hidden = true;
     }
-    status.textContent = '资料已填入表单；请继续核对分类、标签、阅读日期和短评，再发布或更新。';
+    status.textContent = '资料已填入表单；请继续核对分类、标签、阅读状态、阅读月份和短评，再发布或更新。';
   });
 })();

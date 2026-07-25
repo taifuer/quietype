@@ -15,6 +15,8 @@ All notable changes to Quietype will be documented in this file.
 - Polished code-block keyboard focus and horizontal scroll affordances without changing the established light syntax palette.
 - Normalized the reading editor field widths and kept the footer focused on copyright, contact, and filing information.
 - Versioned local assets from their modification times so iterative deployments cannot leave month-long stale CSS or JavaScript caches.
+- Reduced reading records to month precision, added plain-text read states, renamed personal ratings, and removed visible local book permalinks.
+- Made book covers fall back to generated text artwork when lookup, import, or front-end image loading fails.
 
 ## [0.9.0] - 2026-07-22
 
