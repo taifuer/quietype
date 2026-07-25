@@ -13,6 +13,7 @@ define( 'QUIETYPE_VERSION', '0.9.0' );
 
 require_once get_template_directory() . '/inc/admin-settings.php';
 require_once get_template_directory() . '/inc/login-security.php';
+require_once get_template_directory() . '/inc/books.php';
 require_once get_template_directory() . '/inc/seo.php';
 require_once get_template_directory() . '/inc/mail.php';
 require_once get_template_directory() . '/inc/content-performance.php';
@@ -32,11 +33,16 @@ function quietype_setup() {
 	register_nav_menus(
 		array(
 			'primary' => '顶部导航',
-			'footer'  => '页脚导航',
 		)
 	);
 }
 add_action( 'after_setup_theme', 'quietype_setup' );
+
+/** Bust long-lived browser caches whenever a packaged asset changes. */
+function quietype_asset_version( $relative_path ) {
+	$path = get_theme_file_path( $relative_path );
+	return is_file( $path ) ? (string) filemtime( $path ) : QUIETYPE_VERSION;
+}
 
 function quietype_assets() {
 	$style_dependencies = array();
@@ -45,8 +51,8 @@ function quietype_assets() {
 		wp_enqueue_style( 'quietype-photoswipe', get_template_directory_uri() . '/assets/vendor/photoswipe/photoswipe.css', array(), '5.4.4' );
 		$style_dependencies[] = 'quietype-photoswipe';
 	}
-	wp_enqueue_style( 'quietype', get_stylesheet_uri(), $style_dependencies, QUIETYPE_VERSION );
-	wp_enqueue_script( 'quietype', get_template_directory_uri() . '/assets/js/theme.js', array(), QUIETYPE_VERSION, true );
+	wp_enqueue_style( 'quietype', get_stylesheet_uri(), $style_dependencies, quietype_asset_version( 'style.css' ) );
+	wp_enqueue_script( 'quietype', get_template_directory_uri() . '/assets/js/theme.js', array(), quietype_asset_version( 'assets/js/theme.js' ), true );
 	if ( is_singular( 'post' ) ) {
 		wp_localize_script(
 			'quietype',
@@ -60,7 +66,7 @@ function quietype_assets() {
 		);
 	}
 	if ( is_singular() && $features['images'] ) {
-		wp_enqueue_script( 'quietype-lightbox', get_template_directory_uri() . '/assets/js/lightbox.js', array(), QUIETYPE_VERSION, true );
+		wp_enqueue_script( 'quietype-lightbox', get_template_directory_uri() . '/assets/js/lightbox.js', array(), quietype_asset_version( 'assets/js/lightbox.js' ), true );
 	}
 }
 add_action( 'wp_enqueue_scripts', 'quietype_assets', 20 );
@@ -71,7 +77,7 @@ function quietype_login_assets() {
 		'quietype-login',
 		get_template_directory_uri() . '/assets/css/login.css',
 		array(),
-		QUIETYPE_VERSION
+		quietype_asset_version( 'assets/css/login.css' )
 	);
 }
 add_action( 'login_enqueue_scripts', 'quietype_login_assets' );
@@ -320,6 +326,7 @@ function quietype_menu_fallback() {
 	echo '<ul class="menu">';
 	echo '<li><a href="' . esc_url( home_url( '/' ) ) . '">首页</a></li>';
 	echo '<li><a href="' . esc_url( home_url( '/articlearchive/' ) ) . '">归档</a></li>';
+	echo '<li><a href="' . esc_url( get_post_type_archive_link( 'book' ) ) . '">阅读</a></li>';
 	echo '<li><a href="' . esc_url( home_url( '/links/' ) ) . '">友链</a></li>';
 	echo '<li><a href="' . esc_url( home_url( '/about/' ) ) . '">关于</a></li>';
 	echo '</ul>';

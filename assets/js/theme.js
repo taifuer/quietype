@@ -299,6 +299,9 @@
     }
   };
   updateScrollState();
+  requestAnimationFrame(updateScrollState);
+  window.addEventListener('load', updateScrollState, { once: true });
+  window.addEventListener('resize', updateScrollState, { passive: true });
   window.addEventListener('scroll', updateScrollState, { passive: true });
   topButton?.addEventListener('click', (event) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });

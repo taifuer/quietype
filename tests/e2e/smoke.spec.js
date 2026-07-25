@@ -3,6 +3,7 @@ const { test, expect } = require('@playwright/test');
 const routes = [
   ['首页', '/'],
   ['文章', '/quietype-reading-test/'],
+  ['阅读', '/reading/'],
   ['归档', '/archive/'],
   ['友链', '/links/'],
   ['关于', '/about/'],
@@ -28,6 +29,31 @@ test.describe('public pages', () => {
       expect(browserErrors).toEqual([]);
     });
   }
+});
+
+test('reading archive groups compact book records by year', async ({ page }) => {
+  await page.goto('/reading/');
+  await expect(page.locator('.books-hero h1')).toHaveText('但是还有书籍');
+  await expect(page.locator('.book-item')).toHaveCount(8);
+  await expect(page.locator('.book-year-shelf')).toHaveCount(3);
+  await expect(page.locator('.book-year-heading h2')).toHaveText(['2026', '2025', '2024']);
+  await expect(page.locator('.book-title-row h3 a').first()).toHaveAttribute('href', /^https:\/\/book\.douban\.com\/subject\/[0-9]+\/$/);
+  await expect(page.locator('.book-terms .post-category').first()).toBeVisible();
+  await expect(page.locator('.book-terms .post-tag').first()).toContainText('#');
+  await expect(page.locator('.personal-rating').first()).toHaveAttribute('aria-label', /满分 5 星/);
+});
+
+test('standalone book routes defer to the confirmed Douban source', async ({ request }) => {
+  const response = await request.get('/reading/programming-pearls/', { maxRedirects: 0 });
+  expect(response.status()).toBe(302);
+  expect(response.headers().location).toBe('https://book.douban.com/subject/3227098/');
+});
+
+test('reading tools stay above a visible footer on short pages', async ({ page }) => {
+  await page.goto('/about/', { waitUntil: 'networkidle' });
+  const toolsBox = await page.locator('.reading-tools').boundingBox();
+  const footerBox = await page.locator('.site-footer').boundingBox();
+  expect(toolsBox.y + toolsBox.height).toBeLessThan(footerBox.y);
 });
 
 test('article table of contents clears the sticky header', async ({ page }) => {

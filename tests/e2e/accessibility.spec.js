@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const AxeBuilder = require('@axe-core/playwright').default;
 
-const routes = ['/', '/quietype-reading-test/', '/archive/', '/?s=Quietype', '/quietype-missing-page/'];
+const routes = ['/', '/quietype-reading-test/', '/reading/', '/archive/', '/?s=Quietype', '/quietype-missing-page/'];
 
 for (const path of routes) {
   test(`${path} has no serious WCAG A/AA violations`, async ({ page }) => {

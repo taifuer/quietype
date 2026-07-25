@@ -7,10 +7,14 @@ All notable changes to Quietype will be documented in this file.
 ### Added
 
 - Added unobtrusive, copy-aware permalinks to rendered H2 and H3 article headings.
+- Added a compact annual reading archive with administrator-defined categories and tags, short notes, whole-star ratings, covers, and direct Douban links.
+- Added administrator-only Douban metadata previews with a separate manual confirmation step and validated cover imports.
 
 ### Changed
 
 - Polished code-block keyboard focus and horizontal scroll affordances without changing the established light syntax palette.
+- Normalized the reading editor field widths and kept the footer focused on copyright, contact, and filing information.
+- Versioned local assets from their modification times so iterative deployments cannot leave month-long stale CSS or JavaScript caches.
 
 ## [0.9.0] - 2026-07-22
 

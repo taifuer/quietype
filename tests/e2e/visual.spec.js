@@ -8,6 +8,7 @@ test.beforeEach(async ({ page }) => {
 for (const [name, path] of [
   ['home', '/'],
   ['article', '/quietype-reading-test/'],
+  ['reading', '/reading/'],
   ['archive', '/archive/']
 ]) {
   test(`${name} matches the approved viewport`, async ({ page }) => {
