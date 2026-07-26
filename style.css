@@ -4,7 +4,7 @@ Theme URI: https://github.com/taifuer/quietype
 Author: taifu
 Author URI: https://github.com/taifuer
 Description: A quiet WordPress theme for thoughtful reading, designed for Chinese long-form and technical writing.
-Version: 0.10.1
+Version: 0.10.2
 Requires at least: 6.4
 Requires PHP: 8.0
 License: GNU General Public License v2 or later
@@ -291,10 +291,10 @@ figure { margin: 0; }
 
 /* Annual reading archive */
 .books-page.section-wrap { max-width: var(--layout); padding-top: 42px; }
-.books-hero { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 28px; margin-bottom: 34px; }
+.books-hero { display: grid; grid-template-columns: fit-content(540px) minmax(220px, 340px); align-items: end; justify-content: start; gap: 36px; margin-bottom: 34px; }
 .books-hero .eyebrow { margin-bottom: 16px; }
 .books-hero h1 { margin: 0; font: 680 clamp(42px, 5vw, 54px)/1.22 var(--sans); letter-spacing: -.035em; }
-.books-hero__meta { max-width: 340px; padding-bottom: 4px; color: var(--muted); text-align: right; }
+.books-hero__meta { min-width: 0; max-width: 340px; padding-bottom: 5px; color: var(--muted); text-align: left; }
 .books-hero__meta p { margin: 0; font-size: 14px; line-height: 1.65; }
 .book-year-index { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); margin-bottom: 8px; border-block: 1px solid var(--line); }
 .book-year-index a { display: flex; align-items: baseline; justify-content: center; gap: 8px; padding: 13px 10px; color: var(--muted); }
@@ -340,10 +340,10 @@ figure { margin: 0; }
 
 /* Annual photo archive */
 .photos-page.section-wrap { max-width: var(--layout); padding-top: 42px; }
-.photos-hero { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 28px; margin-bottom: 34px; }
+.photos-hero { display: grid; grid-template-columns: fit-content(540px) minmax(220px, 340px); align-items: end; justify-content: start; gap: 36px; margin-bottom: 34px; }
 .photos-hero .eyebrow { margin-bottom: 16px; }
 .photos-hero h1 { margin: 0; font: 680 clamp(42px, 5vw, 54px)/1.22 var(--sans); letter-spacing: -.035em; }
-.photos-hero__meta { max-width: 340px; padding-bottom: 4px; color: var(--muted); text-align: right; }
+.photos-hero__meta { min-width: 0; max-width: 340px; padding-bottom: 5px; color: var(--muted); text-align: left; }
 .photos-hero__meta p { margin: 0; font-size: 14px; line-height: 1.65; }
 .photo-year-index { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); margin-bottom: 8px; border-block: 1px solid var(--line); }
 .photo-year-index a { display: flex; align-items: baseline; justify-content: center; gap: 8px; padding: 13px 10px; color: var(--muted); }
@@ -624,7 +624,7 @@ figure { margin: 0; }
 	.books-hero { display: block; margin-bottom: 25px; }
 	.books-hero .eyebrow { margin-bottom: 13px; }
 	.books-hero h1 { font-size: 38px; line-height: 1.28; }
-	.books-hero__meta { max-width: none; padding: 0; margin-top: 17px; text-align: left; }
+	.books-hero__meta { max-width: none; padding: 0; margin-top: 14px; text-align: left; }
 	.book-year-index { grid-template-columns: repeat(6, minmax(0, 1fr)); margin-bottom: 2px; border-bottom: 0; }
 	.book-year-index a { grid-column: span 2; flex-direction: column; align-items: center; gap: 1px; padding: 10px 4px; border-bottom: 1px solid var(--line); }
 	.book-year-index a:nth-child(3n + 1) { border-left: 0; }
@@ -678,7 +678,7 @@ figure { margin: 0; }
 	.photos-hero { display: block; margin-bottom: 25px; }
 	.photos-hero .eyebrow { margin-bottom: 13px; }
 	.photos-hero h1 { font-size: 38px; line-height: 1.28; }
-	.photos-hero__meta { max-width: none; padding: 0; margin-top: 17px; text-align: left; }
+	.photos-hero__meta { max-width: none; padding: 0; margin-top: 14px; text-align: left; }
 	.photo-year-index { grid-template-columns: repeat(6, minmax(0, 1fr)); margin-bottom: 2px; border-bottom: 0; }
 	.photo-year-index a { grid-column: span 2; flex-direction: column; align-items: center; gap: 1px; padding: 10px 4px; border-bottom: 1px solid var(--line); }
 	.photo-year-index a:nth-child(3n + 1) { border-left: 0; }

@@ -27,7 +27,7 @@ function quietype_register_admin_settings() {
 		'quietype_contact_email'              => array( 'string', 'taifu@taifua.com', 'sanitize_email' ),
 		'quietype_icp_number'                 => array( 'string', '湘ICP备17002466号', 'sanitize_text_field' ),
 		'quietype_start_year'                 => array( 'integer', 2017, 'quietype_sanitize_start_year' ),
-		'quietype_books_page_title'           => array( 'string', '书卷多情', 'quietype_sanitize_archive_title' ),
+		'quietype_books_page_title'           => array( 'string', '万卷古今', 'quietype_sanitize_archive_title' ),
 		'quietype_books_page_eyebrow'         => array( 'string', 'BOOKS', 'quietype_sanitize_archive_eyebrow' ),
 		'quietype_books_page_intro'           => array( 'string', '', 'quietype_sanitize_archive_intro' ),
 		'quietype_photos_page_title'          => array( 'string', '万物静观', 'quietype_sanitize_archive_title' ),
@@ -151,7 +151,7 @@ function quietype_sanitize_archive_intro( $value ) {
 function quietype_archive_page_text( $post_type, $field ) {
 	$defaults = array(
 		'book'  => array(
-			'title'   => '书卷多情',
+			'title'   => '万卷古今',
 			'eyebrow' => 'BOOKS',
 			'intro'   => '',
 		),
@@ -293,7 +293,7 @@ function quietype_render_settings_page() {
 				<h2>书籍与照片页面</h2>
 				<p>控制年度书架与图库页首的展示文字。简介留空时不输出对应区域。</p>
 				<table class="form-table" role="presentation">
-					<tr><th><label for="quietype_books_page_title">书籍页标题</label></th><td><input class="regular-text" id="quietype_books_page_title" name="quietype_books_page_title" type="text" maxlength="80" value="<?php echo esc_attr( quietype_get_setting( 'quietype_books_page_title', '书卷多情' ) ); ?>" placeholder="书卷多情"></td></tr>
+					<tr><th><label for="quietype_books_page_title">书籍页标题</label></th><td><input class="regular-text" id="quietype_books_page_title" name="quietype_books_page_title" type="text" maxlength="80" value="<?php echo esc_attr( quietype_get_setting( 'quietype_books_page_title', '万卷古今' ) ); ?>" placeholder="万卷古今"></td></tr>
 					<tr><th><label for="quietype_books_page_eyebrow">书籍页英文标识</label></th><td><input class="regular-text code" id="quietype_books_page_eyebrow" name="quietype_books_page_eyebrow" type="text" maxlength="32" value="<?php echo esc_attr( quietype_get_setting( 'quietype_books_page_eyebrow', 'BOOKS' ) ); ?>" placeholder="BOOKS"></td></tr>
 					<tr><th><label for="quietype_books_page_intro">书籍页简介</label></th><td><textarea class="large-text" id="quietype_books_page_intro" name="quietype_books_page_intro" rows="2" maxlength="180" placeholder="留空不显示"><?php echo esc_textarea( quietype_get_setting( 'quietype_books_page_intro', '' ) ); ?></textarea></td></tr>
 					<tr><th><label for="quietype_photos_page_title">照片页标题</label></th><td><input class="regular-text" id="quietype_photos_page_title" name="quietype_photos_page_title" type="text" maxlength="80" value="<?php echo esc_attr( quietype_get_setting( 'quietype_photos_page_title', '万物静观' ) ); ?>" placeholder="万物静观"></td></tr>

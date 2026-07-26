@@ -123,7 +123,7 @@ test('book and photo archive headings are configurable together', async ({ page 
   await logIn(page);
   await page.goto('/wp-admin/themes.php?page=quietype-settings', { waitUntil: 'domcontentloaded' });
 
-  await expect(page.locator('#quietype_books_page_title')).toHaveValue('书卷多情');
+  await expect(page.locator('#quietype_books_page_title')).toHaveValue('万卷古今');
   await expect(page.locator('#quietype_books_page_eyebrow')).toHaveValue('BOOKS');
   await expect(page.locator('#quietype_books_page_intro')).toHaveAttribute('placeholder', '留空不显示');
   await expect(page.locator('#quietype_photos_page_title')).toHaveValue('万物静观');

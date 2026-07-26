@@ -97,7 +97,7 @@ test('full-resolution photo remains an explicit lightbox action', async ({ page 
 
 test('book archive groups compact reading records by year', async ({ page }) => {
   await page.goto('/books/');
-  await expect(page.locator('.books-hero h1')).toHaveText('书卷多情');
+  await expect(page.locator('.books-hero h1')).toHaveText('万卷古今');
   await expect(page.locator('.books-hero .eyebrow')).toHaveText('BOOKS');
   await expect(page.locator('.books-hero__meta')).toHaveCount(0);
   await expect(page.locator('.book-item')).toHaveCount(8);
