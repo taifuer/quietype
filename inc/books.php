@@ -107,6 +107,7 @@ function quietype_register_books() {
 		'_quietype_book_douban_rating'    => 'quietype_sanitize_douban_rating',
 		'_quietype_book_douban_url'       => 'quietype_sanitize_douban_url',
 		'_quietype_book_douban_id'        => 'quietype_sanitize_douban_id',
+		'_quietype_book_cover_url'        => 'quietype_sanitize_book_cover_url',
 	);
 	foreach ( $meta_fields as $key => $sanitize_callback ) {
 		register_post_meta(
@@ -242,6 +243,12 @@ function quietype_sanitize_douban_rating( $value ) {
 	return $rating > 0 && $rating <= 10 ? number_format( $rating, 1, '.', '' ) : '';
 }
 
+/** Keep remote covers on secure, browser-rendered URLs without fetching them server-side. */
+function quietype_sanitize_book_cover_url( $value ) {
+	$url = esc_url_raw( trim( (string) $value ), array( 'https' ) );
+	return wp_parse_url( $url, PHP_URL_HOST ) ? $url : '';
+}
+
 /** Accept either a Douban subject ID or its canonical book URL. */
 function quietype_sanitize_douban_id( $value ) {
 	$value = trim( sanitize_text_field( (string) $value ) );
@@ -299,6 +306,7 @@ function quietype_book_data( $post_id = null ) {
 		'douban_rating'    => (float) get_post_meta( $post_id, '_quietype_book_douban_rating', true ),
 		'douban_url'       => $douban_url ?: quietype_douban_url( $douban_id ),
 		'douban_id'        => $douban_id,
+		'cover_url'        => quietype_sanitize_book_cover_url( get_post_meta( $post_id, '_quietype_book_cover_url', true ) ),
 	);
 }
 
@@ -308,8 +316,8 @@ function quietype_book_rating_html( $rating ) {
 	if ( ! $rating ) {
 		return '';
 	}
-	$html  = '<span class="personal-rating" role="img" aria-label="评分 ' . esc_attr( $rating ) . ' 星，满分 5 星">';
-	$html .= '<span>评分</span><span class="personal-rating__stars" aria-hidden="true">';
+	$html  = '<span class="personal-rating" role="img" aria-label="个人评分 ' . esc_attr( $rating ) . ' 星，满分 5 星">';
+	$html .= '<span class="personal-rating__stars" aria-hidden="true">';
 	for ( $star = 1; $star <= 5; $star++ ) {
 		$html .= '<i class="personal-rating__star' . ( $star <= $rating ? ' is-full' : '' ) . '">★</i>';
 	}
@@ -334,18 +342,38 @@ function quietype_book_terms_html( $post_id = null ) {
 	return $html;
 }
 
-/** Add the compact fields below the normal title and excerpt. */
+/** Add the compact fields and a clearly named native excerpt editor. */
 function quietype_add_book_meta_box() {
 	add_meta_box( 'quietype-book-details', '书籍资料与阅读记录', 'quietype_render_book_meta_box', 'book', 'normal', 'high' );
+	remove_meta_box( 'postexcerpt', 'book', 'normal' );
+	add_meta_box( 'postexcerpt', '点评', 'quietype_render_book_note_meta_box', 'book', 'normal', 'high' );
 }
 add_action( 'add_meta_boxes_book', 'quietype_add_book_meta_box' );
+
+/** Reuse post_excerpt so notes remain portable if the theme changes. */
+function quietype_render_book_note_meta_box( $post ) {
+	?>
+	<label class="screen-reader-text" for="excerpt">点评</label>
+	<textarea class="widefat" id="excerpt" name="excerpt" rows="4"><?php echo esc_textarea( $post->post_excerpt ); ?></textarea>
+	<p class="description">简短记录读后感受；详细的阅读总结仍建议写成普通文章。</p>
+	<?php
+}
+
+/** Keep the primary book note visible for users without a saved screen preference. */
+function quietype_book_default_hidden_meta_boxes( $hidden, $screen ) {
+	if ( $screen instanceof WP_Screen && 'book' === $screen->post_type ) {
+		$hidden = array_diff( $hidden, array( 'postexcerpt' ) );
+	}
+	return array_values( $hidden );
+}
+add_filter( 'default_hidden_meta_boxes', 'quietype_book_default_hidden_meta_boxes', 10, 2 );
 
 function quietype_render_book_meta_box( $post ) {
 	$data = quietype_book_data( $post->ID );
 	wp_nonce_field( 'quietype_save_book', 'quietype_book_nonce' );
 	?>
 	<div class="quietype-book-editor">
-		<p class="description">填写豆瓣链接或条目 ID 后先读取预览；只有点击“确认填入”才会改动表单。抓取失败时可直接手工填写。书籍短评请填写编辑页面中的“摘要”。</p>
+		<p class="description">填写豆瓣链接或条目 ID 后先读取预览；只有点击“确认填入”才会改动表单。抓取失败时可直接手工填写，读后感受填写下方“点评”。</p>
 		<div class="quietype-book-lookup">
 			<label class="screen-reader-text" for="quietype_book_douban_input">豆瓣链接或条目 ID</label>
 			<input class="regular-text code" id="quietype_book_douban_input" type="text" value="<?php echo esc_attr( $data['douban_url'] ?: $data['douban_id'] ); ?>" placeholder="https://book.douban.com/subject/38380879/ 或 38380879">
@@ -366,6 +394,7 @@ function quietype_render_book_meta_box( $post ) {
 			<tr><th><label for="quietype_book_publisher">出版社</label></th><td><input class="regular-text" id="quietype_book_publisher" name="quietype_book_publisher" type="text" value="<?php echo esc_attr( $data['publisher'] ); ?>"></td></tr>
 			<tr><th><label for="quietype_book_publication_year">出版年份</label></th><td><input class="small-text" id="quietype_book_publication_year" name="quietype_book_publication_year" type="number" min="1000" max="<?php echo esc_attr( (int) gmdate( 'Y' ) + 2 ); ?>" value="<?php echo esc_attr( $data['publication_year'] ); ?>"></td></tr>
 			<tr><th><label for="quietype_book_isbn">ISBN</label></th><td><input class="regular-text code" id="quietype_book_isbn" name="quietype_book_isbn" type="text" value="<?php echo esc_attr( $data['isbn'] ); ?>"></td></tr>
+			<tr><th><label for="quietype_book_cover_url">封面图片地址</label></th><td><input class="regular-text code" id="quietype_book_cover_url" name="quietype_book_cover_url" type="url" value="<?php echo esc_attr( $data['cover_url'] ); ?>" placeholder="https://pic.taifua.com/path/to/cover.jpg"><p class="description">可填写 HTTPS 图片地址，将优先于特色图显示；留空则使用特色图或文字封面。</p></td></tr>
 			<tr><th><label for="quietype_book_status">阅读状态</label></th><td><select id="quietype_book_status" name="quietype_book_status"><?php foreach ( array( 'read' => '已读', 'reading' => '在读', 'planned' => '待读' ) as $status => $label ) : ?><option value="<?php echo esc_attr( $status ); ?>" <?php selected( $data['status'], $status ); ?>><?php echo esc_html( $label ); ?></option><?php endforeach; ?></select></td></tr>
 			<tr><th><label for="quietype_book_read_date">阅读月份</label></th><td><input id="quietype_book_read_date" name="quietype_book_read_date" type="month" value="<?php echo esc_attr( $data['read_date'] ); ?>"><p class="description">用于年度分组；待读书目可填写计划月份。</p></td></tr>
 			<tr><th><label for="quietype_book_rating">我的评价</label></th><td><select id="quietype_book_rating" name="quietype_book_rating"><option value="">暂不评分</option><?php for ( $rating = 1; $rating <= 5; $rating++ ) : ?><option value="<?php echo esc_attr( $rating ); ?>" <?php selected( $data['rating'], $rating ); ?>><?php echo esc_html( str_repeat( '★', $rating ) . str_repeat( '☆', 5 - $rating ) ); ?></option><?php endfor; ?></select></td></tr>
@@ -376,7 +405,7 @@ function quietype_render_book_meta_box( $post ) {
 			<img id="quietype-book-cover-preview" src="" alt="" hidden>
 			<p><label><input id="quietype_book_import_cover" name="quietype_book_import_cover" type="checkbox" value="1" checked> 保存时将预览封面导入媒体库并设为特色图</label></p>
 		</div>
-		<input id="quietype_book_cover_url" name="quietype_book_cover_url" type="hidden" value="">
+		<input id="quietype_book_import_source_url" name="quietype_book_import_source_url" type="hidden" value="">
 	</div>
 	<?php
 }
@@ -384,7 +413,11 @@ function quietype_render_book_meta_box( $post ) {
 /** Load the dependency-free preview helper only in the book editor. */
 function quietype_book_admin_assets( $hook ) {
 	$screen = get_current_screen();
-	if ( ! $screen || 'book' !== $screen->post_type || ! in_array( $hook, array( 'post.php', 'post-new.php' ), true ) ) {
+	if ( ! $screen || 'book' !== $screen->post_type ) {
+		return;
+	}
+	wp_add_inline_style( 'common', '.quietype-book-editor{max-width:860px}.quietype-book-lookup{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.quietype-book-lookup>input,.quietype-book-editor .form-table input[type="text"],.quietype-book-editor .form-table input[type="url"],.quietype-book-editor .form-table input[type="number"],.quietype-book-editor .form-table input[type="month"],.quietype-book-editor .form-table select{width:100%;max-width:420px;min-height:32px}.quietype-book-preview{display:grid;grid-template-columns:72px minmax(0,1fr);gap:14px;align-items:start;padding:12px;margin:14px 0;border:1px solid #dcdcde;background:#f6f7f7}.quietype-book-preview[hidden],.quietype-book-import[hidden]{display:none}.quietype-book-preview img,.quietype-book-import img{width:72px;height:104px;object-fit:contain;background:#fff}.quietype-book-preview p{margin:5px 0}.quietype-book-import{display:flex;align-items:center;gap:12px;padding:10px 12px;margin:4px 0 12px;border-left:3px solid #72aee6;background:#f6f7f7}#postexcerpt #excerpt{min-height:96px}.column-quietype_book_reading{width:150px}.quietype-book-reading{white-space:nowrap}.quietype-book-reading__status{font-weight:600}.quietype-book-reading__date{color:#646970;font-variant-numeric:tabular-nums}@media(max-width:782px){.quietype-book-lookup>input,.quietype-book-editor .form-table input[type="text"],.quietype-book-editor .form-table input[type="url"],.quietype-book-editor .form-table input[type="number"],.quietype-book-editor .form-table input[type="month"],.quietype-book-editor .form-table select{max-width:none}}' );
+	if ( ! in_array( $hook, array( 'post.php', 'post-new.php' ), true ) ) {
 		return;
 	}
 	wp_enqueue_script( 'quietype-book-admin', get_template_directory_uri() . '/assets/js/admin-books.js', array(), quietype_asset_version( 'assets/js/admin-books.js' ), true );
@@ -396,9 +429,45 @@ function quietype_book_admin_assets( $hook ) {
 			'nonce'   => wp_create_nonce( 'quietype_book_lookup' ),
 		)
 	);
-	wp_add_inline_style( 'common', '.quietype-book-editor{max-width:860px}.quietype-book-lookup{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.quietype-book-lookup>input,.quietype-book-editor .form-table input[type="text"],.quietype-book-editor .form-table input[type="url"],.quietype-book-editor .form-table input[type="number"],.quietype-book-editor .form-table input[type="month"],.quietype-book-editor .form-table select{width:100%;max-width:420px;min-height:32px}.quietype-book-preview{display:grid;grid-template-columns:72px minmax(0,1fr);gap:14px;align-items:start;padding:12px;margin:14px 0;border:1px solid #dcdcde;background:#f6f7f7}.quietype-book-preview[hidden],.quietype-book-import[hidden]{display:none}.quietype-book-preview img,.quietype-book-import img{width:72px;height:104px;object-fit:contain;background:#fff}.quietype-book-preview p{margin:5px 0}.quietype-book-import{display:flex;align-items:center;gap:12px;padding:10px 12px;margin:4px 0 12px;border-left:3px solid #72aee6;background:#f6f7f7}@media(max-width:782px){.quietype-book-lookup>input,.quietype-book-editor .form-table input[type="text"],.quietype-book-editor .form-table input[type="url"],.quietype-book-editor .form-table input[type="number"],.quietype-book-editor .form-table input[type="month"],.quietype-book-editor .form-table select{max-width:none}}' );
 }
 add_action( 'admin_enqueue_scripts', 'quietype_book_admin_assets' );
+
+/** Replace the publishing date with the operational reading state and month. */
+function quietype_book_admin_columns( $columns ) {
+	$updated = array();
+	foreach ( $columns as $key => $label ) {
+		if ( 'date' === $key ) {
+			continue;
+		}
+		$updated[ $key ] = $label;
+		if ( 'title' === $key ) {
+			$updated['quietype_book_reading'] = '阅读记录';
+		}
+	}
+	return $updated;
+}
+add_filter( 'manage_book_posts_columns', 'quietype_book_admin_columns' );
+
+function quietype_render_book_admin_column( $column, $post_id ) {
+	if ( 'quietype_book_reading' !== $column ) {
+		return;
+	}
+	$data   = quietype_book_data( $post_id );
+	$status = quietype_book_status_label( $data['status'] );
+	$date   = $data['read_date'] ? str_replace( '-', '.', $data['read_date'] ) : '';
+	echo '<span class="quietype-book-reading">';
+	if ( $status ) {
+		echo '<span class="quietype-book-reading__status">' . esc_html( $status ) . '</span>';
+	}
+	if ( $status && $date ) {
+		echo '<span aria-hidden="true"> · </span>';
+	}
+	if ( $date ) {
+		echo '<time class="quietype-book-reading__date" datetime="' . esc_attr( $data['read_date'] ) . '">' . esc_html( $date ) . '</time>';
+	}
+	echo '</span>';
+}
+add_action( 'manage_book_posts_custom_column', 'quietype_render_book_admin_column', 10, 2 );
 
 /** Save only values that the administrator has reviewed in the form. */
 function quietype_save_book_meta( $post_id, $post ) {
@@ -417,6 +486,7 @@ function quietype_save_book_meta( $post_id, $post ) {
 		'_quietype_book_status'           => array( 'quietype_book_status', 'quietype_sanitize_book_status' ),
 		'_quietype_book_rating'           => array( 'quietype_book_rating', 'quietype_sanitize_book_rating' ),
 		'_quietype_book_douban_rating'    => array( 'quietype_book_douban_rating', 'quietype_sanitize_douban_rating' ),
+		'_quietype_book_cover_url'        => array( 'quietype_book_cover_url', 'quietype_sanitize_book_cover_url' ),
 	);
 	foreach ( $fields as $meta_key => $field ) {
 		$raw   = isset( $_POST[ $field[0] ] ) ? wp_unslash( $_POST[ $field[0] ] ) : '';
@@ -439,8 +509,8 @@ function quietype_save_book_meta( $post_id, $post ) {
 		delete_post_meta( $post_id, '_quietype_book_douban_id' );
 		delete_post_meta( $post_id, '_quietype_book_douban_url' );
 	}
-	if ( isset( $_POST['quietype_book_import_cover'], $_POST['quietype_book_cover_url'] ) && current_user_can( 'upload_files' ) ) {
-		quietype_import_book_cover( $post_id, esc_url_raw( wp_unslash( $_POST['quietype_book_cover_url'] ) ) );
+	if ( isset( $_POST['quietype_book_import_cover'], $_POST['quietype_book_import_source_url'] ) && current_user_can( 'upload_files' ) ) {
+		quietype_import_book_cover( $post_id, esc_url_raw( wp_unslash( $_POST['quietype_book_import_source_url'] ) ) );
 	}
 }
 add_action( 'save_post_book', 'quietype_save_book_meta', 10, 2 );

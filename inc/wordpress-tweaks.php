@@ -15,9 +15,9 @@ function quietype_maybe_hide_admin_bar( $show ) {
 }
 add_filter( 'show_admin_bar', 'quietype_maybe_hide_admin_bar' );
 
-/** Stop keeping new post/page revisions while preserving autosaves. */
+/** Stop keeping new content revisions while preserving autosaves. */
 function quietype_revisions_to_keep( $number, $post ) {
-	if ( quietype_get_setting( 'quietype_disable_revisions', false ) && $post instanceof WP_Post && in_array( $post->post_type, array( 'post', 'page' ), true ) ) {
+	if ( quietype_get_setting( 'quietype_disable_revisions', false ) && $post instanceof WP_Post && in_array( $post->post_type, array( 'post', 'page', 'book' ), true ) ) {
 		return 0;
 	}
 	return $number;

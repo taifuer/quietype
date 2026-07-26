@@ -20,6 +20,12 @@ All notable changes to Quietype will be documented in this file.
 - Made book covers fall back to generated text artwork when lookup, import, or front-end image loading fails.
 - Moved the public bookshelf to `/books/` with permanent redirects from former `/reading/` routes.
 - Preserved server-side cover imports when Douban prevents the browser from displaying its preview image.
+- Made book notes visible by default, replaced the publishing-date column with compact reading metadata, and renamed the archive eyebrow to `BOOKS`.
+- Extended revision disabling, counting, and explicit cleanup to book records while preserving autosaves.
+- Consolidated each reading card's month, status, personal stars, and Douban score above the closing note while leaving only the title as its external link.
+- Added optional HTTPS book-cover URLs, including `pic.taifua.com`, with priority over featured images and the existing text fallback.
+- Kept Douban scores adjacent to each personal reading record instead of isolating them at the card edge.
+- Normalized reading dates, states, and personal stars at 12px while tightening the vertical rhythm between book-card metadata and notes.
 
 ## [0.9.0] - 2026-07-22
 

@@ -23,7 +23,7 @@ $book_count = array_sum( array_map( 'count', $books_by_year ) );
 <section class="books-page section-wrap">
 	<header class="books-hero">
 		<div>
-			<p class="eyebrow">READING</p>
+			<p class="eyebrow">BOOKS</p>
 			<h1>但是还有书籍</h1>
 		</div>
 		<?php if ( $book_count ) : ?>

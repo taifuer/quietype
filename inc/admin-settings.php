@@ -213,7 +213,7 @@ function quietype_render_settings_page() {
 			<div class="notice <?php echo 'sent' === $_GET['quietype_mail'] ? 'notice-success' : 'notice-error'; ?> is-dismissible"><p><?php echo 'sent' === $_GET['quietype_mail'] ? '测试邮件已交给 SMTP 服务器。' : '测试邮件发送失败，请检查 SMTP 参数和服务器日志。'; ?></p></div>
 		<?php endif; ?>
 		<?php if ( isset( $_GET['quietype_revisions_deleted'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
-			<div class="notice notice-success is-dismissible"><p>已永久删除 <?php echo esc_html( absint( $_GET['quietype_revisions_deleted'] ) ); ?> 条文章与页面历史版本。</p></div>
+			<div class="notice notice-success is-dismissible"><p>已永久删除 <?php echo esc_html( absint( $_GET['quietype_revisions_deleted'] ) ); ?> 条内容历史版本。</p></div>
 		<?php endif; ?>
 		<nav class="quietype-settings__nav" aria-label="设置分区">
 			<a href="#quietype-section-site">站点</a><a href="#quietype-section-seo">SEO</a><a href="#quietype-section-access">访问</a><a href="#quietype-section-wordpress">WordPress</a><a href="#quietype-section-security">安全</a><a href="#quietype-section-mail">邮件</a><a href="#quietype-section-code">代码</a>
@@ -254,7 +254,7 @@ function quietype_render_settings_page() {
 				<h2>WordPress 优化</h2>
 				<table class="form-table" role="presentation">
 					<tr><th>前台工具栏</th><td><?php quietype_settings_checkbox( 'quietype_hide_admin_bar', '登录后隐藏网站前台顶部管理工具栏' ); ?><p class="description">仅影响网站前台，WordPress 后台工具栏保持不变。</p></td></tr>
-					<tr><th>内容历史版本</th><td><?php quietype_settings_checkbox( 'quietype_disable_revisions', '停止为文章和页面保存新的历史版本' ); ?><p class="description">自动保存仍然保留；此开关不会自动删除数据库中已有的历史版本。</p></td></tr>
+					<tr><th>内容历史版本</th><td><?php quietype_settings_checkbox( 'quietype_disable_revisions', '停止为文章、页面和书籍保存新的历史版本' ); ?><p class="description">自动保存仍然保留；此开关不会自动删除数据库中已有的历史版本。</p></td></tr>
 				</table>
 			</section>
 
@@ -304,8 +304,8 @@ function quietype_render_settings_page() {
 
 		<section class="quietype-settings__section" id="quietype-section-revision-cleanup">
 			<h2>历史版本清理</h2>
-			<p>当前数据库中有 <strong><?php echo esc_html( quietype_revision_count() ); ?></strong> 条文章或页面历史版本。删除不可撤销，但不会删除已发布内容和自动草稿。</p>
-			<form action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="post" onsubmit="return confirm('确定永久删除全部文章和页面历史版本吗？此操作不可撤销。');"><input type="hidden" name="action" value="quietype_delete_revisions"><?php wp_nonce_field( 'quietype_delete_revisions' ); ?><?php submit_button( '删除现有历史版本', 'delete', 'submit', false ); ?></form>
+			<p>当前数据库中有 <strong><?php echo esc_html( quietype_revision_count() ); ?></strong> 条文章、页面或书籍历史版本。删除不可撤销，但不会删除已发布内容和自动草稿。</p>
+			<form action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="post" onsubmit="return confirm('确定永久删除全部文章、页面和书籍历史版本吗？此操作不可撤销。');"><input type="hidden" name="action" value="quietype_delete_revisions"><?php wp_nonce_field( 'quietype_delete_revisions' ); ?><?php submit_button( '删除现有历史版本', 'delete', 'submit', false ); ?></form>
 		</section>
 	</div>
 	<?php
@@ -328,20 +328,20 @@ function quietype_print_custom_footer_code() {
 }
 add_action( 'wp_footer', 'quietype_print_custom_footer_code', 99 );
 
-/** Count only revisions belonging to posts and pages. */
+/** Count revisions belonging to theme-managed editorial content. */
 function quietype_revision_count() {
 	global $wpdb;
-	return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} revisions INNER JOIN {$wpdb->posts} parents ON parents.ID = revisions.post_parent WHERE revisions.post_type = 'revision' AND parents.post_type IN ('post','page')" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Static query without user input.
+	return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} revisions INNER JOIN {$wpdb->posts} parents ON parents.ID = revisions.post_parent WHERE revisions.post_type = 'revision' AND parents.post_type IN ('post','page','book')" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Static query without user input.
 }
 
-/** Permanently remove existing post/page revisions after explicit confirmation. */
+/** Permanently remove existing content revisions after explicit confirmation. */
 function quietype_handle_delete_revisions() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( '无权执行此操作。' );
 	}
 	check_admin_referer( 'quietype_delete_revisions' );
 	global $wpdb;
-	$revision_ids = $wpdb->get_col( "SELECT revisions.ID FROM {$wpdb->posts} revisions INNER JOIN {$wpdb->posts} parents ON parents.ID = revisions.post_parent WHERE revisions.post_type = 'revision' AND parents.post_type IN ('post','page')" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Static query without user input.
+	$revision_ids = $wpdb->get_col( "SELECT revisions.ID FROM {$wpdb->posts} revisions INNER JOIN {$wpdb->posts} parents ON parents.ID = revisions.post_parent WHERE revisions.post_type = 'revision' AND parents.post_type IN ('post','page','book')" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Static query without user input.
 	$deleted = 0;
 	foreach ( $revision_ids as $revision_id ) {
 		if ( wp_delete_post_revision( (int) $revision_id ) ) {

@@ -34,17 +34,25 @@ test.describe('public pages', () => {
 test('book archive groups compact reading records by year', async ({ page }) => {
   await page.goto('/books/');
   await expect(page.locator('.books-hero h1')).toHaveText('但是还有书籍');
+  await expect(page.locator('.books-hero .eyebrow')).toHaveText('BOOKS');
   await expect(page.locator('.book-item')).toHaveCount(8);
   await expect(page.locator('.book-year-shelf')).toHaveCount(3);
   await expect(page.locator('.book-year-heading h2')).toHaveText(['2026', '2025', '2024']);
   await expect(page.locator('.book-title-row h3 a').first()).toHaveAttribute('href', /^https:\/\/book\.douban\.com\/subject\/[0-9]+\/$/);
+  await expect(page.locator('a.book-cover')).toHaveCount(0);
+  await expect(page.locator('.book-cover').first()).toHaveJSProperty('tagName', 'DIV');
   await expect(page.locator('.book-terms .post-category').first()).toBeVisible();
   await expect(page.locator('.book-terms .post-tag').first()).toContainText('#');
   await expect(page.locator('.book-cover__fallback').first()).toBeVisible();
   await expect(page.locator('.book-status')).toContainText(['已读', '在读', '待读', '已读', '已读', '已读', '已读', '已读']);
-  await expect(page.locator('.personal-rating').first()).toContainText('评分');
-  await expect(page.locator('.personal-rating').first()).toHaveAttribute('aria-label', /^评分 .*满分 5 星$/);
+  await expect(page.locator('.personal-rating').first()).not.toContainText('评分');
+  await expect(page.locator('.personal-rating').first()).toHaveAttribute('aria-label', /^个人评分 .*满分 5 星$/);
   await expect(page.locator('.book-read-date').first()).toHaveText(/^20[0-9]{2}\.[0-9]{2}$/);
+  await expect(page.locator('.book-evaluation__summary > .douban-rating').first()).toBeVisible();
+  const firstEvaluation = page.locator('.book-evaluation').first();
+  const firstNote = page.locator('.book-note').first();
+  expect(await firstEvaluation.evaluate((element) => element.compareDocumentPosition(document.querySelector('.book-note')) & Node.DOCUMENT_POSITION_FOLLOWING)).toBeTruthy();
+  expect((await firstEvaluation.boundingBox()).y).toBeLessThan((await firstNote.boundingBox()).y);
 });
 
 test('standalone book routes defer to the confirmed Douban source', async ({ request }) => {

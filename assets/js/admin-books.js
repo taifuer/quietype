@@ -95,7 +95,7 @@
     setValue('quietype_book_douban_rating', pendingBook.douban_rating);
     setValue('quietype_book_douban_url', pendingBook.douban_url);
     setValue('quietype_book_douban_id', pendingBook.douban_id);
-    setValue('quietype_book_cover_url', pendingBook.cover_url);
+    setValue('quietype_book_import_source_url', pendingBook.cover_url);
     subjectField.value = pendingBook.douban_url;
 
     const importPanel = field('quietype-book-import');
