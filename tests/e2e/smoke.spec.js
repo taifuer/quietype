@@ -67,6 +67,32 @@ test('book archive groups compact reading records by year', async ({ page }) => 
   }
 });
 
+test('an incomplete mobile year row occupies only its real cells', async ({ page }) => {
+  test.skip(page.viewportSize().width > 720, 'Mobile-only year-grid assertion.');
+  await page.goto('/books/');
+  const layout = await page.locator('.book-year-index').evaluate((navigation) => {
+    const template = navigation.querySelector('a');
+    while (navigation.children.length < 7) navigation.append(template.cloneNode(true));
+    navigation.className = 'book-year-index book-year-index--count-7 book-year-index--remainder-1';
+    const links = [...navigation.querySelectorAll('a')];
+    const first = links[0].getBoundingClientRect();
+    const last = links[6].getBoundingClientRect();
+    const emptyTarget = document.elementFromPoint(last.right + last.width / 2, last.top + last.height / 2);
+    return {
+      first: { x: Math.round(first.x), width: Math.round(first.width) },
+      last: { x: Math.round(last.x), width: Math.round(last.width) },
+      lastBorderBottom: getComputedStyle(links[6]).borderBottomWidth,
+      navigationBorderBottom: getComputedStyle(navigation).borderBottomWidth,
+      emptyCellIsLink: Boolean(emptyTarget?.closest('a'))
+    };
+  });
+
+  expect(layout.last).toEqual(layout.first);
+  expect(layout.lastBorderBottom).toBe('1px');
+  expect(layout.navigationBorderBottom).toBe('0px');
+  expect(layout.emptyCellIsLink).toBe(false);
+});
+
 test('standalone book routes defer to the confirmed Douban source', async ({ request }) => {
   const response = await request.get('/books/programming-pearls/', { maxRedirects: 0 });
   expect(response.status()).toBe(302);
