@@ -58,6 +58,18 @@ function quietype_get_meta_description() {
 			}
 		}
 	}
+	if ( is_post_type_archive( 'book' ) ) {
+		$description = quietype_archive_page_text( 'book', 'intro' );
+		if ( $description ) {
+			return quietype_normalize_meta_text( $description );
+		}
+	}
+	if ( is_post_type_archive( 'photo' ) ) {
+		$description = quietype_archive_page_text( 'photo', 'intro' );
+		if ( $description ) {
+			return quietype_normalize_meta_text( $description );
+		}
+	}
 	if ( is_category() || is_tag() || is_tax() ) {
 		$description = term_description();
 		if ( $description ) {

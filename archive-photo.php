@@ -20,9 +20,11 @@ while ( have_posts() ) {
 	$photos_by_year[ $year ][] = get_post();
 }
 krsort( $photos_by_year, SORT_NUMERIC );
-$years       = array_keys( $photos_by_year );
-$photo_count = array_sum( array_map( 'count', $photos_by_year ) );
-$year_count  = count( $years );
+$years      = array_keys( $photos_by_year );
+$year_count = count( $years );
+$page_title = quietype_archive_page_text( 'photo', 'title' );
+$eyebrow    = quietype_archive_page_text( 'photo', 'eyebrow' );
+$intro      = quietype_archive_page_text( 'photo', 'intro' );
 $year_index_classes = array( 'photo-year-index', 'photo-year-index--count-' . $year_count );
 if ( $year_count > 4 && 0 !== $year_count % 3 ) {
 	$year_index_classes[] = 'photo-year-index--remainder-' . ( $year_count % 3 );
@@ -31,16 +33,12 @@ if ( $year_count > 4 && 0 !== $year_count % 3 ) {
 <section class="photos-page section-wrap">
 	<header class="photos-hero">
 		<div>
-			<p class="eyebrow">PHOTOS</p>
-			<h1>照片</h1>
+			<p class="eyebrow"><?php echo esc_html( $eyebrow ); ?></p>
+			<h1><?php echo esc_html( $page_title ); ?></h1>
 		</div>
-		<?php if ( $photo_count ) : ?>
+		<?php if ( $intro ) : ?>
 			<div class="photos-hero__meta">
-				<?php if ( count( $years ) > 1 ) : ?>
-					<p>从 <?php echo esc_html( min( $years ) ); ?> 到 <?php echo esc_html( max( $years ) ); ?>，留下 <?php echo esc_html( number_format_i18n( $photo_count ) ); ?> 张照片。</p>
-				<?php else : ?>
-					<p><?php echo esc_html( $years[0] ); ?> 年，留下 <?php echo esc_html( number_format_i18n( $photo_count ) ); ?> 张照片。</p>
-				<?php endif; ?>
+				<p><?php echo esc_html( $intro ); ?></p>
 			</div>
 		<?php endif; ?>
 	</header>
@@ -53,6 +51,7 @@ if ( $year_count > 4 && 0 !== $year_count % 3 ) {
 		</nav>
 
 		<?php foreach ( $photos_by_year as $year => $photos ) : ?>
+			<?php set_query_var( 'quietype_photo_year_count', count( $photos ) ); ?>
 			<section class="photo-year" id="photo-year-<?php echo esc_attr( $year ); ?>" aria-labelledby="photo-year-title-<?php echo esc_attr( $year ); ?>">
 				<header class="photo-year__heading">
 					<h2 id="photo-year-title-<?php echo esc_attr( $year ); ?>"><?php echo esc_html( $year ); ?></h2>

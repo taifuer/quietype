@@ -30,7 +30,9 @@ test('photo lookup previews metadata before manual confirmation', async ({ page 
             shutter_speed: '1/250s',
             iso: '100',
             camera: 'FUJIFILM X-T5',
-            lens: 'XF 23mm F2 R WR'
+            lens: 'XF 23mm F2 R WR',
+            file_size: 1843200,
+            is_oversized: false
           }
         })
       });
@@ -47,9 +49,10 @@ test('photo lookup previews metadata before manual confirmation', async ({ page 
   await page.locator('#quietype_photo_lookup_url').fill('https://pic.taifua.com/photos/changsha.jpg');
   await page.locator('#quietype-photo-lookup').click();
   await expect(page.locator('#quietype-photo-preview')).toBeVisible();
-  await expect(page.locator('#quietype-photo-preview-size')).toHaveText('6000 × 4000');
+  await expect(page.locator('#quietype-photo-preview-size')).toHaveText('6000 × 4000 · 1.8 MB');
   await expect(page.locator('#quietype-photo-preview-exif')).toHaveText('35mm · f/2.8 · 1/250s · ISO 100');
   await expect(page.locator('#quietype_photo_image_url')).toHaveValue('');
+  await expect(page.locator('#quietype_photo_original_url')).toHaveValue('');
   await expect(page.locator('#quietype_photo_width')).toHaveValue('');
 
   await page.locator('#quietype-photo-confirm').click();

@@ -36,23 +36,32 @@ test.describe('public pages', () => {
 });
 
 test('photo archive groups external images and keeps details in the lightbox', async ({ page }) => {
+  const originalRequests = [];
+  page.on('request', (request) => {
+    if (request.url().includes('photo-1-original.jpg')) originalRequests.push(request.url());
+  });
   await page.route('https://images.example.test/**', async (route) => {
     await route.fulfill({ status: 200, contentType: 'image/gif', body: Buffer.from('R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=', 'base64') });
   });
   await page.goto('/photos/');
-  await expect(page.locator('.photos-hero h1')).toHaveText('照片');
+  await expect(page.locator('.photos-hero h1')).toHaveText('万物静观');
   await expect(page.locator('.photos-hero .eyebrow')).toHaveText('PHOTOS');
+  await expect(page.locator('.photos-hero__meta')).toHaveCount(0);
   await expect(page.locator('.photo-card')).toHaveCount(6);
   await expect(page.locator('.photo-year')).toHaveCount(3);
   await expect(page.locator('.photo-year__heading h2')).toHaveText(['2026', '2025', '2024']);
   await expect(page.locator('.photo-year-index')).toHaveClass(/photo-year-index--count-3/);
   await expect(page.locator('.photo-frame').first()).toHaveAttribute('data-photo-exif', '35mm · f/4 · 1/320s · ISO 160');
+  await expect(page.locator('.photo-frame').first()).toHaveAttribute('data-photo-original', 'https://images.example.test/photo-1-original.jpg');
   await expect(page.locator('.photo-frame img').first()).toHaveAttribute('referrerpolicy', 'no-referrer');
+  expect(originalRequests).toEqual([]);
 
   await page.locator('.photo-frame img').first().click();
   await expect(page.locator('.pswp')).toBeVisible();
   await expect(page.locator('.pswp__quietype-caption')).toContainText('雨后屋檐');
   await expect(page.locator('.pswp__quietype-caption')).toContainText('35mm · f/4 · 1/320s · ISO 160');
+  await expect(page.locator('.pswp__quietype-caption a')).toHaveAttribute('href', 'https://images.example.test/photo-1-original.jpg');
+  expect(originalRequests).toEqual([]);
 });
 
 test('standalone photo records redirect to the archive', async ({ request }) => {
@@ -61,10 +70,36 @@ test('standalone photo records redirect to the archive', async ({ request }) => 
   expect(response.headers().location).toMatch(/\/photos\/?#photo-[0-9]+$/);
 });
 
+test('full-resolution photo remains an explicit lightbox action', async ({ page }) => {
+  const originalUrl = 'https://images.example.test/original-opt-in.jpg';
+  const originalRequests = [];
+  page.on('request', (request) => {
+    if (request.url() === originalUrl) originalRequests.push(request.url());
+  });
+  await page.route('https://images.example.test/**', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'image/gif', body: Buffer.from('R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=', 'base64') });
+  });
+  await page.goto('/photos/');
+  const frame = page.locator('.photo-frame').first();
+  await frame.evaluate((element, original) => {
+    element.dataset.pswpSrc = 'https://images.example.test/display.jpg';
+    element.dataset.pswpWidth = '1';
+    element.dataset.pswpHeight = '1';
+    element.dataset.photoOriginal = original;
+  }, originalUrl);
+
+  await frame.locator('img').click();
+  await expect(page.locator('.pswp')).toBeVisible();
+  await expect(page.locator('.pswp__quietype-caption a')).toHaveAttribute('href', originalUrl);
+  await expect(page.locator('.pswp__quietype-caption a')).toBeVisible();
+  expect(originalRequests).toEqual([]);
+});
+
 test('book archive groups compact reading records by year', async ({ page }) => {
   await page.goto('/books/');
-  await expect(page.locator('.books-hero h1')).toHaveText('但是还有书籍');
+  await expect(page.locator('.books-hero h1')).toHaveText('书卷多情');
   await expect(page.locator('.books-hero .eyebrow')).toHaveText('BOOKS');
+  await expect(page.locator('.books-hero__meta')).toHaveCount(0);
   await expect(page.locator('.book-item')).toHaveCount(8);
   await expect(page.locator('.book-year-shelf')).toHaveCount(4);
   await expect(page.locator('.book-year-heading h2')).toHaveText(['2026', '2025', '2024', '2023']);

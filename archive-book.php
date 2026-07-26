@@ -18,8 +18,10 @@ while ( have_posts() ) {
 }
 krsort( $books_by_year, SORT_NUMERIC );
 $years      = array_keys( $books_by_year );
-$book_count = array_sum( array_map( 'count', $books_by_year ) );
 $year_count = count( $years );
+$page_title = quietype_archive_page_text( 'book', 'title' );
+$eyebrow    = quietype_archive_page_text( 'book', 'eyebrow' );
+$intro      = quietype_archive_page_text( 'book', 'intro' );
 $year_index_classes = array( 'book-year-index', 'book-year-index--count-' . $year_count );
 if ( $year_count > 4 && 0 !== $year_count % 3 ) {
 	$year_index_classes[] = 'book-year-index--remainder-' . ( $year_count % 3 );
@@ -28,16 +30,12 @@ if ( $year_count > 4 && 0 !== $year_count % 3 ) {
 <section class="books-page section-wrap">
 	<header class="books-hero">
 		<div>
-			<p class="eyebrow">BOOKS</p>
-			<h1>但是还有书籍</h1>
+			<p class="eyebrow"><?php echo esc_html( $eyebrow ); ?></p>
+			<h1><?php echo esc_html( $page_title ); ?></h1>
 		</div>
-		<?php if ( $book_count ) : ?>
+		<?php if ( $intro ) : ?>
 			<div class="books-hero__meta">
-				<?php if ( count( $years ) > 1 ) : ?>
-					<p>从 <?php echo esc_html( min( $years ) ); ?> 到 <?php echo esc_html( max( $years ) ); ?>，记录 <?php echo esc_html( number_format_i18n( $book_count ) ); ?> 本书。</p>
-				<?php else : ?>
-					<p><?php echo esc_html( $years[0] ); ?> 年，记录 <?php echo esc_html( number_format_i18n( $book_count ) ); ?> 本书。</p>
-				<?php endif; ?>
+				<p><?php echo esc_html( $intro ); ?></p>
 			</div>
 		<?php endif; ?>
 	</header>

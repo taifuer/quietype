@@ -16,14 +16,26 @@
     if (element) element.textContent = value || '未识别到拍摄参数';
   };
 
+  const fileSize = (bytes) => {
+    const size = Number(bytes) || 0;
+    if (!size) return '';
+    if (size < 1024 * 1024) return `${Math.max(1, Math.round(size / 1024))} KB`;
+    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
   const showPreview = (data) => {
     pending = data;
     preview.hidden = false;
-    previewImage.src = data.url;
-    previewImage.alt = '远程照片预览';
-    previewImage.hidden = false;
-    previewImage.addEventListener('error', () => { previewImage.hidden = true; }, { once: true });
-    text('#quietype-photo-preview-size', data.width && data.height ? `${data.width} × ${data.height}` : '尺寸未识别');
+    previewImage.removeAttribute('src');
+    previewImage.hidden = true;
+    if (!data.is_oversized) {
+      previewImage.src = data.url;
+      previewImage.alt = '远程照片预览';
+      previewImage.hidden = false;
+      previewImage.addEventListener('error', () => { previewImage.hidden = true; }, { once: true });
+    }
+    const dimensions = data.width && data.height ? `${data.width} × ${data.height}` : '尺寸未识别';
+    text('#quietype-photo-preview-size', [dimensions, fileSize(data.file_size)].filter(Boolean).join(' · '));
     text('#quietype-photo-preview-exif', [data.focal_length, data.aperture, data.shutter_speed, data.iso ? `ISO ${data.iso}` : ''].filter(Boolean).join(' · '));
     text('#quietype-photo-preview-device', [data.camera, data.lens].filter(Boolean).join(' · '));
   };
@@ -50,7 +62,9 @@
       const result = await response.json();
       if (!result.success) throw new Error(result.data?.message || '没有识别到图片信息。');
       showPreview(result.data);
-      status.textContent = '读取完成，请确认后填入。';
+      status.textContent = result.data.is_oversized
+        ? '图片超过 10 MB，已跳过浏览器预览；建议将压缩图作为展示图、原文件填入原图地址。'
+        : '读取完成，请确认后填入。';
     } catch (error) {
       status.textContent = error.message || '读取失败，请手工填写。';
     } finally {

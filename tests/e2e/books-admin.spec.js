@@ -117,3 +117,16 @@ test('revision controls describe posts, pages, and books', async ({ page }) => {
   await expect(page.getByText('停止为文章、页面和书籍保存新的历史版本')).toBeVisible();
   await expect(page.locator('#quietype-section-revision-cleanup')).toContainText('文章、页面或书籍历史版本');
 });
+
+test('book and photo archive headings are configurable together', async ({ page }) => {
+  test.skip(page.viewportSize().width < 700, 'The settings screen is viewport-independent.');
+  await logIn(page);
+  await page.goto('/wp-admin/themes.php?page=quietype-settings', { waitUntil: 'domcontentloaded' });
+
+  await expect(page.locator('#quietype_books_page_title')).toHaveValue('书卷多情');
+  await expect(page.locator('#quietype_books_page_eyebrow')).toHaveValue('BOOKS');
+  await expect(page.locator('#quietype_books_page_intro')).toHaveAttribute('placeholder', '留空不显示');
+  await expect(page.locator('#quietype_photos_page_title')).toHaveValue('万物静观');
+  await expect(page.locator('#quietype_photos_page_eyebrow')).toHaveValue('PHOTOS');
+  await expect(page.locator('#quietype_photos_page_intro')).toHaveAttribute('placeholder', '留空不显示');
+});

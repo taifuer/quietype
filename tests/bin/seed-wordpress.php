@@ -203,9 +203,20 @@ foreach ( $photos as $index => $photo ) {
 		)
 	);
 	foreach ( array(
-		'_quietype_photo_image_url' => 'https://images.example.test/photo-' . ( $index + 1 ) . '.jpg', '_quietype_photo_captured_date' => $photo[1], '_quietype_photo_location' => $photo[2], '_quietype_photo_width' => $photo[3], '_quietype_photo_height' => $photo[4], '_quietype_photo_focal_length' => $photo[5], '_quietype_photo_aperture' => $photo[6], '_quietype_photo_shutter_speed' => $photo[7], '_quietype_photo_iso' => $photo[8],
+		'_quietype_photo_image_url'     => 'https://images.example.test/photo-' . ( $index + 1 ) . '.jpg',
+		'_quietype_photo_original_url'  => 0 === $index ? 'https://images.example.test/photo-1-original.jpg' : '',
+		'_quietype_photo_captured_date' => $photo[1],
+		'_quietype_photo_location'      => $photo[2],
+		'_quietype_photo_width'         => $photo[3],
+		'_quietype_photo_height'        => $photo[4],
+		'_quietype_photo_focal_length'  => $photo[5],
+		'_quietype_photo_aperture'      => $photo[6],
+		'_quietype_photo_shutter_speed' => $photo[7],
+		'_quietype_photo_iso'           => $photo[8],
 	) as $meta_key => $meta_value ) {
-		update_post_meta( $photo_id, $meta_key, $meta_value );
+		if ( '' !== $meta_value ) {
+			update_post_meta( $photo_id, $meta_key, $meta_value );
+		}
 	}
 }
 

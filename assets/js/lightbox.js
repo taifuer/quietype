@@ -22,6 +22,7 @@ if (images.length) {
       photoExif: link?.dataset.photoExif || '',
       photoDevice: link?.dataset.photoDevice || '',
       photoCaption: link?.dataset.photoCaption || '',
+      photoOriginal: link?.dataset.photoOriginal || '',
     };
   };
 
@@ -70,12 +71,13 @@ if (images.length) {
       order: 9,
       isButton: false,
       appendTo: 'root',
-      html: '<div class="pswp__quietype-caption-inner"><div><strong></strong><span></span></div><p></p><small></small></div>',
+      html: '<div class="pswp__quietype-caption-inner"><div><strong></strong><span></span></div><p></p><small></small><a target="_blank" rel="noopener noreferrer">查看原图 ↗</a></div>',
       onInit: (element, pswp) => {
         const title = element.querySelector('strong');
         const meta = element.querySelector('span');
         const caption = element.querySelector('p');
         const details = element.querySelector('small');
+        const original = element.querySelector('a');
         const update = () => {
           const data = pswp.currSlide?.data || {};
           const detailParts = [data.photoExif, data.photoDevice].filter(Boolean);
@@ -83,7 +85,9 @@ if (images.length) {
           meta.textContent = data.photoMeta || '';
           caption.textContent = data.photoCaption || '';
           details.textContent = detailParts.join('  ·  ');
-          element.hidden = !data.photoTitle && !data.photoMeta && !data.photoCaption && !detailParts.length;
+          original.href = data.photoOriginal || '';
+          original.hidden = !data.photoOriginal;
+          element.hidden = !data.photoTitle && !data.photoMeta && !data.photoCaption && !detailParts.length && !data.photoOriginal;
         };
         pswp.on('change', update);
         update();

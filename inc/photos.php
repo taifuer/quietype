@@ -46,6 +46,7 @@ function quietype_register_photos() {
 
 	$meta_fields = array(
 		'_quietype_photo_image_url'     => 'quietype_sanitize_photo_url',
+		'_quietype_photo_original_url'  => 'quietype_sanitize_photo_url',
 		'_quietype_photo_captured_date' => 'quietype_sanitize_photo_date',
 		'_quietype_photo_location'      => 'sanitize_text_field',
 		'_quietype_photo_width'         => 'quietype_sanitize_photo_dimension',
@@ -123,7 +124,9 @@ function quietype_sanitize_photo_iso( $value ) {
 function quietype_photo_data( $post_id = null ) {
 	$post_id       = $post_id ?: get_the_ID();
 	$attachment_id = get_post_thumbnail_id( $post_id );
-	$image_url     = quietype_sanitize_photo_url( get_post_meta( $post_id, '_quietype_photo_image_url', true ) );
+	$external_url  = quietype_sanitize_photo_url( get_post_meta( $post_id, '_quietype_photo_image_url', true ) );
+	$image_url     = $external_url;
+	$original_url  = quietype_sanitize_photo_url( get_post_meta( $post_id, '_quietype_photo_original_url', true ) );
 	$width         = quietype_sanitize_photo_dimension( get_post_meta( $post_id, '_quietype_photo_width', true ) );
 	$height        = quietype_sanitize_photo_dimension( get_post_meta( $post_id, '_quietype_photo_height', true ) );
 	if ( ! $image_url && $attachment_id ) {
@@ -140,6 +143,9 @@ function quietype_photo_data( $post_id = null ) {
 	}
 	return array(
 		'image_url'     => $image_url,
+		'original_url'  => $original_url,
+		'attachment_id' => $attachment_id,
+		'is_external'   => (bool) $external_url,
 		'captured_date' => $captured_date,
 		'location'      => (string) get_post_meta( $post_id, '_quietype_photo_location', true ),
 		'width'         => (int) $width,
@@ -151,6 +157,50 @@ function quietype_photo_data( $post_id = null ) {
 		'camera'        => (string) get_post_meta( $post_id, '_quietype_photo_camera', true ),
 		'lens'          => (string) get_post_meta( $post_id, '_quietype_photo_lens', true ),
 	);
+}
+
+/**
+ * Resolve a lightweight grid image, a restrained lightbox image and an optional original.
+ *
+ * External images cannot receive WordPress-generated derivatives, so their display URL is
+ * used for both the grid and lightbox. The optional original is never loaded automatically.
+ */
+function quietype_photo_image_sources( $data ) {
+	$width  = $data['width'] ?: 1600;
+	$height = $data['height'] ?: 1067;
+	$result = array(
+		'grid_url'        => $data['image_url'],
+		'lightbox_url'    => $data['image_url'],
+		'lightbox_width'  => $width,
+		'lightbox_height' => $height,
+		'original_url'    => $data['original_url'],
+	);
+
+	if ( ! $data['attachment_id'] || $data['is_external'] ) {
+		if ( $result['original_url'] === $result['lightbox_url'] ) {
+			$result['original_url'] = '';
+		}
+		return $result;
+	}
+
+	$grid     = wp_get_attachment_image_src( $data['attachment_id'], 'quietype-photo-grid' );
+	$lightbox = wp_get_attachment_image_src( $data['attachment_id'], 'quietype-photo-lightbox' );
+	$original = wp_get_original_image_url( $data['attachment_id'] );
+	if ( $grid ) {
+		$result['grid_url'] = $grid[0];
+	}
+	if ( $lightbox ) {
+		$result['lightbox_url']    = $lightbox[0];
+		$result['lightbox_width']  = $lightbox[1];
+		$result['lightbox_height'] = $lightbox[2];
+	}
+	if ( ! $result['original_url'] && $original && $original !== $result['lightbox_url'] ) {
+		$result['original_url'] = $original;
+	}
+	if ( $result['original_url'] === $result['lightbox_url'] ) {
+		$result['original_url'] = '';
+	}
+	return $result;
 }
 
 /** Build one restrained line for PhotoSwipe; omit it completely when empty. */
@@ -219,7 +269,7 @@ function quietype_render_photo_meta_box( $post ) {
 	wp_nonce_field( 'quietype_save_photo', 'quietype_photo_nonce' );
 	?>
 	<div class="quietype-photo-editor">
-		<p class="description">填写 HTTPS 图片地址后先读取预览；只有点击“确认填入”才会改动尺寸和拍摄参数。识别失败或图床已清除 EXIF 时，可直接手工填写。</p>
+		<p class="description">填写 HTTPS 展示图后先读取预览；只有点击“确认填入”才会改动尺寸和拍摄参数。展示图建议控制在 1600–2560px、2MB 以内，原图另行填写且只在访客主动打开时加载。</p>
 		<div class="quietype-photo-lookup">
 			<label class="screen-reader-text" for="quietype_photo_lookup_url">外链图片地址</label>
 			<input class="large-text code" id="quietype_photo_lookup_url" type="url" value="<?php echo esc_attr( $data['image_url'] ); ?>" placeholder="https://pic.taifua.com/path/to/photo.jpg">
@@ -236,7 +286,8 @@ function quietype_render_photo_meta_box( $post ) {
 			</div>
 		</div>
 		<table class="form-table" role="presentation">
-			<tr><th><label for="quietype_photo_image_url">图片地址</label></th><td><input class="large-text code" id="quietype_photo_image_url" name="quietype_photo_image_url" type="url" value="<?php echo esc_attr( $data['image_url'] ); ?>" placeholder="https://pic.taifua.com/path/to/photo.jpg"><p class="description">外链优先；留空时使用特色图片。</p></td></tr>
+			<tr><th><label for="quietype_photo_image_url">展示图片地址</label></th><td><input class="large-text code" id="quietype_photo_image_url" name="quietype_photo_image_url" type="url" value="<?php echo esc_attr( $data['image_url'] ); ?>" placeholder="https://pic.taifua.com/path/to/photo.jpg"><p class="description">用于网格与灯箱；留空时使用特色图片及其响应式尺寸。</p></td></tr>
+			<tr><th><label for="quietype_photo_original_url">原图地址</label></th><td><input class="large-text code" id="quietype_photo_original_url" name="quietype_photo_original_url" type="url" value="<?php echo esc_attr( $data['original_url'] ); ?>" placeholder="https://pic.taifua.com/path/to/photo-original.jpg"><p class="description">可选。只作为灯箱中的“查看原图”入口，不会随页面或灯箱自动下载。</p></td></tr>
 			<tr><th><label for="quietype_photo_captured_date">拍摄月份</label></th><td><input id="quietype_photo_captured_date" name="quietype_photo_captured_date" type="month" value="<?php echo esc_attr( $data['captured_date'] ); ?>" required><p class="description">用于前台按年份分组，精确到月份即可。</p></td></tr>
 			<tr><th><label for="quietype_photo_location">地点</label></th><td><input class="regular-text" id="quietype_photo_location" name="quietype_photo_location" type="text" value="<?php echo esc_attr( $data['location'] ); ?>" placeholder="湖南 · 长沙"></td></tr>
 			<tr><th>图片尺寸</th><td class="quietype-photo-pair"><label><span>宽度</span><input id="quietype_photo_width" name="quietype_photo_width" type="number" min="1" max="60000" value="<?php echo esc_attr( $data['width'] ?: '' ); ?>"></label><label><span>高度</span><input id="quietype_photo_height" name="quietype_photo_height" type="number" min="1" max="60000" value="<?php echo esc_attr( $data['height'] ?: '' ); ?>"></label></td></tr>
@@ -277,6 +328,7 @@ function quietype_save_photo_meta( $post_id, $post ) {
 	}
 	$fields = array(
 		'_quietype_photo_image_url'     => array( 'quietype_photo_image_url', 'quietype_sanitize_photo_url' ),
+		'_quietype_photo_original_url'  => array( 'quietype_photo_original_url', 'quietype_sanitize_photo_url' ),
 		'_quietype_photo_captured_date' => array( 'quietype_photo_captured_date', 'quietype_sanitize_photo_date' ),
 		'_quietype_photo_location'      => array( 'quietype_photo_location', 'sanitize_text_field' ),
 		'_quietype_photo_width'         => array( 'quietype_photo_width', 'quietype_sanitize_photo_dimension' ),
@@ -454,11 +506,15 @@ function quietype_ajax_lookup_photo() {
 	if ( 200 !== $status ) {
 		wp_send_json_error( array( 'message' => '远程图片返回了异常状态，请稍后重试。' ), $status >= 400 && $status < 600 ? $status : 502 );
 	}
-	$result = quietype_photo_metadata_from_binary( wp_remote_retrieve_body( $response ) );
+	$body   = wp_remote_retrieve_body( $response );
+	$result = quietype_photo_metadata_from_binary( $body );
 	if ( is_wp_error( $result ) ) {
 		wp_send_json_error( array( 'message' => $result->get_error_message() ), 422 );
 	}
-	$result['url'] = $url;
+	$content_length        = absint( wp_remote_retrieve_header( $response, 'content-length' ) );
+	$result['url']          = $url;
+	$result['file_size']    = max( strlen( $body ), $content_length );
+	$result['is_oversized'] = $result['file_size'] > 10 * MB_IN_BYTES;
 	set_transient( $cache_key, $result, 30 * DAY_IN_SECONDS );
 	wp_send_json_success( $result );
 }

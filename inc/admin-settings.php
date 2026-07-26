@@ -27,6 +27,12 @@ function quietype_register_admin_settings() {
 		'quietype_contact_email'              => array( 'string', 'taifu@taifua.com', 'sanitize_email' ),
 		'quietype_icp_number'                 => array( 'string', '湘ICP备17002466号', 'sanitize_text_field' ),
 		'quietype_start_year'                 => array( 'integer', 2017, 'quietype_sanitize_start_year' ),
+		'quietype_books_page_title'           => array( 'string', '书卷多情', 'quietype_sanitize_archive_title' ),
+		'quietype_books_page_eyebrow'         => array( 'string', 'BOOKS', 'quietype_sanitize_archive_eyebrow' ),
+		'quietype_books_page_intro'           => array( 'string', '', 'quietype_sanitize_archive_intro' ),
+		'quietype_photos_page_title'          => array( 'string', '万物静观', 'quietype_sanitize_archive_title' ),
+		'quietype_photos_page_eyebrow'        => array( 'string', 'PHOTOS', 'quietype_sanitize_archive_eyebrow' ),
+		'quietype_photos_page_intro'          => array( 'string', '', 'quietype_sanitize_archive_intro' ),
 		'quietype_link_check_enabled'         => array( 'boolean', true, 'quietype_sanitize_checkbox' ),
 		'quietype_article_copyright_enabled'  => array( 'boolean', true, 'quietype_sanitize_checkbox' ),
 		'quietype_article_author_name'        => array( 'string', '小傅', 'sanitize_text_field' ),
@@ -124,6 +130,55 @@ function quietype_sanitize_seo_keywords( $value ) {
 	return mb_substr( implode( ',', array_unique( $parts ) ), 0, 500 );
 }
 
+/** Keep archive display copy concise and free of markup. */
+function quietype_sanitize_archive_title( $value ) {
+	$value = trim( preg_replace( '/\s+/u', ' ', wp_strip_all_tags( (string) $value ) ) );
+	return mb_substr( $value, 0, 80 );
+}
+
+function quietype_sanitize_archive_eyebrow( $value ) {
+	$value = strtoupper( sanitize_text_field( (string) $value ) );
+	$value = preg_replace( '/[^A-Z0-9 .&_-]/', '', $value );
+	return substr( trim( $value ), 0, 32 );
+}
+
+function quietype_sanitize_archive_intro( $value ) {
+	$value = trim( preg_replace( '/\s+/u', ' ', wp_strip_all_tags( (string) $value ) ) );
+	return mb_substr( $value, 0, 180 );
+}
+
+/** Return one configured archive label with a stable fallback for required fields. */
+function quietype_archive_page_text( $post_type, $field ) {
+	$defaults = array(
+		'book'  => array(
+			'title'   => '书卷多情',
+			'eyebrow' => 'BOOKS',
+			'intro'   => '',
+		),
+		'photo' => array(
+			'title'   => '万物静观',
+			'eyebrow' => 'PHOTOS',
+			'intro'   => '',
+		),
+	);
+	if ( ! isset( $defaults[ $post_type ][ $field ] ) ) {
+		return '';
+	}
+	$value = (string) quietype_get_setting( 'quietype_' . $post_type . 's_page_' . $field, $defaults[ $post_type ][ $field ] );
+	return '' !== $value || 'intro' === $field ? $value : $defaults[ $post_type ][ $field ];
+}
+
+/** Keep the browser and social title aligned with the visible archive heading. */
+function quietype_archive_document_title( $parts ) {
+	if ( is_post_type_archive( 'book' ) ) {
+		$parts['title'] = quietype_archive_page_text( 'book', 'title' );
+	} elseif ( is_post_type_archive( 'photo' ) ) {
+		$parts['title'] = quietype_archive_page_text( 'photo', 'title' );
+	}
+	return $parts;
+}
+add_filter( 'document_title_parts', 'quietype_archive_document_title' );
+
 /** Keep the copyright range plausible and never later than the current year. */
 function quietype_sanitize_start_year( $value ) {
 	$year = absint( $value );
@@ -216,7 +271,7 @@ function quietype_render_settings_page() {
 			<div class="notice notice-success is-dismissible"><p>已永久删除 <?php echo esc_html( absint( $_GET['quietype_revisions_deleted'] ) ); ?> 条内容历史版本。</p></div>
 		<?php endif; ?>
 		<nav class="quietype-settings__nav" aria-label="设置分区">
-			<a href="#quietype-section-site">站点</a><a href="#quietype-section-seo">SEO</a><a href="#quietype-section-access">访问</a><a href="#quietype-section-wordpress">WordPress</a><a href="#quietype-section-security">安全</a><a href="#quietype-section-mail">邮件</a><a href="#quietype-section-code">代码</a>
+			<a href="#quietype-section-site">站点</a><a href="#quietype-section-archives">内容页面</a><a href="#quietype-section-seo">SEO</a><a href="#quietype-section-access">访问</a><a href="#quietype-section-wordpress">WordPress</a><a href="#quietype-section-security">安全</a><a href="#quietype-section-mail">邮件</a><a href="#quietype-section-code">代码</a>
 		</nav>
 		<form action="options.php" method="post">
 			<?php settings_fields( 'quietype_settings' ); ?>
@@ -231,6 +286,19 @@ function quietype_render_settings_page() {
 					<tr><th>友链检测</th><td><?php quietype_settings_checkbox( 'quietype_link_check_enabled', '每天分批检测友链可达性', true ); ?><p class="description">每天最多检测五条；连续失败三次只会进入“待确认”，不会自动在前台标记失联。</p></td></tr>
 					<tr><th>文章版权声明</th><td><?php quietype_settings_checkbox( 'quietype_article_copyright_enabled', '在文章正文末尾显示 CC BY-NC-SA 4.0 声明', true ); ?></td></tr>
 					<tr><th><label for="quietype_article_author_name">版权署名</label></th><td><input class="regular-text" id="quietype_article_author_name" name="quietype_article_author_name" type="text" value="<?php echo esc_attr( quietype_get_setting( 'quietype_article_author_name', '小傅' ) ); ?>"><p class="description">留空时使用文章作者的 WordPress 显示名称，署名链接回本站首页。</p></td></tr>
+				</table>
+			</section>
+
+			<section class="quietype-settings__section" id="quietype-section-archives">
+				<h2>书籍与照片页面</h2>
+				<p>控制年度书架与图库页首的展示文字。简介留空时不输出对应区域。</p>
+				<table class="form-table" role="presentation">
+					<tr><th><label for="quietype_books_page_title">书籍页标题</label></th><td><input class="regular-text" id="quietype_books_page_title" name="quietype_books_page_title" type="text" maxlength="80" value="<?php echo esc_attr( quietype_get_setting( 'quietype_books_page_title', '书卷多情' ) ); ?>" placeholder="书卷多情"></td></tr>
+					<tr><th><label for="quietype_books_page_eyebrow">书籍页英文标识</label></th><td><input class="regular-text code" id="quietype_books_page_eyebrow" name="quietype_books_page_eyebrow" type="text" maxlength="32" value="<?php echo esc_attr( quietype_get_setting( 'quietype_books_page_eyebrow', 'BOOKS' ) ); ?>" placeholder="BOOKS"></td></tr>
+					<tr><th><label for="quietype_books_page_intro">书籍页简介</label></th><td><textarea class="large-text" id="quietype_books_page_intro" name="quietype_books_page_intro" rows="2" maxlength="180" placeholder="留空不显示"><?php echo esc_textarea( quietype_get_setting( 'quietype_books_page_intro', '' ) ); ?></textarea></td></tr>
+					<tr><th><label for="quietype_photos_page_title">照片页标题</label></th><td><input class="regular-text" id="quietype_photos_page_title" name="quietype_photos_page_title" type="text" maxlength="80" value="<?php echo esc_attr( quietype_get_setting( 'quietype_photos_page_title', '万物静观' ) ); ?>" placeholder="万物静观"></td></tr>
+					<tr><th><label for="quietype_photos_page_eyebrow">照片页英文标识</label></th><td><input class="regular-text code" id="quietype_photos_page_eyebrow" name="quietype_photos_page_eyebrow" type="text" maxlength="32" value="<?php echo esc_attr( quietype_get_setting( 'quietype_photos_page_eyebrow', 'PHOTOS' ) ); ?>" placeholder="PHOTOS"></td></tr>
+					<tr><th><label for="quietype_photos_page_intro">照片页简介</label></th><td><textarea class="large-text" id="quietype_photos_page_intro" name="quietype_photos_page_intro" rows="2" maxlength="180" placeholder="留空不显示"><?php echo esc_textarea( quietype_get_setting( 'quietype_photos_page_intro', '' ) ); ?></textarea></td></tr>
 				</table>
 			</section>
 
