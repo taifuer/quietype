@@ -13,7 +13,7 @@ const validator = new HtmlValidate({
   }
 });
 
-for (const path of ['/', '/quietype-reading-test/', '/reading/', '/archive/', '/about/', '/quietype-missing-page/']) {
+for (const path of ['/', '/quietype-reading-test/', '/books/', '/archive/', '/about/', '/quietype-missing-page/']) {
   test(`${path} emits structurally valid HTML`, async ({ request }, testInfo) => {
     test.skip(testInfo.project.name !== 'desktop-chromium', 'Markup is viewport-independent.');
     const response = await request.get(path);

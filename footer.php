@@ -1,4 +1,21 @@
 </main>
+<?php if ( has_nav_menu( 'prefooter' ) ) : ?>
+	<nav class="prefooter-nav" aria-label="页尾导航">
+		<div class="prefooter-nav__inner">
+			<?php
+			wp_nav_menu(
+				array(
+					'theme_location' => 'prefooter',
+					'container'      => false,
+					'menu_class'     => 'prefooter-nav__menu',
+					'depth'          => 1,
+					'fallback_cb'    => false,
+				)
+			);
+			?>
+		</div>
+	</nav>
+<?php endif; ?>
 <footer class="site-footer">
 	<div class="site-footer__inner">
 		<div class="footer-legal">

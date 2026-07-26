@@ -31,9 +31,9 @@ function quietype_register_books() {
 			'public'              => true,
 			'exclude_from_search' => true,
 			'show_in_rest'        => true,
-			'has_archive'         => 'reading',
+			'has_archive'         => 'books',
 			'rewrite'             => array(
-				'slug'       => 'reading',
+				'slug'       => 'books',
 				'with_front' => false,
 			),
 			'menu_icon'           => 'dashicons-book-alt',
@@ -128,7 +128,7 @@ add_action( 'init', 'quietype_register_books' );
 
 /** Migrate the early reading prototype without losing entered records. */
 function quietype_upgrade_books() {
-	if ( '3' === get_option( 'quietype_book_data_version' ) ) {
+	if ( '4' === get_option( 'quietype_book_data_version' ) ) {
 		return;
 	}
 	$book_ids = get_posts(
@@ -162,9 +162,46 @@ function quietype_upgrade_books() {
 		}
 	}
 	flush_rewrite_rules( false );
-	update_option( 'quietype_book_data_version', '3', false );
+	update_option( 'quietype_book_data_version', '4', false );
 }
 add_action( 'init', 'quietype_upgrade_books', 30 );
+
+/** Keep pre-0.9.1 reading URLs available long enough to redirect permanently. */
+function quietype_register_legacy_book_routes() {
+	add_rewrite_rule( '^reading/?$', 'index.php?quietype_legacy_books=1', 'top' );
+	add_rewrite_rule( '^reading/([^/]+)/?$', 'index.php?quietype_legacy_book_slug=$matches[1]', 'top' );
+}
+add_action( 'init', 'quietype_register_legacy_book_routes', 20 );
+
+function quietype_legacy_book_query_vars( $query_vars ) {
+	$query_vars[] = 'quietype_legacy_books';
+	$query_vars[] = 'quietype_legacy_book_slug';
+	return $query_vars;
+}
+add_filter( 'query_vars', 'quietype_legacy_book_query_vars' );
+
+/** Redirect the former archive and detail routes without exposing duplicate pages. */
+function quietype_redirect_legacy_book_routes() {
+	if ( get_query_var( 'quietype_legacy_books' ) ) {
+		wp_safe_redirect( get_post_type_archive_link( 'book' ), 301, 'Quietype' );
+		exit;
+	}
+	$slug = sanitize_title( (string) get_query_var( 'quietype_legacy_book_slug' ) );
+	if ( ! $slug ) {
+		return;
+	}
+	$book = get_page_by_path( $slug, OBJECT, 'book' );
+	if ( $book instanceof WP_Post ) {
+		$data = quietype_book_data( $book->ID );
+		if ( $data['douban_url'] ) {
+			wp_redirect( $data['douban_url'], 301, 'Quietype' ); // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- URL is rebuilt from a validated numeric Douban ID.
+			exit;
+		}
+	}
+	wp_safe_redirect( get_post_type_archive_link( 'book' ), 301, 'Quietype' );
+	exit;
+}
+add_action( 'template_redirect', 'quietype_redirect_legacy_book_routes', 0 );
 
 function quietype_sanitize_book_year( $value ) {
 	$year = absint( $value );

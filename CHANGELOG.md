@@ -9,6 +9,7 @@ All notable changes to Quietype will be documented in this file.
 - Added unobtrusive, copy-aware permalinks to rendered H2 and H3 article headings.
 - Added a compact annual reading archive with administrator-defined categories and tags, short notes, whole-star ratings, covers, and direct Douban links.
 - Added administrator-only Douban metadata previews with a separate manual confirmation step and validated cover imports.
+- Added an optional navigation row between page content and the legal footer.
 
 ### Changed
 
@@ -17,6 +18,8 @@ All notable changes to Quietype will be documented in this file.
 - Versioned local assets from their modification times so iterative deployments cannot leave month-long stale CSS or JavaScript caches.
 - Reduced reading records to month precision, added plain-text read states, renamed personal ratings, and removed visible local book permalinks.
 - Made book covers fall back to generated text artwork when lookup, import, or front-end image loading fails.
+- Moved the public bookshelf to `/books/` with permanent redirects from former `/reading/` routes.
+- Preserved server-side cover imports when Douban prevents the browser from displaying its preview image.
 
 ## [0.9.0] - 2026-07-22
 

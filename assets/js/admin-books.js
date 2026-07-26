@@ -39,10 +39,9 @@
     field('quietype-book-preview-extra').textContent = [book.douban_rating ? `豆瓣 ${book.douban_rating}` : '', book.isbn ? `ISBN ${book.isbn}` : ''].filter(Boolean).join(' · ');
     if (book.cover_url) {
       cover.addEventListener('error', () => {
-        if (pendingBook) pendingBook.cover_url = '';
         cover.removeAttribute('src');
         cover.hidden = true;
-        status.textContent = '书籍资料已读取，封面暂时不可用；保存后将使用默认文字封面。';
+        status.textContent = '书籍资料已读取，封面无法直接预览；确认后仍会由服务器尝试导入。';
       }, { once: true });
       cover.src = book.cover_url;
       cover.alt = `《${book.title}》封面预览`;
@@ -102,6 +101,10 @@
     const importPanel = field('quietype-book-import');
     const cover = field('quietype-book-cover-preview');
     if (pendingBook.cover_url) {
+      cover.addEventListener('error', () => {
+        cover.removeAttribute('src');
+        cover.hidden = true;
+      }, { once: true });
       cover.src = pendingBook.cover_url;
       cover.alt = `《${pendingBook.title}》封面预览`;
       cover.hidden = false;

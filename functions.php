@@ -32,7 +32,8 @@ function quietype_setup() {
 	add_editor_style( 'style.css' );
 	register_nav_menus(
 		array(
-			'primary' => '顶部导航',
+			'primary'   => '顶部导航',
+			'prefooter' => '页尾上方导航',
 		)
 	);
 }

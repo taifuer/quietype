@@ -12,7 +12,7 @@ test('Douban lookup previews data before manual confirmation', async ({ page }) 
   });
   await page.route('**/wp-admin/admin-ajax.php', async (route) => {
     const request = route.request();
-    if (request.postData()?.includes('action=quietype_lookup_book')) {
+    if (request.postData()?.includes('quietype_lookup_book')) {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -59,7 +59,7 @@ test('Douban lookup previews data before manual confirmation', async ({ page }) 
   await expect(page.locator('#quietype-book-preview')).toBeVisible();
   await expect(page.locator('#quietype-book-preview-title')).toHaveText('佩索阿：最后的时光');
   await expect(page.locator('#quietype-book-preview-cover')).toBeHidden();
-  await expect(page.locator('#quietype-book-lookup-status')).toContainText('默认文字封面');
+  await expect(page.locator('#quietype-book-lookup-status')).toContainText('服务器尝试导入');
   await expect(page.locator('#quietype_book_authors')).toHaveValue('');
   await expect(page.locator('#quietype_book_douban_url')).toHaveValue('');
 
@@ -74,7 +74,9 @@ test('Douban lookup previews data before manual confirmation', async ({ page }) 
   await expect(page.locator('#quietype_book_authors')).toHaveValue('[法] 尼古拉·巴拉尔 著绘');
   await expect(page.locator('#quietype_book_publisher')).toHaveValue('湖南文艺出版社');
   await expect(page.locator('#quietype_book_douban_url')).toHaveValue('https://book.douban.com/subject/38380879/');
-  await expect(page.locator('#quietype_book_cover_url')).toHaveValue('');
-  await expect(page.locator('#quietype-book-import')).toBeHidden();
+  await expect(page.locator('#quietype_book_cover_url')).toHaveValue('https://img9.doubanio.com/view/subject/s/public/s-invalid.jpg');
+  await expect(page.locator('#quietype-book-import')).toBeVisible();
+  await expect(page.locator('#quietype_book_import_cover')).toBeChecked();
+  await expect(page.locator('#quietype-book-cover-preview')).toBeHidden();
   await expect(page.locator('#quietype-book-lookup-status')).toContainText('资料已填入表单');
 });

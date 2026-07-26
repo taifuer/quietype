@@ -3,7 +3,7 @@ const { test, expect } = require('@playwright/test');
 const routes = [
   ['首页', '/'],
   ['文章', '/quietype-reading-test/'],
-  ['阅读', '/reading/'],
+  ['书籍', '/books/'],
   ['归档', '/archive/'],
   ['友链', '/links/'],
   ['关于', '/about/'],
@@ -31,8 +31,8 @@ test.describe('public pages', () => {
   }
 });
 
-test('reading archive groups compact book records by year', async ({ page }) => {
-  await page.goto('/reading/');
+test('book archive groups compact reading records by year', async ({ page }) => {
+  await page.goto('/books/');
   await expect(page.locator('.books-hero h1')).toHaveText('但是还有书籍');
   await expect(page.locator('.book-item')).toHaveCount(8);
   await expect(page.locator('.book-year-shelf')).toHaveCount(3);
@@ -48,9 +48,29 @@ test('reading archive groups compact book records by year', async ({ page }) => 
 });
 
 test('standalone book routes defer to the confirmed Douban source', async ({ request }) => {
-  const response = await request.get('/reading/programming-pearls/', { maxRedirects: 0 });
+  const response = await request.get('/books/programming-pearls/', { maxRedirects: 0 });
   expect(response.status()).toBe(302);
   expect(response.headers().location).toBe('https://book.douban.com/subject/3227098/');
+});
+
+test('former reading routes redirect permanently', async ({ request }) => {
+  const archive = await request.get('/reading/', { maxRedirects: 0 });
+  expect(archive.status()).toBe(301);
+  expect(archive.headers().location).toMatch(/\/books\/$/);
+
+  const book = await request.get('/reading/programming-pearls/', { maxRedirects: 0 });
+  expect(book.status()).toBe(301);
+  expect(book.headers().location).toBe('https://book.douban.com/subject/3227098/');
+});
+
+test('pre-footer navigation stays separate from legal footer content', async ({ page }) => {
+  await page.goto('/');
+  const navigation = page.locator('nav.prefooter-nav');
+  await expect(navigation).toBeVisible();
+  await expect(navigation.locator('a')).toHaveText(['书籍', '归档', '友链', '关于']);
+  await expect(page.locator('footer.site-footer nav.prefooter-nav')).toHaveCount(0);
+  await expect(navigation).toHaveCSS('border-top-width', '1px');
+  await expect(page.locator('footer.site-footer')).toHaveCSS('border-top-width', '1px');
 });
 
 test('reading tools stay above a visible footer on short pages', async ({ page }) => {

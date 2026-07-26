@@ -14,6 +14,7 @@ if ( ! is_blog_installed() ) {
 	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 	wp_install( '太傅博客', 'admin', 'admin@example.test', true, '', 'password' );
 }
+wp_installing( false );
 
 wp_set_current_user( 1 );
 switch_theme( 'quietype' );
@@ -179,17 +180,35 @@ foreach ( $books as $book ) {
 	}
 }
 
+$quietype_test_menus = array();
 foreach ( wp_get_nav_menus() as $existing_menu ) {
-	wp_delete_nav_menu( $existing_menu->term_id );
+	if ( in_array( $existing_menu->name, array( '主导航', '页尾导航' ), true ) ) {
+		$quietype_test_menus[ $existing_menu->name ] = (int) $existing_menu->term_id;
+		foreach ( wp_get_nav_menu_items( $existing_menu->term_id ) ?: array() as $existing_menu_item ) {
+			wp_delete_post( $existing_menu_item->ID, true );
+		}
+	} else {
+		wp_delete_nav_menu( $existing_menu->term_id );
+	}
 }
-$menu_id = wp_create_nav_menu( '主导航' );
-wp_update_nav_menu_item( $menu_id, 0, array( 'menu-item-title' => '首页', 'menu-item-url' => home_url( '/' ), 'menu-item-status' => 'publish' ) );
-wp_update_nav_menu_item( $menu_id, 0, array( 'menu-item-title' => '实践', 'menu-item-object' => 'category', 'menu-item-object-id' => $practice['term_id'], 'menu-item-type' => 'taxonomy', 'menu-item-status' => 'publish' ) );
+$quietype_primary_menu_id = $quietype_test_menus['主导航'] ?? wp_create_nav_menu( '主导航' );
+wp_update_nav_menu_item( $quietype_primary_menu_id, 0, array( 'menu-item-title' => '首页', 'menu-item-url' => home_url( '/' ), 'menu-item-status' => 'publish' ) );
+wp_update_nav_menu_item( $quietype_primary_menu_id, 0, array( 'menu-item-title' => '实践', 'menu-item-object' => 'category', 'menu-item-object-id' => $practice['term_id'], 'menu-item-type' => 'taxonomy', 'menu-item-status' => 'publish' ) );
 foreach ( array( $archive_id, $links_id, $about_id ) as $page_id ) {
-	wp_update_nav_menu_item( $menu_id, 0, array( 'menu-item-title' => get_the_title( $page_id ), 'menu-item-object' => 'page', 'menu-item-object-id' => $page_id, 'menu-item-type' => 'post_type', 'menu-item-status' => 'publish' ) );
+	wp_update_nav_menu_item( $quietype_primary_menu_id, 0, array( 'menu-item-title' => get_the_title( $page_id ), 'menu-item-object' => 'page', 'menu-item-object-id' => $page_id, 'menu-item-type' => 'post_type', 'menu-item-status' => 'publish' ) );
 }
-wp_update_nav_menu_item( $menu_id, 0, array( 'menu-item-title' => '阅读', 'menu-item-url' => get_post_type_archive_link( 'book' ), 'menu-item-type' => 'custom', 'menu-item-status' => 'publish' ) );
-set_theme_mod( 'nav_menu_locations', array( 'primary' => $menu_id ) );
+wp_update_nav_menu_item( $quietype_primary_menu_id, 0, array( 'menu-item-title' => '阅读', 'menu-item-url' => get_post_type_archive_link( 'book' ), 'menu-item-type' => 'custom', 'menu-item-status' => 'publish' ) );
+$quietype_prefooter_menu_id = $quietype_test_menus['页尾导航'] ?? wp_create_nav_menu( '页尾导航' );
+wp_update_nav_menu_item( $quietype_prefooter_menu_id, 0, array( 'menu-item-title' => '书籍', 'menu-item-url' => get_post_type_archive_link( 'book' ), 'menu-item-type' => 'custom', 'menu-item-status' => 'publish' ) );
+foreach ( array( '归档' => $archive_id, '友链' => $links_id, '关于' => $about_id ) as $menu_title => $page_id ) {
+	wp_update_nav_menu_item( $quietype_prefooter_menu_id, 0, array( 'menu-item-title' => $menu_title, 'menu-item-url' => get_permalink( $page_id ), 'menu-item-type' => 'custom', 'menu-item-status' => 'publish' ) );
+}
+$quietype_theme_mods                       = get_option( 'theme_mods_quietype', array() );
+$quietype_theme_mods['nav_menu_locations'] = array(
+	'primary'   => (int) $quietype_primary_menu_id,
+	'prefooter' => (int) $quietype_prefooter_menu_id,
+);
+update_option( 'theme_mods_quietype', $quietype_theme_mods );
 
 wp_insert_comment(
 	array(
