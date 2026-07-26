@@ -55,7 +55,7 @@ function quietype_register_photos() {
 		'_quietype_photo_aperture'      => 'quietype_sanitize_photo_parameter',
 		'_quietype_photo_shutter_speed' => 'quietype_sanitize_photo_parameter',
 		'_quietype_photo_iso'           => 'quietype_sanitize_photo_iso',
-		'_quietype_photo_camera'        => 'sanitize_text_field',
+		'_quietype_photo_camera'        => 'quietype_sanitize_photo_camera',
 		'_quietype_photo_lens'          => 'sanitize_text_field',
 	);
 	foreach ( $meta_fields as $key => $sanitize_callback ) {
@@ -120,6 +120,15 @@ function quietype_sanitize_photo_iso( $value ) {
 	return $value >= 1 && $value <= 409600 ? (string) $value : '';
 }
 
+/** Keep phone-camera metadata at brand level while preserving dedicated camera names. */
+function quietype_sanitize_photo_camera( $value ) {
+	$value = sanitize_text_field( trim( (string) $value ) );
+	if ( preg_match( '/^(?:Xiaomi|Redmi|POCO)(?:\s|$)/iu', $value ) ) {
+		return 'Xiaomi';
+	}
+	return $value;
+}
+
 /** Return normalized photo data for the archive and administration screen. */
 function quietype_photo_data( $post_id = null ) {
 	$post_id       = $post_id ?: get_the_ID();
@@ -154,7 +163,7 @@ function quietype_photo_data( $post_id = null ) {
 		'aperture'      => quietype_sanitize_photo_parameter( get_post_meta( $post_id, '_quietype_photo_aperture', true ) ),
 		'shutter_speed' => quietype_sanitize_photo_parameter( get_post_meta( $post_id, '_quietype_photo_shutter_speed', true ) ),
 		'iso'           => quietype_sanitize_photo_iso( get_post_meta( $post_id, '_quietype_photo_iso', true ) ),
-		'camera'        => (string) get_post_meta( $post_id, '_quietype_photo_camera', true ),
+		'camera'        => quietype_sanitize_photo_camera( get_post_meta( $post_id, '_quietype_photo_camera', true ) ),
 		'lens'          => (string) get_post_meta( $post_id, '_quietype_photo_lens', true ),
 	);
 }
@@ -337,7 +346,7 @@ function quietype_save_photo_meta( $post_id, $post ) {
 		'_quietype_photo_aperture'      => array( 'quietype_photo_aperture', 'quietype_sanitize_photo_parameter' ),
 		'_quietype_photo_shutter_speed' => array( 'quietype_photo_shutter_speed', 'quietype_sanitize_photo_parameter' ),
 		'_quietype_photo_iso'           => array( 'quietype_photo_iso', 'quietype_sanitize_photo_iso' ),
-		'_quietype_photo_camera'        => array( 'quietype_photo_camera', 'sanitize_text_field' ),
+		'_quietype_photo_camera'        => array( 'quietype_photo_camera', 'quietype_sanitize_photo_camera' ),
 		'_quietype_photo_lens'          => array( 'quietype_photo_lens', 'sanitize_text_field' ),
 	);
 	foreach ( $fields as $meta_key => $field ) {
@@ -466,7 +475,7 @@ function quietype_photo_metadata_from_binary( $binary ) {
 	$result['iso']           = quietype_sanitize_photo_iso( $sub['ISOSpeedRatings'] ?? $sub['PhotographicSensitivity'] ?? '' );
 	$make                    = trim( (string) ( $ifd0['Make'] ?? '' ) );
 	$model                   = trim( (string) ( $ifd0['Model'] ?? '' ) );
-	$result['camera']        = sanitize_text_field( $make && 0 !== stripos( $model, $make ) ? trim( $make . ' ' . $model ) : $model );
+	$result['camera']        = quietype_sanitize_photo_camera( $make && 0 !== stripos( $model, $make ) ? trim( $make . ' ' . $model ) : $model );
 	$result['lens']          = sanitize_text_field( $sub['LensModel'] ?? '' );
 	return $result;
 }

@@ -9,6 +9,7 @@ $photo_data    = quietype_photo_data();
 $photo_sources = quietype_photo_image_sources( $photo_data );
 $photo_index   = absint( get_query_var( 'quietype_photo_index', 0 ) );
 $year_count    = absint( get_query_var( 'quietype_photo_year_count', 0 ) );
+$is_deferred   = (bool) get_query_var( 'quietype_photo_deferred', false );
 $ratio         = $photo_data['width'] && $photo_data['height'] ? $photo_data['width'] / $photo_data['height'] : 1.5;
 $layout        = 'photo-card--standard';
 $desktop_width = 600;
@@ -44,7 +45,7 @@ if ( $photo_data['location'] ) {
 	<a class="photo-frame" href="<?php echo esc_url( $photo_sources['lightbox_url'] ); ?>" data-pswp-src="<?php echo esc_url( $photo_sources['lightbox_url'] ); ?>" data-pswp-width="<?php echo esc_attr( $photo_sources['lightbox_width'] ); ?>" data-pswp-height="<?php echo esc_attr( $photo_sources['lightbox_height'] ); ?>" data-photo-original="<?php echo esc_url( $photo_sources['original_url'] ); ?>" data-photo-title="<?php echo esc_attr( get_the_title() ); ?>" data-photo-meta="<?php echo esc_attr( implode( ' · ', $caption_meta ) ); ?>" data-photo-exif="<?php echo esc_attr( $exif_text ); ?>" data-photo-device="<?php echo esc_attr( $device_text ); ?>" data-photo-caption="<?php echo esc_attr( $caption ); ?>">
 		<?php
 		if ( $photo_data['attachment_id'] && ! $photo_data['is_external'] ) {
-			echo wp_get_attachment_image(
+			$image_markup = wp_get_attachment_image(
 				$photo_data['attachment_id'],
 				'quietype-photo-grid',
 				false,
@@ -54,10 +55,32 @@ if ( $photo_data['location'] ) {
 					'decoding' => 'async',
 					'sizes'    => $image_sizes,
 				)
-			); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Core generates escaped image markup.
+			);
+			if ( $is_deferred && class_exists( 'WP_HTML_Tag_Processor' ) ) {
+				$fallback_markup = $image_markup;
+				$processor       = new WP_HTML_Tag_Processor( $image_markup );
+				if ( $processor->next_tag( 'img' ) ) {
+					foreach ( array( 'src', 'srcset' ) as $attribute ) {
+						$value = $processor->get_attribute( $attribute );
+						if ( $value ) {
+							$processor->set_attribute( 'data-' . $attribute, $value );
+							$processor->remove_attribute( $attribute );
+						}
+					}
+					$processor->set_attribute( 'data-photo-deferred', 'true' );
+					$image_markup = $processor->get_updated_html();
+				}
+				echo $image_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Core markup modified by the HTML processor.
+				?><noscript><?php echo $fallback_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Core generates escaped image markup. ?></noscript><?php
+			} else {
+				echo $image_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Core generates escaped image markup.
+			}
 		} else {
 			?>
-			<img src="<?php echo esc_url( $photo_sources['grid_url'] ); ?>" alt="<?php echo esc_attr( $alt ); ?>" width="<?php echo esc_attr( $photo_data['width'] ?: 1600 ); ?>" height="<?php echo esc_attr( $photo_data['height'] ?: 1067 ); ?>" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+			<img <?php echo $is_deferred ? 'data-src' : 'src'; ?>="<?php echo esc_url( $photo_sources['grid_url'] ); ?>"<?php echo $is_deferred ? ' data-photo-deferred="true"' : ''; ?> alt="<?php echo esc_attr( $alt ); ?>" width="<?php echo esc_attr( $photo_data['width'] ?: 1600 ); ?>" height="<?php echo esc_attr( $photo_data['height'] ?: 1067 ); ?>" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+			<?php if ( $is_deferred ) : ?>
+				<noscript><img src="<?php echo esc_url( $photo_sources['grid_url'] ); ?>" alt="<?php echo esc_attr( $alt ); ?>" width="<?php echo esc_attr( $photo_data['width'] ?: 1600 ); ?>" height="<?php echo esc_attr( $photo_data['height'] ?: 1067 ); ?>" loading="lazy" decoding="async" referrerpolicy="no-referrer"></noscript>
+			<?php endif; ?>
 			<?php
 		}
 		?>

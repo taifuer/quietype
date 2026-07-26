@@ -28,6 +28,9 @@ All notable changes to Quietype will be documented in this file.
 - Normalized reading dates, states, and personal stars at 12px while tightening the vertical rhythm between book-card metadata and notes.
 - Balanced incomplete mobile year-index rows with cell-owned borders and tightened the separators inside compact reading records.
 - Purged the cached public bookshelf after book saves, status changes, and permanent deletions when a loopback server endpoint is configured.
+- Served Media Library book covers through a dedicated 252 × 372 derivative with responsive display hints, preserving the original uploads.
+- Kept the newest photo year open while collapsing older years, and deferred archived image requests until their sections approach the viewport.
+- Reduced Xiaomi, Redmi, and POCO camera metadata to the shared Xiaomi brand label on the public photo archive.
 
 ## [0.9.0] - 2026-07-22
 

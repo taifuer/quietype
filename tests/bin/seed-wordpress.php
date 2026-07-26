@@ -161,6 +161,7 @@ $books = array(
 		'excerpt' => '小时候读故事，后来读关系。简单的句子里藏着成年人容易忘记的事。',
 	),
 );
+$book_ids = array();
 foreach ( $books as $book ) {
 	$book_id = wp_insert_post(
 		array(
@@ -180,6 +181,35 @@ foreach ( $books as $book ) {
 		if ( '' !== $meta_value ) {
 			update_post_meta( $book_id, $meta_key, $meta_value );
 		}
+	}
+	$book_ids[] = $book_id;
+}
+
+// Give the final fixture a real featured image so the dedicated cover derivative is exercised.
+if ( $book_ids && function_exists( 'imagecreatetruecolor' ) ) {
+	$cover = imagecreatetruecolor( 504, 744 );
+	imagefilledrectangle( $cover, 0, 0, 503, 743, imagecolorallocate( $cover, 239, 232, 216 ) );
+	imagefilledrectangle( $cover, 42, 42, 461, 701, imagecolorallocate( $cover, 121, 88, 68 ) );
+	imagefilledrectangle( $cover, 48, 48, 455, 695, imagecolorallocate( $cover, 250, 249, 246 ) );
+	ob_start();
+	imagejpeg( $cover, null, 88 );
+	$cover_bytes = ob_get_clean();
+	imagedestroy( $cover );
+	$cover_upload = wp_upload_bits( 'quietype-test-book-cover.jpg', null, $cover_bytes );
+	if ( empty( $cover_upload['error'] ) ) {
+		add_image_size( 'quietype-book-cover', 252, 372, false );
+		$cover_attachment_id = wp_insert_attachment(
+			array(
+				'post_mime_type' => 'image/jpeg',
+				'post_status'    => 'inherit',
+				'post_title'     => 'Quietype test book cover',
+			),
+			$cover_upload['file'],
+			end( $book_ids )
+		);
+		require_once ABSPATH . 'wp-admin/includes/image.php';
+		wp_update_attachment_metadata( $cover_attachment_id, wp_generate_attachment_metadata( $cover_attachment_id, $cover_upload['file'] ) );
+		set_post_thumbnail( end( $book_ids ), $cover_attachment_id );
 	}
 }
 
@@ -213,6 +243,7 @@ foreach ( $photos as $index => $photo ) {
 		'_quietype_photo_aperture'      => $photo[6],
 		'_quietype_photo_shutter_speed' => $photo[7],
 		'_quietype_photo_iso'           => $photo[8],
+		'_quietype_photo_camera'        => 0 === $index ? 'Xiaomi 14 Pro' : '',
 	) as $meta_key => $meta_value ) {
 		if ( '' !== $meta_value ) {
 			update_post_meta( $photo_id, $meta_key, $meta_value );

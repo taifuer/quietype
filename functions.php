@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'QUIETYPE_VERSION', '0.10.4' );
+define( 'QUIETYPE_VERSION', '0.10.6' );
 
 require_once get_template_directory() . '/inc/admin-settings.php';
 require_once get_template_directory() . '/inc/login-security.php';
@@ -28,6 +28,7 @@ function quietype_setup() {
 	add_theme_support( 'title-tag' );
 	add_theme_support( 'automatic-feed-links' );
 	add_theme_support( 'post-thumbnails' );
+	add_image_size( 'quietype-book-cover', 252, 372, false );
 	add_image_size( 'quietype-photo-grid', 1280, 1280, false );
 	add_image_size( 'quietype-photo-lightbox', 2560, 2560, false );
 	add_theme_support( 'responsive-embeds' );
@@ -71,8 +72,13 @@ function quietype_assets() {
 			)
 		);
 	}
+	$lightbox_dependencies = array();
+	if ( is_post_type_archive( 'photo' ) ) {
+		wp_enqueue_script( 'quietype-photos', get_template_directory_uri() . '/assets/js/photos.js', array(), quietype_asset_version( 'assets/js/photos.js' ), true );
+		$lightbox_dependencies[] = 'quietype-photos';
+	}
 	if ( $has_lightbox ) {
-		wp_enqueue_script( 'quietype-lightbox', get_template_directory_uri() . '/assets/js/lightbox.js', array(), quietype_asset_version( 'assets/js/lightbox.js' ), true );
+		wp_enqueue_script( 'quietype-lightbox', get_template_directory_uri() . '/assets/js/lightbox.js', $lightbox_dependencies, quietype_asset_version( 'assets/js/lightbox.js' ), true );
 	}
 }
 add_action( 'wp_enqueue_scripts', 'quietype_assets', 20 );

@@ -4,7 +4,7 @@ Theme URI: https://github.com/taifuer/quietype
 Author: taifu
 Author URI: https://github.com/taifuer
 Description: A quiet WordPress theme for thoughtful reading, designed for Chinese long-form and technical writing.
-Version: 0.10.4
+Version: 0.10.6
 Requires at least: 6.4
 Requires PHP: 8.0
 License: GNU General Public License v2 or later
@@ -356,7 +356,16 @@ figure { margin: 0; }
 .photo-year__heading { position: sticky; top: 102px; align-self: start; }
 .photo-year__heading h2 { margin: 0; font: 520 34px/1 var(--serif); letter-spacing: -.02em; }
 .photo-year__heading p { margin: 10px 0 0; color: var(--muted); font-size: 13px; }
+.photo-year__toggle { display: inline-flex; align-items: center; gap: 10px; padding: 2px 0; border: 0; background: transparent; color: inherit; font: inherit; letter-spacing: inherit; cursor: pointer; }
+.photo-year__toggle i { width: 8px; height: 8px; border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); transform: translateY(-2px) rotate(45deg); transition: transform .2s ease; }
+.photo-year__toggle[aria-expanded="true"] i { transform: translateY(2px) rotate(225deg); }
+.photo-year__toggle:hover { color: var(--accent); }
+.photo-year__toggle:focus-visible { border-radius: 2px; outline: 2px solid var(--accent); outline-offset: 5px; }
 .photo-grid { display: grid; grid-auto-flow: dense; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 28px 10px; min-width: 0; }
+html.js .photo-year[data-expanded="false"] { display: block; padding: 20px 0; }
+html.js .photo-year[data-expanded="false"] .photo-year__heading { position: static; display: flex; align-items: baseline; justify-content: space-between; }
+html.js .photo-year[data-expanded="false"] .photo-year__heading p { margin: 0; }
+html.js .photo-year[data-expanded="false"] .photo-grid { display: none; }
 .photo-card { min-width: 0; margin: 0; grid-column: span 6; scroll-margin-top: 88px; }
 .photo-card--wide { grid-column: span 8; }
 .photo-card--narrow, .photo-card--square { grid-column: span 4; }
@@ -366,6 +375,8 @@ figure { margin: 0; }
 .photo-card--square .photo-frame { aspect-ratio: 1; }
 .photo-frame::after { position: absolute; inset: 0; border: 1px solid rgba(255, 255, 255, .12); pointer-events: none; content: ""; }
 .photo-frame img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .35s ease, opacity .2s ease; }
+.js .photo-frame img[data-photo-deferred]:not(.is-photo-loaded) { opacity: 0; }
+html:not(.js) .photo-frame img[data-photo-deferred] { display: none; }
 .photo-frame:hover img { transform: scale(1.012); }
 .photo-caption { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-top: 9px; }
 .photo-caption strong { overflow: hidden; color: var(--text-soft); font: 560 15px/1.45 var(--serif); text-overflow: ellipsis; white-space: nowrap; }
@@ -694,6 +705,7 @@ figure { margin: 0; }
 	.photo-year__heading { position: static; display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 22px; }
 	.photo-year__heading h2 { font-size: 29px; }
 	.photo-year__heading p { margin: 0; }
+	html.js .photo-year[data-expanded="false"] { padding: 18px 0; }
 	.photo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 8px; }
 	.photo-card, .photo-card--wide, .photo-card--narrow, .photo-card--square { grid-column: span 1; }
 	.photo-grid--odd .photo-card--lead { grid-column: 1 / -1; }

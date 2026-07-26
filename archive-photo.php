@@ -46,18 +46,25 @@ if ( $year_count > 4 && 0 !== $year_count % 3 ) {
 	<?php if ( $photos_by_year ) : ?>
 		<nav class="<?php echo esc_attr( implode( ' ', $year_index_classes ) ); ?>" aria-label="按年份查看">
 			<?php foreach ( $photos_by_year as $year => $photos ) : ?>
-				<a href="#photo-year-<?php echo esc_attr( $year ); ?>"><strong><?php echo esc_html( $year ); ?></strong><span><?php echo esc_html( count( $photos ) ); ?> 张</span></a>
+				<?php $is_latest_year = $year === $years[0]; ?>
+				<a href="#photo-year-<?php echo esc_attr( $year ); ?>" aria-controls="photo-grid-<?php echo esc_attr( $year ); ?>" aria-expanded="<?php echo $is_latest_year ? 'true' : 'false'; ?>"><strong><?php echo esc_html( $year ); ?></strong><span><?php echo esc_html( count( $photos ) ); ?> 张</span></a>
 			<?php endforeach; ?>
 		</nav>
 
 		<?php foreach ( $photos_by_year as $year => $photos ) : ?>
+			<?php $is_latest_year = $year === $years[0]; ?>
 			<?php set_query_var( 'quietype_photo_year_count', count( $photos ) ); ?>
-			<section class="photo-year" id="photo-year-<?php echo esc_attr( $year ); ?>" aria-labelledby="photo-year-title-<?php echo esc_attr( $year ); ?>">
+			<?php set_query_var( 'quietype_photo_deferred', true ); ?>
+			<section class="photo-year" id="photo-year-<?php echo esc_attr( $year ); ?>" aria-labelledby="photo-year-title-<?php echo esc_attr( $year ); ?>" data-expanded="<?php echo $is_latest_year ? 'true' : 'false'; ?>">
 				<header class="photo-year__heading">
-					<h2 id="photo-year-title-<?php echo esc_attr( $year ); ?>"><?php echo esc_html( $year ); ?></h2>
+					<h2 id="photo-year-title-<?php echo esc_attr( $year ); ?>">
+						<button class="photo-year__toggle" type="button" aria-expanded="<?php echo $is_latest_year ? 'true' : 'false'; ?>" aria-controls="photo-grid-<?php echo esc_attr( $year ); ?>" aria-label="<?php echo esc_attr( ( $is_latest_year ? '收起 ' : '展开 ' ) . $year . ' 年照片' ); ?>">
+							<span><?php echo esc_html( $year ); ?></span><i aria-hidden="true"></i>
+						</button>
+					</h2>
 					<p><?php echo esc_html( count( $photos ) ); ?> 张</p>
 				</header>
-				<div class="photo-grid photo-grid--<?php echo 0 === count( $photos ) % 2 ? 'even' : 'odd'; ?>">
+				<div class="photo-grid photo-grid--<?php echo 0 === count( $photos ) % 2 ? 'even' : 'odd'; ?>" id="photo-grid-<?php echo esc_attr( $year ); ?>">
 					<?php foreach ( $photos as $photo_index => $post ) : // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited ?>
 						<?php setup_postdata( $post ); ?>
 						<?php set_query_var( 'quietype_photo_index', $photo_index ); ?>
@@ -66,6 +73,7 @@ if ( $year_count > 4 && 0 !== $year_count % 3 ) {
 				</div>
 			</section>
 		<?php endforeach; ?>
+		<?php set_query_var( 'quietype_photo_deferred', false ); ?>
 		<?php wp_reset_postdata(); ?>
 	<?php else : ?>
 		<p class="empty-state">这里暂时还没有照片。</p>

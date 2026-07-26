@@ -37,8 +37,10 @@ test.describe('public pages', () => {
 
 test('photo archive groups external images and keeps details in the lightbox', async ({ page }) => {
   const originalRequests = [];
+  const deferredRequests = [];
   page.on('request', (request) => {
     if (request.url().includes('photo-1-original.jpg')) originalRequests.push(request.url());
+    if (/photo-[4-6]\.jpg/.test(request.url())) deferredRequests.push(request.url());
   });
   await page.route('https://images.example.test/**', async (route) => {
     await route.fulfill({ status: 200, contentType: 'image/gif', body: Buffer.from('R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=', 'base64') });
@@ -51,12 +53,27 @@ test('photo archive groups external images and keeps details in the lightbox', a
   await expect(page.locator('.photo-year')).toHaveCount(3);
   await expect(page.locator('.photo-year__heading h2')).toHaveText(['2026', '2025', '2024']);
   await expect(page.locator('.photo-year-index')).toHaveClass(/photo-year-index--count-3/);
+  await expect(page.locator('.photo-year').nth(0)).toHaveAttribute('data-expanded', 'true');
+  await expect(page.locator('.photo-year').nth(1)).toHaveAttribute('data-expanded', 'false');
+  await expect(page.locator('.photo-year').nth(2)).toHaveAttribute('data-expanded', 'false');
+  await expect(page.locator('.photo-grid').first()).toBeVisible();
+  await expect(page.locator('.photo-grid').nth(1)).toBeHidden();
+  await expect(page.locator('.photo-year').nth(1).locator('img').first()).not.toHaveAttribute('src');
+  await expect(page.locator('.photo-year').nth(1).locator('img').first()).toHaveAttribute('data-src', 'https://images.example.test/photo-4.jpg');
+  expect(deferredRequests).toEqual([]);
   await expect(page.locator('.photo-frame').first()).toHaveAttribute('data-photo-exif', '35mm · f/4 · 1/320s · ISO 160');
+  await expect(page.locator('.photo-frame').first()).toHaveAttribute('data-photo-device', 'Xiaomi');
   await expect(page.locator('.photo-frame').first()).toHaveAttribute('data-photo-meta', '安徽 · 宏村 · 2026年7月');
   await expect(page.locator('.photo-caption small').first()).toHaveText('安徽 · 宏村 · 2026年7月');
   await expect(page.locator('.photo-frame').first()).toHaveAttribute('data-photo-original', 'https://images.example.test/photo-1-original.jpg');
   await expect(page.locator('.photo-frame img').first()).toHaveAttribute('referrerpolicy', 'no-referrer');
   expect(originalRequests).toEqual([]);
+
+  await page.locator('.photo-year').nth(1).locator('.photo-year__toggle').click();
+  await expect(page.locator('.photo-year').nth(1)).toHaveAttribute('data-expanded', 'true');
+  await expect(page.locator('.photo-grid').nth(1)).toBeVisible();
+  await expect(page.locator('.photo-year').nth(1).locator('img').first()).toHaveAttribute('src', 'https://images.example.test/photo-4.jpg');
+  await expect.poll(() => deferredRequests.length).toBe(2);
 
   await page.locator('.photo-frame img').first().click();
   await expect(page.locator('.pswp')).toBeVisible();
@@ -75,6 +92,17 @@ test('standalone photo records redirect to the archive', async ({ request }) => 
   const response = await request.get('/photos/quietype-photo-1/', { maxRedirects: 0 });
   expect(response.status()).toBe(301);
   expect(response.headers().location).toMatch(/\/photos\/?#photo-[0-9]+$/);
+});
+
+test('photo year deep links expand and hydrate archived images', async ({ page }) => {
+  await page.route('https://images.example.test/**', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'image/gif', body: Buffer.from('R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=', 'base64') });
+  });
+  await page.goto('/photos/#photo-year-2024');
+  const targetYear = page.locator('#photo-year-2024');
+  await expect(targetYear).toHaveAttribute('data-expanded', 'true');
+  await expect(targetYear.locator('.photo-grid')).toBeVisible();
+  await expect(targetYear.locator('img').first()).toHaveAttribute('src', 'https://images.example.test/photo-6.jpg');
 });
 
 test('full-resolution photo remains an explicit lightbox action', async ({ page }) => {
@@ -114,6 +142,12 @@ test('book archive groups compact reading records by year', async ({ page }) => 
   await expect(page.locator('.book-title-row h3 a').first()).toHaveAttribute('href', /^https:\/\/book\.douban\.com\/subject\/[0-9]+\/$/);
   await expect(page.locator('a.book-cover')).toHaveCount(0);
   await expect(page.locator('.book-cover').first()).toHaveJSProperty('tagName', 'DIV');
+	const localCover = page.locator('.book-cover img.attachment-quietype-book-cover');
+	await expect(localCover).toHaveCount(1);
+	await expect(localCover).toHaveAttribute('src', /quietype-test-book-cover-252x372\.jpg$/);
+	await expect(localCover).toHaveAttribute('sizes', /(?:auto, )?\(max-width: 720px\) 76px, 84px/);
+	await expect(localCover).toHaveAttribute('width', '252');
+	await expect(localCover).toHaveAttribute('height', '372');
   await expect(page.locator('.book-terms .post-category').first()).toBeVisible();
   await expect(page.locator('.book-terms .post-tag').first()).toContainText('#');
   await expect(page.locator('.book-cover__fallback').first()).toBeVisible();

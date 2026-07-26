@@ -18,7 +18,19 @@ $cover_fallback = '<span class="book-cover__fallback"><i>' . esc_html( mb_substr
 		<?php if ( $book_data['cover_url'] ) : ?>
 			<img src="<?php echo esc_url( $book_data['cover_url'] ); ?>" alt="《<?php echo esc_attr( get_the_title() ); ?>》封面" loading="lazy" decoding="async" referrerpolicy="no-referrer">
 		<?php elseif ( $has_cover ) : ?>
-			<?php the_post_thumbnail( 'medium', array( 'loading' => 'lazy', 'decoding' => 'async', 'alt' => '《' . get_the_title() . '》封面' ) ); ?>
+			<?php
+			echo wp_get_attachment_image(
+				get_post_thumbnail_id(),
+				'quietype-book-cover',
+				false,
+				array(
+					'loading'  => 'lazy',
+					'decoding' => 'async',
+					'alt'      => '《' . get_the_title() . '》封面',
+					'sizes'    => '(max-width: 720px) 76px, 84px',
+				)
+			); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- WordPress builds and escapes the image markup.
+			?>
 		<?php endif; ?>
 	</div>
 	<div class="book-body">
