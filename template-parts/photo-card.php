@@ -27,8 +27,11 @@ if ( 0 === $photo_index ) {
 }
 $mobile_width = 0 === $photo_index && 1 === $year_count % 2 ? 100 : 50;
 $image_sizes  = sprintf( '(max-width: 720px) %dvw, %dpx', $mobile_width, $desktop_width );
-$month       = substr( $photo_data['captured_date'], 5, 2 );
-$caption_meta = array_filter( array( $photo_data['location'], $month ? $month . ' 月' : '' ) );
+$captured_label = '';
+if ( preg_match( '/^(\d{4})-(\d{2})$/', $photo_data['captured_date'], $captured_parts ) ) {
+	$captured_label = sprintf( '%d年%d月', (int) $captured_parts[1], (int) $captured_parts[2] );
+}
+$caption_meta = array_filter( array( $photo_data['location'], $captured_label ) );
 $caption      = trim( wp_strip_all_tags( get_the_excerpt() ) );
 $exif_text    = quietype_photo_exif_text( $photo_data );
 $device_text  = implode( ' · ', array_filter( array( $photo_data['camera'], $photo_data['lens'] ) ) );

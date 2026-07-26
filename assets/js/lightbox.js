@@ -31,7 +31,22 @@ if (images.length) {
     bgOpacity: 0.92,
     wheelToZoom: true,
     zoom: false,
-    paddingFn: () => ({ top: 48, bottom: 48, left: 24, right: 24 }),
+    paddingFn: (viewportSize, itemData) => {
+      const isMobile = viewportSize.x <= 720;
+      const hasPhotoDetails = isMobile && Boolean(
+        itemData.photoCaption
+        || itemData.photoExif
+        || itemData.photoDevice
+        || itemData.photoOriginal
+      );
+
+      return {
+        top: isMobile ? 44 : 48,
+        bottom: hasPhotoDetails ? 138 : 48,
+        left: isMobile ? 12 : 24,
+        right: isMobile ? 12 : 24,
+      };
+    },
   });
 
   lightbox.addFilter('thumbEl', (thumb, data) => data.element || thumb);
@@ -84,7 +99,9 @@ if (images.length) {
           title.textContent = data.photoTitle || '';
           meta.textContent = data.photoMeta || '';
           caption.textContent = data.photoCaption || '';
+          caption.hidden = !data.photoCaption;
           details.textContent = detailParts.join('  ·  ');
+          details.hidden = !detailParts.length;
           original.href = data.photoOriginal || '';
           original.hidden = !data.photoOriginal;
           element.hidden = !data.photoTitle && !data.photoMeta && !data.photoCaption && !detailParts.length && !data.photoOriginal;

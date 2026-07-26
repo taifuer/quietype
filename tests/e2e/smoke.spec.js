@@ -52,6 +52,8 @@ test('photo archive groups external images and keeps details in the lightbox', a
   await expect(page.locator('.photo-year__heading h2')).toHaveText(['2026', '2025', '2024']);
   await expect(page.locator('.photo-year-index')).toHaveClass(/photo-year-index--count-3/);
   await expect(page.locator('.photo-frame').first()).toHaveAttribute('data-photo-exif', '35mm · f/4 · 1/320s · ISO 160');
+  await expect(page.locator('.photo-frame').first()).toHaveAttribute('data-photo-meta', '安徽 · 宏村 · 2026年7月');
+  await expect(page.locator('.photo-caption small').first()).toHaveText('安徽 · 宏村 · 2026年7月');
   await expect(page.locator('.photo-frame').first()).toHaveAttribute('data-photo-original', 'https://images.example.test/photo-1-original.jpg');
   await expect(page.locator('.photo-frame img').first()).toHaveAttribute('referrerpolicy', 'no-referrer');
   expect(originalRequests).toEqual([]);
@@ -60,6 +62,8 @@ test('photo archive groups external images and keeps details in the lightbox', a
   await expect(page.locator('.pswp')).toBeVisible();
   await expect(page.locator('.pswp__quietype-caption')).toContainText('雨后屋檐');
   await expect(page.locator('.pswp__quietype-caption')).toContainText('35mm · f/4 · 1/320s · ISO 160');
+  await expect(page.locator('.pswp__quietype-caption p')).toBeVisible();
+  await expect(page.locator('.pswp__quietype-caption small')).toBeVisible();
   await expect(page.locator('.pswp__quietype-caption a')).toHaveAttribute('href', 'https://images.example.test/photo-1-original.jpg');
   expect(originalRequests).toEqual([]);
 });
