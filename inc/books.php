@@ -515,6 +515,61 @@ function quietype_save_book_meta( $post_id, $post ) {
 }
 add_action( 'save_post_book', 'quietype_save_book_meta', 10, 2 );
 
+/** Schedule one archive-cache purge after every book mutation in the request. */
+function quietype_schedule_book_archive_cache_purge( $post_id, $post = null ) {
+	if ( ! $post instanceof WP_Post ) {
+		$post = get_post( $post_id );
+	}
+	if ( ! $post instanceof WP_Post || 'book' !== $post->post_type || wp_is_post_revision( $post_id ) ) {
+		return;
+	}
+	static $scheduled = false;
+	if ( $scheduled ) {
+		return;
+	}
+	$scheduled = true;
+	add_action( 'shutdown', 'quietype_purge_book_archive_cache', PHP_INT_MAX );
+}
+add_action( 'save_post_book', 'quietype_schedule_book_archive_cache_purge', 100, 2 );
+add_action( 'deleted_post', 'quietype_schedule_book_archive_cache_purge', 10, 2 );
+
+/** Purge the public book archive through an optional, loopback-only server endpoint. */
+function quietype_purge_book_archive_cache() {
+	$endpoint = defined( 'QUIETYPE_CACHE_PURGE_ENDPOINT' ) ? (string) QUIETYPE_CACHE_PURGE_ENDPOINT : '';
+	$endpoint = (string) apply_filters( 'quietype_book_archive_cache_purge_endpoint', $endpoint );
+	$endpoint = esc_url_raw( $endpoint );
+	if ( ! $endpoint ) {
+		return;
+	}
+	$host    = (string) wp_parse_url( home_url( '/' ), PHP_URL_HOST );
+	$headers = array();
+	if ( $host ) {
+		$headers['Host'] = $host;
+	}
+	$response = wp_remote_request(
+		$endpoint,
+		array(
+			'method'      => 'PURGE',
+			'timeout'     => 2,
+			'redirection' => 0,
+			'blocking'    => true,
+			'headers'     => $headers,
+			'user-agent'  => 'Quietype/' . QUIETYPE_VERSION . '; ' . home_url( '/' ),
+		)
+	);
+	if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG ) {
+		return;
+	}
+	if ( is_wp_error( $response ) ) {
+		error_log( 'Quietype book cache purge failed: ' . $response->get_error_message() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+		return;
+	}
+	$status = (int) wp_remote_retrieve_response_code( $response );
+	if ( ! in_array( $status, array( 200, 204, 404 ), true ) ) {
+		error_log( 'Quietype book cache purge returned HTTP ' . $status . '.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+	}
+}
+
 /** Give programmatically inserted books a stable reading date. */
 function quietype_ensure_book_defaults( $post_id, $post ) {
 	if ( ! $post instanceof WP_Post || 'book' !== $post->post_type || wp_is_post_revision( $post_id ) ) {

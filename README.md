@@ -117,6 +117,8 @@ Quietype 会检查当前正文，只在确实存在代码、公式、图表或�
 
 主题不加载网络字体，PhotoSwipe 随主题本地分发，正文相关资源按内容条件保留。图片支持原生懒加载、远程尺寸缓存和替代文字发布检查，减少布局偏移与无效请求。
 
+使用 Nginx FastCGI 等整页缓存时，可以在 Web 服务器配置一个仅允许本机访问、用于清理 `/books` 的 PURGE 入口，再在 `wp-config.php` 中定义 `QUIETYPE_CACHE_PURGE_ENDPOINT`。Quietype 会在书籍保存、状态变化或永久删除后的请求末尾调用一次该入口；未定义常量时不会发起额外请求。缓存清理失败不会阻止内容保存，服务器原有 TTL 仍作为兜底。
+
 评论头像默认将 WordPress 生成的 Gravatar 地址替换为 `https://gravatar.loli.net/avatar/`。可在“外观 → Quietype 设置 → 访问”中修改，留空则使用 WordPress 原始地址；开发者也可以通过过滤器覆盖：
 
 ```php

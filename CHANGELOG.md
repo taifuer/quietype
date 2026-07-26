@@ -27,6 +27,7 @@ All notable changes to Quietype will be documented in this file.
 - Kept Douban scores adjacent to each personal reading record instead of isolating them at the card edge.
 - Normalized reading dates, states, and personal stars at 12px while tightening the vertical rhythm between book-card metadata and notes.
 - Balanced incomplete mobile year-index rows and tightened the separators inside compact reading records.
+- Purged the cached public bookshelf after book saves, status changes, and permanent deletions when a loopback server endpoint is configured.
 
 ## [0.9.0] - 2026-07-22
 
