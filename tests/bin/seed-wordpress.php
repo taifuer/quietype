@@ -154,7 +154,7 @@ $books = array(
 		'excerpt' => '宏大设定之外，最耐看的还是人在极端尺度与漫长时间面前的选择。',
 	),
 	array(
-		'title' => '小王子', 'slug' => 'the-little-prince', 'authors' => '圣-埃克苏佩里', 'publisher' => '人民文学出版社', 'year' => '2003', 'read_date' => '2024-04-19', 'status' => 'read', 'rating' => '4', 'douban' => '9.1', 'douban_id' => '1084336', 'category' => 'fiction', 'tags' => array( '成长', '重读' ),
+		'title' => '小王子', 'slug' => 'the-little-prince', 'authors' => '圣-埃克苏佩里', 'publisher' => '人民文学出版社', 'year' => '2003', 'read_date' => '2023-04-19', 'status' => 'read', 'rating' => '4', 'douban' => '9.1', 'douban_id' => '1084336', 'category' => 'fiction', 'tags' => array( '成长', '重读' ),
 		'excerpt' => '小时候读故事，后来读关系。简单的句子里藏着成年人容易忘记的事。',
 	),
 );

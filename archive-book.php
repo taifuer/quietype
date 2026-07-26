@@ -19,6 +19,11 @@ while ( have_posts() ) {
 krsort( $books_by_year, SORT_NUMERIC );
 $years      = array_keys( $books_by_year );
 $book_count = array_sum( array_map( 'count', $books_by_year ) );
+$year_count = count( $years );
+$year_index_classes = array( 'book-year-index', 'book-year-index--count-' . $year_count );
+if ( $year_count > 4 && 0 !== $year_count % 3 ) {
+	$year_index_classes[] = 'book-year-index--remainder-' . ( $year_count % 3 );
+}
 ?>
 <section class="books-page section-wrap">
 	<header class="books-hero">
@@ -38,7 +43,7 @@ $book_count = array_sum( array_map( 'count', $books_by_year ) );
 	</header>
 
 	<?php if ( $books_by_year ) : ?>
-		<nav class="book-year-index" aria-label="按年份查看">
+		<nav class="<?php echo esc_attr( implode( ' ', $year_index_classes ) ); ?>" aria-label="按年份查看">
 			<?php foreach ( $books_by_year as $year => $books ) : ?>
 				<a href="#year-<?php echo esc_attr( $year ); ?>"><strong><?php echo esc_html( $year ); ?></strong><span><?php echo esc_html( count( $books ) ); ?> 本</span></a>
 			<?php endforeach; ?>

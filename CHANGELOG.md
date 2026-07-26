@@ -26,6 +26,7 @@ All notable changes to Quietype will be documented in this file.
 - Added optional HTTPS book-cover URLs, including `pic.taifua.com`, with priority over featured images and the existing text fallback.
 - Kept Douban scores adjacent to each personal reading record instead of isolating them at the card edge.
 - Normalized reading dates, states, and personal stars at 12px while tightening the vertical rhythm between book-card metadata and notes.
+- Balanced incomplete mobile year-index rows and tightened the separators inside compact reading records.
 
 ## [0.9.0] - 2026-07-22
 

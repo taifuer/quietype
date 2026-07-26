@@ -36,8 +36,9 @@ test('book archive groups compact reading records by year', async ({ page }) => 
   await expect(page.locator('.books-hero h1')).toHaveText('但是还有书籍');
   await expect(page.locator('.books-hero .eyebrow')).toHaveText('BOOKS');
   await expect(page.locator('.book-item')).toHaveCount(8);
-  await expect(page.locator('.book-year-shelf')).toHaveCount(3);
-  await expect(page.locator('.book-year-heading h2')).toHaveText(['2026', '2025', '2024']);
+  await expect(page.locator('.book-year-shelf')).toHaveCount(4);
+  await expect(page.locator('.book-year-heading h2')).toHaveText(['2026', '2025', '2024', '2023']);
+  await expect(page.locator('.book-year-index')).toHaveClass(/book-year-index--count-4/);
   await expect(page.locator('.book-title-row h3 a').first()).toHaveAttribute('href', /^https:\/\/book\.douban\.com\/subject\/[0-9]+\/$/);
   await expect(page.locator('a.book-cover')).toHaveCount(0);
   await expect(page.locator('.book-cover').first()).toHaveJSProperty('tagName', 'DIV');
@@ -53,6 +54,17 @@ test('book archive groups compact reading records by year', async ({ page }) => 
   const firstNote = page.locator('.book-note').first();
   expect(await firstEvaluation.evaluate((element) => element.compareDocumentPosition(document.querySelector('.book-note')) & Node.DOCUMENT_POSITION_FOLLOWING)).toBeTruthy();
   expect((await firstEvaluation.boundingBox()).y).toBeLessThan((await firstNote.boundingBox()).y);
+
+  if (page.viewportSize().width <= 720) {
+		const yearBoxes = await page.locator('.book-year-index a').evaluateAll((links) => links.map((link) => {
+			const box = link.getBoundingClientRect();
+			return { x: Math.round(box.x), y: Math.round(box.y), width: Math.round(box.width) };
+		}));
+		expect(new Set(yearBoxes.map((box) => box.width)).size).toBe(1);
+		expect(yearBoxes[0].x).toBe(yearBoxes[2].x);
+		expect(yearBoxes[1].x).toBe(yearBoxes[3].x);
+		expect(yearBoxes[2].y).toBeGreaterThan(yearBoxes[0].y);
+  }
 });
 
 test('standalone book routes defer to the confirmed Douban source', async ({ request }) => {
