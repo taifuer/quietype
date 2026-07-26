@@ -60,6 +60,9 @@ test('photo archive groups external images and keeps details in the lightbox', a
 
   await page.locator('.photo-frame img').first().click();
   await expect(page.locator('.pswp')).toBeVisible();
+  await expect(page.locator('.pswp__button--quietype-zoom')).toHaveCount(2);
+  await expect(page.locator('.pswp__button--quietype-zoom').first()).toHaveCSS('color', 'rgb(255, 255, 255)');
+  await expect(page.locator('.pswp__top-bar')).toHaveCSS('background-image', /linear-gradient/);
   await expect(page.locator('.pswp__quietype-caption')).toContainText('雨后屋檐');
   await expect(page.locator('.pswp__quietype-caption')).toContainText('35mm · f/4 · 1/320s · ISO 160');
   await expect(page.locator('.pswp__quietype-caption p')).toBeVisible();
