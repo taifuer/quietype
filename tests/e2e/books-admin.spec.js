@@ -101,6 +101,12 @@ test('book list keeps only compact operational reading metadata', async ({ page 
   await expect(page.locator('th#date')).toHaveCount(0);
   const programmingPearls = page.locator('#the-list tr').filter({ hasText: '编程珠玑' });
   await expect(programmingPearls.locator('.column-quietype_book_reading')).toContainText('已读 · 2026.06');
+  const archiveLink = programmingPearls.locator('.row-actions .view a');
+  await expect(archiveLink).toHaveText('在书架中查看');
+  await expect(archiveLink).toHaveAttribute('href', /\/books\/?#book-[0-9]+$/);
+  await programmingPearls.locator('.row-title').click();
+  await expect(page.locator('#sample-permalink')).toHaveCount(0);
+  await expect(page.locator('#slugdiv')).toHaveCount(0);
 });
 
 test('revision controls describe posts, pages, and books', async ({ page }) => {

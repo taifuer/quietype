@@ -21,7 +21,8 @@ function quietype_register_books() {
 				'add_new_item'       => '添加书籍',
 				'edit_item'          => '编辑书籍',
 				'new_item'           => '新书籍',
-				'view_item'          => '查看豆瓣条目',
+				'view_item'          => '在书架中查看',
+				'view_items'         => '查看书架',
 				'search_items'       => '搜索书籍',
 				'not_found'          => '没有找到书籍',
 				'not_found_in_trash' => '回收站中没有书籍',
@@ -192,14 +193,8 @@ function quietype_redirect_legacy_book_routes() {
 		return;
 	}
 	$book = get_page_by_path( $slug, OBJECT, 'book' );
-	if ( $book instanceof WP_Post ) {
-		$data = quietype_book_data( $book->ID );
-		if ( $data['douban_url'] ) {
-			wp_redirect( $data['douban_url'], 301, 'Quietype' ); // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- URL is rebuilt from a validated numeric Douban ID.
-			exit;
-		}
-	}
-	wp_safe_redirect( get_post_type_archive_link( 'book' ), 301, 'Quietype' );
+	$url  = $book instanceof WP_Post && function_exists( 'quietype_archive_record_url' ) ? quietype_archive_record_url( $book ) : get_post_type_archive_link( 'book' );
+	wp_safe_redirect( $url, 301, 'Quietype' );
 	exit;
 }
 add_action( 'template_redirect', 'quietype_redirect_legacy_book_routes', 0 );
@@ -756,33 +751,13 @@ function quietype_order_book_archive( $query ) {
 }
 add_action( 'pre_get_posts', 'quietype_order_book_archive' );
 
-/** Use the confirmed source as the book's visible link instead of exposing a local detail URL. */
-function quietype_book_external_permalink( $url, $post ) {
-	if ( ! $post instanceof WP_Post || 'book' !== $post->post_type ) {
-		return $url;
-	}
-	$data = quietype_book_data( $post->ID );
-	return $data['douban_url'] ?: get_post_type_archive_link( 'book' );
-}
-add_filter( 'post_type_link', 'quietype_book_external_permalink', 10, 2 );
-
-/** The book editor does not need WordPress's local permalink preview. */
-function quietype_hide_book_sample_permalink( $html, $post_id ) {
-	return 'book' === get_post_type( $post_id ) ? '' : $html;
-}
-add_filter( 'get_sample_permalink_html', 'quietype_hide_book_sample_permalink', 10, 2 );
-
-/** Standalone book URLs deliberately resolve to the source rather than duplicate notes. */
+/** Standalone book URLs resolve to their place in the annual archive. */
 function quietype_redirect_single_book() {
 	if ( ! is_singular( 'book' ) ) {
 		return;
 	}
-	$data = quietype_book_data( get_queried_object_id() );
-	if ( $data['douban_url'] ) {
-		wp_redirect( $data['douban_url'], 302, 'Quietype' ); // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- URL is rebuilt from a validated numeric Douban ID.
-	} else {
-		wp_safe_redirect( get_post_type_archive_link( 'book' ), 302 );
-	}
+	$url = function_exists( 'quietype_archive_record_url' ) ? quietype_archive_record_url( get_queried_object_id() ) : get_post_type_archive_link( 'book' );
+	wp_safe_redirect( $url, 301, 'Quietype' );
 	exit;
 }
 add_action( 'template_redirect', 'quietype_redirect_single_book', 1 );

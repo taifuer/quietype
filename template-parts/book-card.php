@@ -12,7 +12,7 @@ $book_meta = array_filter( array( $book_data['authors'], $book_data['publisher']
 $has_cover = $book_data['cover_url'] || has_post_thumbnail();
 $cover_fallback = '<span class="book-cover__fallback"><i>' . esc_html( mb_substr( get_the_title(), 0, 4 ) ) . '</i><small>' . esc_html( $book_data['authors'] ?: get_bloginfo( 'name' ) ) . '</small></span>';
 ?>
-<article <?php post_class( 'book-item' ); ?>>
+<article id="book-<?php the_ID(); ?>" <?php post_class( 'book-item' ); ?>>
 	<div class="book-cover<?php echo $has_cover ? ' has-cover' : ''; ?>">
 		<?php echo $cover_fallback; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- assembled from escaped text only. ?>
 		<?php if ( $book_data['cover_url'] ) : ?>

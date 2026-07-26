@@ -1,13 +1,13 @@
 {
   "name": "quietype-quality",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "private": true,
   "description": "Automated regression checks for the Quietype WordPress theme.",
   "scripts": {
     "env:start": "bash tests/bin/test-env.sh start",
     "env:stop": "bash tests/bin/test-env.sh stop",
     "env:seed": "bash tests/bin/test-env.sh seed",
-    "test:js": "node --check assets/js/theme.js && node --check assets/js/admin-books.js && node --input-type=module --check < assets/js/lightbox.js",
+    "test:js": "node --check assets/js/theme.js && node --check assets/js/admin-books.js && node --check assets/js/admin-photos.js && node --input-type=module --check < assets/js/lightbox.js",
     "test:e2e": "playwright test",
     "test:e2e:update": "playwright test --update-snapshots",
     "test:performance": "lhci autorun"

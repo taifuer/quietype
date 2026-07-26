@@ -9,11 +9,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'QUIETYPE_VERSION', '0.9.0' );
+define( 'QUIETYPE_VERSION', '0.10.0' );
 
 require_once get_template_directory() . '/inc/admin-settings.php';
 require_once get_template_directory() . '/inc/login-security.php';
 require_once get_template_directory() . '/inc/books.php';
+require_once get_template_directory() . '/inc/photos.php';
+require_once get_template_directory() . '/inc/archive-records.php';
 require_once get_template_directory() . '/inc/seo.php';
 require_once get_template_directory() . '/inc/mail.php';
 require_once get_template_directory() . '/inc/content-performance.php';
@@ -48,7 +50,8 @@ function quietype_asset_version( $relative_path ) {
 function quietype_assets() {
 	$style_dependencies = array();
 	$features = quietype_content_features();
-	if ( is_singular() && $features['images'] ) {
+	$has_lightbox = ( is_singular() && $features['images'] ) || is_post_type_archive( 'photo' );
+	if ( $has_lightbox ) {
 		wp_enqueue_style( 'quietype-photoswipe', get_template_directory_uri() . '/assets/vendor/photoswipe/photoswipe.css', array(), '5.4.4' );
 		$style_dependencies[] = 'quietype-photoswipe';
 	}
@@ -66,7 +69,7 @@ function quietype_assets() {
 			)
 		);
 	}
-	if ( is_singular() && $features['images'] ) {
+	if ( $has_lightbox ) {
 		wp_enqueue_script( 'quietype-lightbox', get_template_directory_uri() . '/assets/js/lightbox.js', array(), quietype_asset_version( 'assets/js/lightbox.js' ), true );
 	}
 }
@@ -328,6 +331,7 @@ function quietype_menu_fallback() {
 	echo '<li><a href="' . esc_url( home_url( '/' ) ) . '">首页</a></li>';
 	echo '<li><a href="' . esc_url( home_url( '/articlearchive/' ) ) . '">归档</a></li>';
 	echo '<li><a href="' . esc_url( get_post_type_archive_link( 'book' ) ) . '">阅读</a></li>';
+	echo '<li><a href="' . esc_url( get_post_type_archive_link( 'photo' ) ) . '">照片</a></li>';
 	echo '<li><a href="' . esc_url( home_url( '/links/' ) ) . '">友链</a></li>';
 	echo '<li><a href="' . esc_url( home_url( '/about/' ) ) . '">关于</a></li>';
 	echo '</ul>';

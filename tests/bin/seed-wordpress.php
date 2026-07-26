@@ -24,10 +24,13 @@ if ( ! function_exists( 'quietype_register_books' ) ) {
 if ( ! post_type_exists( 'book' ) ) {
 	quietype_register_books();
 }
+if ( ! post_type_exists( 'photo' ) ) {
+	quietype_register_photos();
+}
 
 $existing_posts = get_posts(
 	array(
-		'post_type'      => array( 'post', 'page', 'book', 'attachment' ),
+		'post_type'      => array( 'post', 'page', 'book', 'photo', 'attachment' ),
 		'post_status'    => 'any',
 		'posts_per_page' => -1,
 		'fields'         => 'ids',
@@ -177,6 +180,32 @@ foreach ( $books as $book ) {
 		if ( '' !== $meta_value ) {
 			update_post_meta( $book_id, $meta_key, $meta_value );
 		}
+	}
+}
+
+$photos = array(
+	array( '雨后屋檐', '2026-07', '安徽 · 宏村', 1800, 1200, '35mm', 'f/4', '1/320s', '160' ),
+	array( '窗外', '2026-05', '京广线', 1200, 1500, '50mm', 'f/2.8', '1/500s', '200' ),
+	array( '水田', '2026-04', '云南 · 元阳', 1600, 1067, '28mm', 'f/5.6', '1/250s', '100' ),
+	array( '暮色归舟', '2025-11', '湖南 · 洞庭湖', 1800, 1125, '85mm', 'f/4', '1/400s', '320' ),
+	array( '雾林', '2025-09', '江西 · 武功山', 1200, 1500, '35mm', 'f/2.8', '1/160s', '400' ),
+	array( '林间公路', '2024-10', '川西', 1800, 1200, '24mm', 'f/8', '1/125s', '100' ),
+);
+foreach ( $photos as $index => $photo ) {
+	$photo_id = wp_insert_post(
+		array(
+			'post_type'    => 'photo',
+			'post_status'  => 'publish',
+			'post_title'   => $photo[0],
+			'post_name'    => 'quietype-photo-' . ( $index + 1 ),
+			'post_excerpt' => '在路上偶然停下的一刻。',
+			'post_date'    => '2026-07-01 10:00:00',
+		)
+	);
+	foreach ( array(
+		'_quietype_photo_image_url' => 'https://images.example.test/photo-' . ( $index + 1 ) . '.jpg', '_quietype_photo_captured_date' => $photo[1], '_quietype_photo_location' => $photo[2], '_quietype_photo_width' => $photo[3], '_quietype_photo_height' => $photo[4], '_quietype_photo_focal_length' => $photo[5], '_quietype_photo_aperture' => $photo[6], '_quietype_photo_shutter_speed' => $photo[7], '_quietype_photo_iso' => $photo[8],
+	) as $meta_key => $meta_value ) {
+		update_post_meta( $photo_id, $meta_key, $meta_value );
 	}
 }
 

@@ -4,6 +4,7 @@ const routes = [
   ['首页', '/'],
   ['文章', '/quietype-reading-test/'],
   ['书籍', '/books/'],
+  ['照片', '/photos/'],
   ['归档', '/archive/'],
   ['友链', '/links/'],
   ['关于', '/about/'],
@@ -20,6 +21,9 @@ test.describe('public pages', () => {
         const expectedMissingDocument = label === '404' && message.text().includes('status of 404');
         if (message.type() === 'error' && !expectedMissingDocument) browserErrors.push(message.text());
       });
+      await page.route('https://images.example.test/**', async (route) => {
+        await route.fulfill({ status: 200, contentType: 'image/gif', body: Buffer.from('R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=', 'base64') });
+      });
 
       const response = await page.goto(path, { waitUntil: 'networkidle' });
       expect(response, `${label} should return a response`).not.toBeNull();
@@ -29,6 +33,32 @@ test.describe('public pages', () => {
       expect(browserErrors).toEqual([]);
     });
   }
+});
+
+test('photo archive groups external images and keeps details in the lightbox', async ({ page }) => {
+  await page.route('https://images.example.test/**', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'image/gif', body: Buffer.from('R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=', 'base64') });
+  });
+  await page.goto('/photos/');
+  await expect(page.locator('.photos-hero h1')).toHaveText('照片');
+  await expect(page.locator('.photos-hero .eyebrow')).toHaveText('PHOTOS');
+  await expect(page.locator('.photo-card')).toHaveCount(6);
+  await expect(page.locator('.photo-year')).toHaveCount(3);
+  await expect(page.locator('.photo-year__heading h2')).toHaveText(['2026', '2025', '2024']);
+  await expect(page.locator('.photo-year-index')).toHaveClass(/photo-year-index--count-3/);
+  await expect(page.locator('.photo-frame').first()).toHaveAttribute('data-photo-exif', '35mm · f/4 · 1/320s · ISO 160');
+  await expect(page.locator('.photo-frame img').first()).toHaveAttribute('referrerpolicy', 'no-referrer');
+
+  await page.locator('.photo-frame img').first().click();
+  await expect(page.locator('.pswp')).toBeVisible();
+  await expect(page.locator('.pswp__quietype-caption')).toContainText('雨后屋檐');
+  await expect(page.locator('.pswp__quietype-caption')).toContainText('35mm · f/4 · 1/320s · ISO 160');
+});
+
+test('standalone photo records redirect to the archive', async ({ request }) => {
+  const response = await request.get('/photos/quietype-photo-1/', { maxRedirects: 0 });
+  expect(response.status()).toBe(301);
+  expect(response.headers().location).toMatch(/\/photos\/?#photo-[0-9]+$/);
 });
 
 test('book archive groups compact reading records by year', async ({ page }) => {
@@ -93,10 +123,10 @@ test('an incomplete mobile year row occupies only its real cells', async ({ page
   expect(layout.emptyCellIsLink).toBe(false);
 });
 
-test('standalone book routes defer to the confirmed Douban source', async ({ request }) => {
+test('standalone book routes return to the matching archive record', async ({ request }) => {
   const response = await request.get('/books/programming-pearls/', { maxRedirects: 0 });
-  expect(response.status()).toBe(302);
-  expect(response.headers().location).toBe('https://book.douban.com/subject/3227098/');
+  expect(response.status()).toBe(301);
+  expect(response.headers().location).toMatch(/\/books\/?#book-[0-9]+$/);
 });
 
 test('former reading routes redirect permanently', async ({ request }) => {
@@ -106,7 +136,7 @@ test('former reading routes redirect permanently', async ({ request }) => {
 
   const book = await request.get('/reading/programming-pearls/', { maxRedirects: 0 });
   expect(book.status()).toBe(301);
-  expect(book.headers().location).toBe('https://book.douban.com/subject/3227098/');
+  expect(book.headers().location).toMatch(/\/books\/?#book-[0-9]+$/);
 });
 
 test('pre-footer navigation stays separate from legal footer content', async ({ page }) => {
