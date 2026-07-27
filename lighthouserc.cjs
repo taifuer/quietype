@@ -26,8 +26,9 @@ module.exports = {
         'total-blocking-time': ['error', { maxNumericValue: 250, aggregationMethod: 'median' }],
         'resource-summary:font:count': ['error', { maxNumericValue: 0 }],
         'resource-summary:script:size': ['error', { maxNumericValue: 40000 }],
-        // Includes WordPress core block styles as well as the theme stylesheet.
-        'resource-summary:stylesheet:size': ['error', { maxNumericValue: 190000 }]
+        // Transfer size includes response overhead, WordPress core block styles,
+        // PhotoSwipe, and the theme stylesheet. Keep a small maintenance margin.
+        'resource-summary:stylesheet:size': ['error', { maxNumericValue: 195000 }]
       }
     },
     upload: {
