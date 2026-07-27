@@ -33,6 +33,8 @@ All notable changes to Quietype will be documented in this file.
 - Reduced Xiaomi, Redmi, and POCO camera metadata to the shared Xiaomi brand label on the public photo archive.
 - Decoupled PhotoSwipe slides from partially loaded native-lazy thumbnails so cached Edge sessions and adjacent navigation load reliably.
 - Made browser Back close an open lightbox before leaving the current page, including mobile return gestures.
+- Removed native lazy-loading markers from JavaScript-deferred archive images, reduced adjacent PhotoSwipe preloading, and retried one failed CDN request without cache.
+- Restored compact touch-friendly previous and next controls at the middle edges of mobile photos, following the existing UI visibility state.
 
 ## [0.9.0] - 2026-07-22
 

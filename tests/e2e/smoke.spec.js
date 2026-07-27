@@ -60,6 +60,7 @@ test('photo archive groups external images and keeps details in the lightbox', a
   await expect(page.locator('.photo-grid').nth(1)).toBeHidden();
   await expect(page.locator('.photo-year').nth(1).locator('img').first()).not.toHaveAttribute('src');
   await expect(page.locator('.photo-year').nth(1).locator('img').first()).toHaveAttribute('data-src', 'https://images.example.test/photo-4.jpg');
+  await expect(page.locator('.photo-year').nth(1).locator('img').first()).toHaveAttribute('loading', 'eager');
   expect(deferredRequests).toEqual([]);
   await expect(page.locator('.photo-frame').first()).toHaveAttribute('data-photo-exif', '35mm · f/4 · 1/320s · ISO 160');
   await expect(page.locator('.photo-frame').first()).toHaveAttribute('data-photo-device', 'Xiaomi');
@@ -137,6 +138,55 @@ test('photo lightbox loads deferred slides and browser Back closes it in place',
   await expect(page.locator('.pswp')).toBeHidden();
   await expect(page).toHaveURL(/\/photos\/$/);
   await expect.poll(() => page.evaluate(() => Boolean(history.state?.quietypeLightbox))).toBe(false);
+});
+
+test('photo lightbox retries one failed archive image without reusing its cache entry', async ({ page }) => {
+  const retryRequests = [];
+  await page.route('https://images.example.test/**', async (route) => {
+    const url = route.request().url();
+    if (url.includes('photo-4.jpg') && !url.includes('quietype_retry=')) {
+      await route.fulfill({ status: 503, contentType: 'text/plain', body: 'temporary image failure' });
+      return;
+    }
+    if (url.includes('photo-4.jpg') && url.includes('quietype_retry=')) retryRequests.push(url);
+    await route.fulfill({ status: 200, contentType: 'image/gif', body: Buffer.from('R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=', 'base64') });
+  });
+  await page.goto('/photos/');
+  await page.locator('.photo-frame img').first().click();
+  await expect(page.locator('.pswp')).toBeVisible();
+  await page.evaluate(() => window.pswp.goTo(3));
+  await expect(page.locator('.pswp__quietype-caption strong')).toHaveText('暮色归舟');
+  await expect.poll(() => retryRequests.length).toBe(1);
+  const activeImage = page.locator('.pswp__item[aria-hidden="false"] .pswp__img:not(.pswp__img--placeholder)');
+  await expect(activeImage).toHaveAttribute('src', /photo-4\.jpg\?quietype_retry=[0-9]+$/);
+  await expect.poll(() => activeImage.evaluate((image) => image.complete && image.naturalWidth > 0)).toBe(true);
+});
+
+test('mobile lightbox arrows share the standard control visibility state', async ({ page }) => {
+  test.skip(page.viewportSize().width > 720, 'Mobile-only lightbox controls.');
+  await page.route('https://images.example.test/**', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'image/gif', body: Buffer.from('R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=', 'base64') });
+  });
+  await page.goto('/photos/');
+  await page.locator('.photo-frame img').first().click();
+  await expect(page.locator('.pswp')).toBeVisible();
+  await expect.poll(() => page.evaluate(() => Boolean(window.pswp?.opener?.isOpen))).toBe(true);
+  const previous = page.locator('.pswp__button--arrow--prev');
+  const next = page.locator('.pswp__button--arrow--next');
+  await expect(previous).toBeVisible();
+  await expect(next).toBeVisible();
+  await expect(previous).toHaveCSS('width', '48px');
+  await expect(next).toHaveCSS('width', '48px');
+  await next.tap();
+  await expect(page.locator('.pswp__quietype-caption strong')).toHaveText('窗外');
+  await expect.poll(() => page.evaluate(() => !window.pswp?.mainScroll?.isShifted())).toBe(true);
+  await expect.poll(() => page.evaluate(() => window.pswp?.animations?.activeAnimations?.length || 0)).toBe(0);
+
+  const viewport = page.viewportSize();
+  await page.touchscreen.tap(viewport.width / 2, viewport.height / 2);
+  await expect(page.locator('.pswp')).not.toHaveClass(/pswp--ui-visible/);
+  await expect(previous).toHaveCSS('pointer-events', 'none');
+  await expect(next).toHaveCSS('pointer-events', 'none');
 });
 
 test('full-resolution photo remains an explicit lightbox action', async ({ page }) => {

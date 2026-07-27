@@ -5,9 +5,10 @@ const images = [...document.querySelectorAll('.article-content img:not(.emoji):n
 if (images.length) {
   const imageSource = (image) => {
     const link = image.closest('a');
+    const isPhotoArchive = Boolean(image.closest('.photo-frame'));
     const declaredSource = link?.dataset.pswpSrc;
     const linkedImage = link && /\.(?:avif|gif|jpe?g|png|webp)(?:[?#].*)?$/i.test(link.href);
-    const thumbnailReady = image.complete && image.naturalWidth > 0;
+    const thumbnailReady = !isPhotoArchive && image.complete && image.naturalWidth > 0;
     const thumbnailSource = thumbnailReady ? (image.currentSrc || image.src) : '';
     const width = Number(link?.dataset.pswpWidth) || image.naturalWidth || Number(image.getAttribute('width')) || image.clientWidth || 1200;
     const height = Number(link?.dataset.pswpHeight) || image.naturalHeight || Number(image.getAttribute('height')) || image.clientHeight || Math.round(width * 0.75);
@@ -25,6 +26,7 @@ if (images.length) {
       photoDevice: link?.dataset.photoDevice || '',
       photoCaption: link?.dataset.photoCaption || '',
       photoOriginal: link?.dataset.photoOriginal || '',
+      isPhotoArchive,
     };
   };
 
@@ -33,6 +35,17 @@ if (images.length) {
     bgOpacity: 0.92,
     wheelToZoom: true,
     zoom: false,
+    preload: [1, 1],
+    imageClickAction(point) {
+      if (this.gestures.supportsTouch) return;
+      const slide = this.currSlide;
+      if (slide?.isZoomable() && slide.zoomLevels.secondary !== slide.zoomLevels.initial) {
+        slide.toggleZoom(point);
+      } else if (this.options.clickToCloseNonZoomable) {
+        this.close();
+      }
+    },
+    tapAction: false,
     paddingFn: (viewportSize, itemData) => {
       const isMobile = viewportSize.x <= 720;
       const hasPhotoDetails = isMobile && Boolean(
@@ -56,6 +69,27 @@ if (images.length) {
   let closingFromHistory = false;
 
   lightbox.on('afterInit', () => {
+    const pswp = lightbox.pswp;
+    let touchStart = null;
+    const isControl = (target) => target instanceof Element && Boolean(target.closest('.pswp__button, .pswp__quietype-caption a'));
+    pswp.scrollWrap?.addEventListener('pointerdown', (event) => {
+      if (event.pointerType !== 'touch' || isControl(event.target)) return;
+      touchStart = { x: event.clientX, y: event.clientY, time: performance.now() };
+    }, true);
+    pswp.scrollWrap?.addEventListener('pointerup', (event) => {
+      if (!touchStart || event.pointerType !== 'touch' || isControl(event.target)) {
+        touchStart = null;
+        return;
+      }
+      const distance = Math.hypot(event.clientX - touchStart.x, event.clientY - touchStart.y);
+      const duration = performance.now() - touchStart.time;
+      touchStart = null;
+      if (distance <= 10 && duration <= 600) pswp.element?.classList.toggle('pswp--ui-visible');
+    }, true);
+    pswp.scrollWrap?.addEventListener('pointercancel', () => {
+      touchStart = null;
+    }, true);
+
     historyToken = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
     closingFromHistory = false;
     try {
@@ -91,6 +125,25 @@ if (images.length) {
   lightbox.on('destroy', () => {
     historyToken = '';
     closingFromHistory = false;
+  });
+
+  lightbox.on('contentLoadImage', ({ content }) => {
+    if (content.data.isPhotoArchive && content.element) {
+      content.element.referrerPolicy = 'no-referrer';
+    }
+  });
+
+  lightbox.on('loadError', ({ slide }) => {
+    if (!slide?.data?.isPhotoArchive || slide.data.quietypeRetried || !slide.data.src) return;
+    slide.data.quietypeRetried = true;
+    try {
+      const retryUrl = new URL(slide.data.src, window.location.href);
+      retryUrl.searchParams.set('quietype_retry', Date.now().toString());
+      slide.data.src = retryUrl.href;
+      requestAnimationFrame(() => lightbox.pswp?.refreshSlideContent(slide.index));
+    } catch (error) {
+      // Keep PhotoSwipe's native error state when the source is not a valid URL.
+    }
   });
 
   lightbox.addFilter('thumbEl', (thumb, data) => data.element || thumb);

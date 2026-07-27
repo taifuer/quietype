@@ -51,7 +51,7 @@ if ( $photo_data['location'] ) {
 				false,
 				array(
 					'alt'      => $alt,
-					'loading'  => 'lazy',
+					'loading'  => $is_deferred ? 'eager' : 'lazy',
 					'decoding' => 'async',
 					'sizes'    => $image_sizes,
 				)
@@ -77,7 +77,7 @@ if ( $photo_data['location'] ) {
 			}
 		} else {
 			?>
-			<img <?php echo $is_deferred ? 'data-src' : 'src'; ?>="<?php echo esc_url( $photo_sources['grid_url'] ); ?>"<?php echo $is_deferred ? ' data-photo-deferred="true"' : ''; ?> alt="<?php echo esc_attr( $alt ); ?>" width="<?php echo esc_attr( $photo_data['width'] ?: 1600 ); ?>" height="<?php echo esc_attr( $photo_data['height'] ?: 1067 ); ?>" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+			<img <?php echo $is_deferred ? 'data-src' : 'src'; ?>="<?php echo esc_url( $photo_sources['grid_url'] ); ?>"<?php echo $is_deferred ? ' data-photo-deferred="true"' : ''; ?> alt="<?php echo esc_attr( $alt ); ?>" width="<?php echo esc_attr( $photo_data['width'] ?: 1600 ); ?>" height="<?php echo esc_attr( $photo_data['height'] ?: 1067 ); ?>" loading="<?php echo $is_deferred ? 'eager' : 'lazy'; ?>" decoding="async" referrerpolicy="no-referrer">
 			<?php if ( $is_deferred ) : ?>
 				<noscript><img src="<?php echo esc_url( $photo_sources['grid_url'] ); ?>" alt="<?php echo esc_attr( $alt ); ?>" width="<?php echo esc_attr( $photo_data['width'] ?: 1600 ); ?>" height="<?php echo esc_attr( $photo_data['height'] ?: 1067 ); ?>" loading="lazy" decoding="async" referrerpolicy="no-referrer"></noscript>
 			<?php endif; ?>
