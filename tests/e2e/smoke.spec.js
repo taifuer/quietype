@@ -437,3 +437,24 @@ test('mobile actions keep search before the edge-aligned menu', async ({ page })
   await expect(page.locator('.site-nav')).not.toHaveClass(/open/);
   await expect(page.locator('.nav-toggle')).toHaveAttribute('aria-expanded', 'false');
 });
+
+test('mobile menu keeps the sticky header visible after scrolling', async ({ page }) => {
+  test.skip(page.viewportSize().width > 500, 'Mobile-only sticky header assertion.');
+  await page.goto('/quietype-reading-test/');
+  await page.evaluate(() => window.scrollTo(0, 480));
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(300);
+  const scrollPosition = await page.evaluate(() => window.scrollY);
+
+  await page.locator('.nav-toggle').click();
+  await expect(page.locator('html')).toHaveClass(/nav-open/);
+  await expect(page.locator('body')).toHaveClass(/nav-open/);
+  await expect(page.locator('html')).toHaveCSS('overflow-y', 'hidden');
+  await expect.poll(() => page.locator('.site-header').evaluate((header) => Math.abs(header.getBoundingClientRect().top))).toBeLessThan(0.5);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(scrollPosition);
+  await expect.poll(() => page.evaluate(() => Boolean(document.elementFromPoint(window.innerWidth / 2, 32)?.closest('.site-header')))).toBe(true);
+
+  await page.locator('.nav-toggle').click();
+  await expect(page.locator('html')).not.toHaveClass(/nav-open/);
+  await expect(page.locator('body')).not.toHaveClass(/nav-open/);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(scrollPosition);
+});

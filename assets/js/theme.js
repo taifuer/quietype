@@ -74,6 +74,7 @@
   const setNav = (open) => {
     if (!nav || !navToggle) return;
     nav.classList.toggle('open', open);
+    root.classList.toggle('nav-open', open);
     document.body.classList.toggle('nav-open', open);
     navBackdrop?.toggleAttribute('hidden', !open);
     navToggle.setAttribute('aria-label', open ? '关闭菜单' : '打开菜单');

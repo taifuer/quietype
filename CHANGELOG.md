@@ -41,6 +41,7 @@ All notable changes to Quietype will be documented in this file.
 - Centered the visible mobile arrow glyphs inside their circular controls and balanced lightbox padding so photos sit at the viewport's vertical center.
 - Split mobile photo captions into an image-edge title layer and a separate technical-details row so longer descriptions never displace the photograph.
 - Restored one unified viewport-bottom caption for titles, descriptions, camera details, and the original-image action while keeping photos independently centered.
+- Moved mobile menu scroll locking to the root scroller so the sticky header remains visible after opening the drawer from a scrolled page.
 
 ## [0.9.0] - 2026-07-22
 
