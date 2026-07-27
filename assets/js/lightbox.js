@@ -46,18 +46,12 @@ if (images.length) {
       }
     },
     tapAction: false,
-    paddingFn: (viewportSize, itemData) => {
+    paddingFn: (viewportSize) => {
       const isMobile = viewportSize.x <= 720;
-      const hasPhotoDetails = isMobile && Boolean(
-        itemData.photoCaption
-        || itemData.photoExif
-        || itemData.photoDevice
-        || itemData.photoOriginal
-      );
 
       return {
         top: isMobile ? 44 : 48,
-        bottom: hasPhotoDetails ? 138 : 48,
+        bottom: isMobile ? 44 : 48,
         left: isMobile ? 12 : 24,
         right: isMobile ? 12 : 24,
       };
@@ -182,13 +176,26 @@ if (images.length) {
       order: 9,
       isButton: false,
       appendTo: 'root',
-      html: '<div class="pswp__quietype-caption-inner"><div><strong></strong><span></span></div><p></p><small></small><a target="_blank" rel="noopener noreferrer">查看原图 ↗</a></div>',
+      html: '<div class="pswp__quietype-caption-inner"><div class="pswp__quietype-caption-copy"><div><strong></strong><span></span></div><p></p></div><div class="pswp__quietype-caption-details"><small></small><a target="_blank" rel="noopener noreferrer">查看原图 ↗</a></div></div>',
       onInit: (element, pswp) => {
         const title = element.querySelector('strong');
         const meta = element.querySelector('span');
         const caption = element.querySelector('p');
+        const technical = element.querySelector('.pswp__quietype-caption-details');
         const details = element.querySelector('small');
         const original = element.querySelector('a');
+        let geometryFrame = 0;
+        const syncGeometry = () => {
+          cancelAnimationFrame(geometryFrame);
+          geometryFrame = requestAnimationFrame(() => {
+            const image = pswp.element?.querySelector('.pswp__item[aria-hidden="false"] .pswp__img:not(.pswp__img--placeholder)');
+            if (!image) return;
+            const box = image.getBoundingClientRect();
+            element.style.setProperty('--quietype-photo-left', `${Math.max(0, box.left)}px`);
+            element.style.setProperty('--quietype-photo-right', `${Math.max(0, window.innerWidth - box.right)}px`);
+            element.style.setProperty('--quietype-photo-bottom', `${Math.min(window.innerHeight, box.bottom)}px`);
+          });
+        };
         const update = () => {
           const data = pswp.currSlide?.data || {};
           const detailParts = [data.photoExif, data.photoDevice].filter(Boolean);
@@ -200,11 +207,15 @@ if (images.length) {
           details.hidden = !detailParts.length;
           original.href = data.photoOriginal || '';
           original.hidden = !data.photoOriginal;
+          technical.hidden = !detailParts.length && !data.photoOriginal;
           element.hidden = !data.photoTitle && !data.photoMeta && !data.photoCaption && !detailParts.length && !data.photoOriginal;
+          syncGeometry();
         };
         pswp.on('change', update);
         pswp.on('afterSetContent', update);
         pswp.on('contentActivate', update);
+        pswp.on('zoomPanUpdate', syncGeometry);
+        pswp.on('resize', syncGeometry);
         update();
       },
     });
