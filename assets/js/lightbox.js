@@ -203,6 +203,8 @@ if (images.length) {
           element.hidden = !data.photoTitle && !data.photoMeta && !data.photoCaption && !detailParts.length && !data.photoOriginal;
         };
         pswp.on('change', update);
+        pswp.on('afterSetContent', update);
+        pswp.on('contentActivate', update);
         update();
       },
     });

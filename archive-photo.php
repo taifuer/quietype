@@ -54,7 +54,6 @@ if ( $year_count > 4 && 0 !== $year_count % 3 ) {
 		<?php foreach ( $photos_by_year as $year => $photos ) : ?>
 			<?php $is_latest_year = $year === $years[0]; ?>
 			<?php set_query_var( 'quietype_photo_year_count', count( $photos ) ); ?>
-			<?php set_query_var( 'quietype_photo_deferred', true ); ?>
 			<section class="photo-year" id="photo-year-<?php echo esc_attr( $year ); ?>" aria-labelledby="photo-year-title-<?php echo esc_attr( $year ); ?>" data-expanded="<?php echo $is_latest_year ? 'true' : 'false'; ?>">
 				<header class="photo-year__heading">
 					<h2 id="photo-year-title-<?php echo esc_attr( $year ); ?>">
@@ -68,6 +67,7 @@ if ( $year_count > 4 && 0 !== $year_count % 3 ) {
 					<?php foreach ( $photos as $photo_index => $post ) : // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited ?>
 						<?php setup_postdata( $post ); ?>
 						<?php set_query_var( 'quietype_photo_index', $photo_index ); ?>
+						<?php set_query_var( 'quietype_photo_deferred', ! $is_latest_year || $photo_index >= 6 ); ?>
 						<?php get_template_part( 'template-parts/photo', 'card' ); ?>
 					<?php endforeach; ?>
 				</div>

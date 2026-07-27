@@ -6,27 +6,99 @@
 
   const yearLinks = [...document.querySelectorAll('.photo-year-index a[aria-controls]')];
   let imageObserver = null;
+  const maximumRetries = 2;
+
+  const retrySource = (source, attempt) => {
+    try {
+      const url = new URL(source, window.location.href);
+      url.searchParams.set('quietype_grid_retry', `${Date.now()}-${attempt}`);
+      return url.href;
+    } catch (error) {
+      return source;
+    }
+  };
+
+  const markLoaded = (image) => {
+    image.classList.add('is-photo-loaded');
+    image.closest('.photo-frame')?.classList.remove('is-photo-error');
+  };
+
+  const markFailed = (image) => {
+    image.classList.remove('is-photo-loaded');
+    image.closest('.photo-frame')?.classList.add('is-photo-error');
+  };
+
+  const watchDirectImage = (image) => {
+    if (image.dataset.photoRetryReady === 'true') return;
+    image.dataset.photoRetryReady = 'true';
+    const source = image.currentSrc || image.src;
+    if (!source) return;
+    let retries = 0;
+
+    const onLoad = () => {
+      markLoaded(image);
+      image.removeEventListener('load', onLoad);
+      image.removeEventListener('error', onError);
+    };
+    const onError = () => {
+      if (retries >= maximumRetries) {
+        markFailed(image);
+        image.removeEventListener('load', onLoad);
+        image.removeEventListener('error', onError);
+        return;
+      }
+      retries += 1;
+      image.removeAttribute('srcset');
+      window.setTimeout(() => {
+        image.src = retrySource(source, retries);
+      }, retries * 180);
+    };
+
+    image.addEventListener('load', onLoad);
+    image.addEventListener('error', onError);
+    if (image.complete) {
+      if (image.naturalWidth > 0) onLoad();
+      else onError();
+    }
+  };
 
   const revealImage = (image) => {
-    const markLoaded = () => image.classList.add('is-photo-loaded');
+    if (image.dataset.photoLoading === 'true') return;
     const sourceSet = image.dataset.srcset;
     const source = image.dataset.src;
+    if (!source) return;
+    image.dataset.photoLoading = 'true';
+    let retries = 0;
 
-    image.addEventListener('load', markLoaded, { once: true });
-    image.addEventListener('error', markLoaded, { once: true });
-    // IntersectionObserver already decides when this image may load. Asking the
-    // browser to defer it again can leave Edge's native lazy placeholder tied
-    // to the same URL that PhotoSwipe is trying to display.
-    image.loading = 'eager';
+    const onLoad = () => {
+      markLoaded(image);
+      delete image.dataset.src;
+      delete image.dataset.srcset;
+      delete image.dataset.photoLoading;
+      image.removeEventListener('load', onLoad);
+      image.removeEventListener('error', onError);
+    };
+    const onError = () => {
+      if (retries >= maximumRetries) {
+        markFailed(image);
+        delete image.dataset.photoLoading;
+        image.removeEventListener('load', onLoad);
+        image.removeEventListener('error', onError);
+        return;
+      }
+      retries += 1;
+      image.removeAttribute('srcset');
+      window.setTimeout(() => {
+        image.src = retrySource(source, retries);
+      }, retries * 180);
+    };
+
+    image.addEventListener('load', onLoad);
+    image.addEventListener('error', onError);
     if (sourceSet) {
       image.srcset = sourceSet;
-      delete image.dataset.srcset;
     }
-    if (source) {
-      image.src = source;
-      delete image.dataset.src;
-    }
-    if (image.complete && image.naturalWidth > 0) markLoaded();
+    image.src = source;
   };
 
   if ('IntersectionObserver' in window) {
@@ -75,6 +147,8 @@
       setYearExpanded(section, section.dataset.expanded !== 'true');
     });
   });
+
+  document.querySelectorAll('.photo-frame img[src]:not([data-src])').forEach(watchDirectImage);
 
   yearLinks.forEach((link) => {
     link.addEventListener('click', () => {

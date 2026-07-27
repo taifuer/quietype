@@ -51,36 +51,32 @@ if ( $photo_data['location'] ) {
 				false,
 				array(
 					'alt'      => $alt,
-					'loading'  => $is_deferred ? 'eager' : 'lazy',
+					'loading'  => false,
 					'decoding' => 'async',
 					'sizes'    => $image_sizes,
 				)
 			);
-			if ( $is_deferred && class_exists( 'WP_HTML_Tag_Processor' ) ) {
-				$fallback_markup = $image_markup;
+			if ( class_exists( 'WP_HTML_Tag_Processor' ) ) {
 				$processor       = new WP_HTML_Tag_Processor( $image_markup );
 				if ( $processor->next_tag( 'img' ) ) {
-					foreach ( array( 'src', 'srcset' ) as $attribute ) {
-						$value = $processor->get_attribute( $attribute );
-						if ( $value ) {
-							$processor->set_attribute( 'data-' . $attribute, $value );
-							$processor->remove_attribute( $attribute );
+					$processor->remove_attribute( 'loading' );
+					if ( $is_deferred ) {
+						foreach ( array( 'src', 'srcset' ) as $attribute ) {
+							$value = $processor->get_attribute( $attribute );
+							if ( $value ) {
+								$processor->set_attribute( 'data-' . $attribute, $value );
+								$processor->remove_attribute( $attribute );
+							}
 						}
+						$processor->set_attribute( 'data-photo-deferred', 'true' );
 					}
-					$processor->set_attribute( 'data-photo-deferred', 'true' );
 					$image_markup = $processor->get_updated_html();
 				}
-				echo $image_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Core markup modified by the HTML processor.
-				?><noscript><?php echo $fallback_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Core generates escaped image markup. ?></noscript><?php
-			} else {
-				echo $image_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Core generates escaped image markup.
 			}
+			echo $image_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Core markup is escaped and optionally modified by the HTML processor.
 		} else {
 			?>
-			<img <?php echo $is_deferred ? 'data-src' : 'src'; ?>="<?php echo esc_url( $photo_sources['grid_url'] ); ?>"<?php echo $is_deferred ? ' data-photo-deferred="true"' : ''; ?> alt="<?php echo esc_attr( $alt ); ?>" width="<?php echo esc_attr( $photo_data['width'] ?: 1600 ); ?>" height="<?php echo esc_attr( $photo_data['height'] ?: 1067 ); ?>" loading="<?php echo $is_deferred ? 'eager' : 'lazy'; ?>" decoding="async" referrerpolicy="no-referrer">
-			<?php if ( $is_deferred ) : ?>
-				<noscript><img src="<?php echo esc_url( $photo_sources['grid_url'] ); ?>" alt="<?php echo esc_attr( $alt ); ?>" width="<?php echo esc_attr( $photo_data['width'] ?: 1600 ); ?>" height="<?php echo esc_attr( $photo_data['height'] ?: 1067 ); ?>" loading="lazy" decoding="async" referrerpolicy="no-referrer"></noscript>
-			<?php endif; ?>
+			<img <?php echo $is_deferred ? 'data-src' : 'src'; ?>="<?php echo esc_url( $photo_sources['grid_url'] ); ?>"<?php echo $is_deferred ? ' data-photo-deferred="true"' : ''; ?> alt="<?php echo esc_attr( $alt ); ?>" width="<?php echo esc_attr( $photo_data['width'] ?: 1600 ); ?>" height="<?php echo esc_attr( $photo_data['height'] ?: 1067 ); ?>" decoding="async" referrerpolicy="no-referrer">
 			<?php
 		}
 		?>

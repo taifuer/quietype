@@ -45,7 +45,10 @@ test('photo archive groups external images and keeps details in the lightbox', a
   await page.route('https://images.example.test/**', async (route) => {
     await route.fulfill({ status: 200, contentType: 'image/gif', body: Buffer.from('R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=', 'base64') });
   });
-  await page.goto('/photos/');
+  const pageResponse = await page.goto('/photos/');
+  const pageHtml = await pageResponse.text();
+  expect(pageHtml).not.toContain('loading="lazy"');
+  expect(pageHtml).not.toContain('<noscript><img');
   await expect(page.locator('.photos-hero h1')).toHaveText('万物静观');
   await expect(page.locator('.photos-hero .eyebrow')).toHaveText('PHOTOS');
   await expect(page.locator('.photos-hero__meta')).toHaveCount(0);
@@ -58,9 +61,11 @@ test('photo archive groups external images and keeps details in the lightbox', a
   await expect(page.locator('.photo-year').nth(2)).toHaveAttribute('data-expanded', 'false');
   await expect(page.locator('.photo-grid').first()).toBeVisible();
   await expect(page.locator('.photo-grid').nth(1)).toBeHidden();
+  await expect(page.locator('.photo-year').first().locator('img').first()).toHaveAttribute('src', 'https://images.example.test/photo-1.jpg');
+  await expect(page.locator('.photo-year').first().locator('img').first()).not.toHaveAttribute('data-src');
   await expect(page.locator('.photo-year').nth(1).locator('img').first()).not.toHaveAttribute('src');
   await expect(page.locator('.photo-year').nth(1).locator('img').first()).toHaveAttribute('data-src', 'https://images.example.test/photo-4.jpg');
-  await expect(page.locator('.photo-year').nth(1).locator('img').first()).toHaveAttribute('loading', 'eager');
+  await expect(page.locator('.photo-year').nth(1).locator('img').first()).not.toHaveAttribute('loading');
   expect(deferredRequests).toEqual([]);
   await expect(page.locator('.photo-frame').first()).toHaveAttribute('data-photo-exif', '35mm · f/4 · 1/320s · ISO 160');
   await expect(page.locator('.photo-frame').first()).toHaveAttribute('data-photo-device', 'Xiaomi');
@@ -74,7 +79,7 @@ test('photo archive groups external images and keeps details in the lightbox', a
   await expect(page.locator('.photo-year').nth(1)).toHaveAttribute('data-expanded', 'true');
   await expect(page.locator('.photo-grid').nth(1)).toBeVisible();
   await expect(page.locator('.photo-year').nth(1).locator('img').first()).toHaveAttribute('src', 'https://images.example.test/photo-4.jpg');
-  await expect(page.locator('.photo-year').nth(1).locator('img').first()).toHaveAttribute('loading', 'eager');
+  await expect(page.locator('.photo-year').nth(1).locator('img').first()).not.toHaveAttribute('loading');
   await expect.poll(() => deferredRequests.length).toBe(2);
 
   await page.locator('.photo-frame img').first().click();
@@ -88,6 +93,33 @@ test('photo archive groups external images and keeps details in the lightbox', a
   await expect(page.locator('.pswp__quietype-caption small')).toBeVisible();
   await expect(page.locator('.pswp__quietype-caption a')).toHaveAttribute('href', 'https://images.example.test/photo-1-original.jpg');
   expect(originalRequests).toEqual([]);
+});
+
+test('photo grid retries a transient CDN failure and preserves its lightbox details', async ({ page }) => {
+  const retryRequests = [];
+  await page.route('https://images.example.test/**', async (route) => {
+    const url = route.request().url();
+    if (url.includes('photo-4.jpg') && !url.includes('quietype_grid_retry=')) {
+      await route.fulfill({ status: 503, contentType: 'text/plain', body: 'temporary image failure' });
+      return;
+    }
+    if (url.includes('photo-4.jpg') && url.includes('quietype_grid_retry=')) retryRequests.push(url);
+    await route.fulfill({ status: 200, contentType: 'image/gif', body: Buffer.from('R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=', 'base64') });
+  });
+  await page.goto('/photos/');
+  const archivedYear = page.locator('.photo-year').nth(1);
+  await archivedYear.locator('.photo-year__toggle').click();
+  const retriedImage = archivedYear.locator('.photo-frame img').first();
+  await expect.poll(() => retryRequests.length).toBe(1);
+  await expect(retriedImage).toHaveAttribute('src', /photo-4\.jpg\?quietype_grid_retry=[0-9]+-1$/);
+  await expect.poll(() => retriedImage.evaluate((image) => image.complete && image.naturalWidth > 0)).toBe(true);
+  await expect(archivedYear.locator('.photo-frame').first()).not.toHaveClass(/is-photo-error/);
+
+  await archivedYear.locator('.photo-frame').first().click();
+  await expect(page.locator('.pswp__quietype-caption strong')).toHaveText('暮色归舟');
+  await expect(page.locator('.pswp__quietype-caption span')).toHaveText('湖南 · 洞庭湖 · 2025年11月');
+  await expect(page.locator('.pswp__quietype-caption p')).not.toBeEmpty();
+  await expect(page.locator('.pswp__quietype-caption small')).not.toBeEmpty();
 });
 
 test('standalone photo records redirect to the archive', async ({ request }) => {
@@ -121,6 +153,9 @@ test('photo lightbox loads deferred slides and browser Back closes it in place',
 
   await page.evaluate(() => window.pswp.goTo(3));
   await expect(page.locator('.pswp__quietype-caption strong')).toHaveText('暮色归舟');
+  await expect(page.locator('.pswp__quietype-caption span')).toHaveText('湖南 · 洞庭湖 · 2025年11月');
+  await expect(page.locator('.pswp__quietype-caption p')).not.toBeEmpty();
+  await expect(page.locator('.pswp__quietype-caption small')).not.toBeEmpty();
   const activeImage = page.locator('.pswp__item[aria-hidden="false"] .pswp__img:not(.pswp__img--placeholder)');
   await expect(activeImage).toHaveAttribute('src', 'https://images.example.test/photo-4.jpg');
   await expect.poll(() => activeImage.evaluate((image) => image.complete && image.naturalWidth > 0)).toBe(true);

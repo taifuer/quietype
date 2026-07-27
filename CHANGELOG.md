@@ -36,6 +36,8 @@ All notable changes to Quietype will be documented in this file.
 - Removed native lazy-loading markers from JavaScript-deferred archive images, reduced adjacent PhotoSwipe preloading, and retried one failed CDN request without cache.
 - Restored compact touch-friendly previous and next controls at the middle edges of mobile photos, following the existing UI visibility state.
 - Centered PhotoSwipe's native mobile arrow artwork symmetrically and restored its shared tap-to-hide transition with the other controls.
+- Removed the remaining native-lazy photo fallbacks, loaded the first six archive images directly, and added cache-busting grid retries for transient CDN failures.
+- Refreshed lightbox captions whenever slide content is set or activated so titles, descriptions, and camera details remain synchronized.
 
 ## [0.9.0] - 2026-07-22
 
