@@ -31,6 +31,8 @@ All notable changes to Quietype will be documented in this file.
 - Served Media Library book covers through a dedicated 252 × 372 derivative with responsive display hints, preserving the original uploads.
 - Kept the newest photo year open while collapsing older years, and deferred archived image requests until their sections approach the viewport.
 - Reduced Xiaomi, Redmi, and POCO camera metadata to the shared Xiaomi brand label on the public photo archive.
+- Decoupled PhotoSwipe slides from partially loaded native-lazy thumbnails so cached Edge sessions and adjacent navigation load reliably.
+- Made browser Back close an open lightbox before leaving the current page, including mobile return gestures.
 
 ## [0.9.0] - 2026-07-22
 

@@ -7,16 +7,18 @@ if (images.length) {
     const link = image.closest('a');
     const declaredSource = link?.dataset.pswpSrc;
     const linkedImage = link && /\.(?:avif|gif|jpe?g|png|webp)(?:[?#].*)?$/i.test(link.href);
+    const thumbnailReady = image.complete && image.naturalWidth > 0;
+    const thumbnailSource = thumbnailReady ? (image.currentSrc || image.src) : '';
     const width = Number(link?.dataset.pswpWidth) || image.naturalWidth || Number(image.getAttribute('width')) || image.clientWidth || 1200;
     const height = Number(link?.dataset.pswpHeight) || image.naturalHeight || Number(image.getAttribute('height')) || image.clientHeight || Math.round(width * 0.75);
 
     return {
       src: declaredSource || (linkedImage ? link.href : (image.currentSrc || image.src)),
-      msrc: image.currentSrc || image.src,
+      msrc: thumbnailSource,
       width,
       height,
       alt: image.alt || '',
-      element: image,
+      element: thumbnailReady ? image : undefined,
       photoTitle: link?.dataset.photoTitle || '',
       photoMeta: link?.dataset.photoMeta || '',
       photoExif: link?.dataset.photoExif || '',
@@ -49,8 +51,49 @@ if (images.length) {
     },
   });
 
+  const historyStateKey = 'quietypeLightbox';
+  let historyToken = '';
+  let closingFromHistory = false;
+
+  lightbox.on('afterInit', () => {
+    historyToken = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    closingFromHistory = false;
+    try {
+      const currentState = history.state && typeof history.state === 'object' ? history.state : {};
+      history.pushState({ ...currentState, [historyStateKey]: historyToken }, '', window.location.href);
+    } catch (error) {
+      historyToken = '';
+    }
+  });
+
+  window.addEventListener('popstate', (event) => {
+    if (!historyToken || event.state?.[historyStateKey] === historyToken) return;
+    closingFromHistory = true;
+    const pswp = lightbox.pswp;
+    if (!pswp) return;
+    if (pswp.opener?.isOpening) {
+      const closeAfterOpening = () => {
+        pswp.off('openingAnimationEnd', closeAfterOpening);
+        pswp.close();
+      };
+      pswp.on('openingAnimationEnd', closeAfterOpening);
+    } else {
+      pswp.close();
+    }
+  });
+
+  lightbox.on('close', () => {
+    if (!closingFromHistory && historyToken && history.state?.[historyStateKey] === historyToken) {
+      history.back();
+    }
+  });
+
+  lightbox.on('destroy', () => {
+    historyToken = '';
+    closingFromHistory = false;
+  });
+
   lightbox.addFilter('thumbEl', (thumb, data) => data.element || thumb);
-  lightbox.addFilter('placeholderSrc', (src, slide) => slide.data.msrc || src);
   lightbox.on('uiRegister', () => {
     const zoomBy = (factor) => {
       const { pswp } = lightbox;

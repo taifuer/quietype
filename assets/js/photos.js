@@ -14,6 +14,10 @@
 
     image.addEventListener('load', markLoaded, { once: true });
     image.addEventListener('error', markLoaded, { once: true });
+    // IntersectionObserver already decides when this image may load. Asking the
+    // browser to defer it again can leave Edge's native lazy placeholder tied
+    // to the same URL that PhotoSwipe is trying to display.
+    image.loading = 'eager';
     if (sourceSet) {
       image.srcset = sourceSet;
       delete image.dataset.srcset;

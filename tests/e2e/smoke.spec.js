@@ -73,6 +73,7 @@ test('photo archive groups external images and keeps details in the lightbox', a
   await expect(page.locator('.photo-year').nth(1)).toHaveAttribute('data-expanded', 'true');
   await expect(page.locator('.photo-grid').nth(1)).toBeVisible();
   await expect(page.locator('.photo-year').nth(1).locator('img').first()).toHaveAttribute('src', 'https://images.example.test/photo-4.jpg');
+  await expect(page.locator('.photo-year').nth(1).locator('img').first()).toHaveAttribute('loading', 'eager');
   await expect.poll(() => deferredRequests.length).toBe(2);
 
   await page.locator('.photo-frame img').first().click();
@@ -103,6 +104,39 @@ test('photo year deep links expand and hydrate archived images', async ({ page }
   await expect(targetYear).toHaveAttribute('data-expanded', 'true');
   await expect(targetYear.locator('.photo-grid')).toBeVisible();
   await expect(targetYear.locator('img').first()).toHaveAttribute('src', 'https://images.example.test/photo-6.jpg');
+});
+
+test('photo lightbox loads deferred slides and browser Back closes it in place', async ({ page }) => {
+  await page.route('https://images.example.test/**', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'image/gif', body: Buffer.from('R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=', 'base64') });
+  });
+  await page.goto('/photos/');
+
+  const archivedImage = page.locator('.photo-year').nth(1).locator('img').first();
+  await expect(archivedImage).not.toHaveAttribute('src');
+  await page.locator('.photo-frame img').first().click();
+  await expect(page.locator('.pswp')).toBeVisible();
+  await expect.poll(() => page.evaluate(() => Boolean(history.state?.quietypeLightbox))).toBe(true);
+
+  await page.evaluate(() => window.pswp.goTo(3));
+  await expect(page.locator('.pswp__quietype-caption strong')).toHaveText('暮色归舟');
+  const activeImage = page.locator('.pswp__item[aria-hidden="false"] .pswp__img:not(.pswp__img--placeholder)');
+  await expect(activeImage).toHaveAttribute('src', 'https://images.example.test/photo-4.jpg');
+  await expect.poll(() => activeImage.evaluate((image) => image.complete && image.naturalWidth > 0)).toBe(true);
+  await expect(archivedImage).not.toHaveAttribute('src');
+
+  await page.evaluate(() => history.back());
+  await expect(page.locator('.pswp')).toBeHidden();
+  await expect(page).toHaveURL(/\/photos\/$/);
+  await expect.poll(() => page.evaluate(() => Boolean(history.state?.quietypeLightbox))).toBe(false);
+
+  await page.locator('.photo-frame img').first().click();
+  await expect(page.locator('.pswp')).toBeVisible();
+  await expect.poll(() => page.evaluate(() => Boolean(window.pswp?.opener?.isOpen))).toBe(true);
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.pswp')).toBeHidden();
+  await expect(page).toHaveURL(/\/photos\/$/);
+  await expect.poll(() => page.evaluate(() => Boolean(history.state?.quietypeLightbox))).toBe(false);
 });
 
 test('full-resolution photo remains an explicit lightbox action', async ({ page }) => {
