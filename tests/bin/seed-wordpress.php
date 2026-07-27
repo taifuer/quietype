@@ -129,7 +129,7 @@ foreach ( array( '算法', '社会', '重读', '经典', '排版', '科幻', '�
 }
 $books = array(
 	array(
-		'title' => '编程珠玑', 'slug' => 'programming-pearls', 'authors' => 'Jon Bentley', 'publisher' => '人民邮电出版社', 'year' => '2015', 'read_date' => '2026-06-02', 'status' => 'read', 'rating' => '5', 'douban' => '9.1', 'douban_id' => '3227098', 'category' => 'technology', 'tags' => array( '算法', '经典' ),
+		'title' => '编程珠玑', 'slug' => 'programming-pearls', 'authors' => 'Jon Bentley', 'publisher' => '人民邮电出版社', 'year' => '2015', 'read_date' => '2026-06-02', 'status' => 'read', 'rating' => '5', 'douban' => '9.1', 'douban_id' => '3227098', 'book_url' => 'https://example.com/books/programming-pearls', 'category' => 'technology', 'tags' => array( '算法', '经典' ),
 		'excerpt' => '真正耐看的不是技巧本身，而是如何把含混的问题压缩成可以验证的结构。',
 	),
 	array(
@@ -157,7 +157,7 @@ $books = array(
 		'excerpt' => '宏大设定之外，最耐看的还是人在极端尺度与漫长时间面前的选择。',
 	),
 	array(
-		'title' => '小王子', 'slug' => 'the-little-prince', 'authors' => '圣-埃克苏佩里', 'publisher' => '人民文学出版社', 'year' => '2003', 'read_date' => '2023-04-19', 'status' => 'read', 'rating' => '4', 'douban' => '9.1', 'douban_id' => '1084336', 'category' => 'fiction', 'tags' => array( '成长', '重读' ),
+		'title' => '小王子', 'slug' => 'the-little-prince', 'authors' => '圣-埃克苏佩里', 'publisher' => '人民文学出版社', 'year' => '2003', 'read_date' => '2023-04-19', 'status' => 'read', 'rating' => '4', 'douban' => '9.1', 'douban_id' => '1084336', 'book_url' => '', 'category' => 'fiction', 'tags' => array( '成长', '重读' ),
 		'excerpt' => '小时候读故事，后来读关系。简单的句子里藏着成年人容易忘记的事。',
 	),
 );
@@ -176,7 +176,7 @@ foreach ( $books as $book ) {
 	wp_set_post_terms( $book_id, array( $book_categories[ $book['category'] ]['term_id'] ), 'book_category' );
 	wp_set_post_terms( $book_id, array_map( function ( $tag ) use ( $book_tags ) { return $book_tags[ $tag ]; }, $book['tags'] ), 'book_tag' );
 	foreach ( array(
-		'_quietype_book_authors' => $book['authors'], '_quietype_book_publisher' => $book['publisher'], '_quietype_book_publication_year' => $book['year'], '_quietype_book_read_date' => $book['read_date'], '_quietype_book_status' => $book['status'], '_quietype_book_rating' => $book['rating'], '_quietype_book_douban_rating' => $book['douban'], '_quietype_book_douban_id' => $book['douban_id'], '_quietype_book_douban_url' => quietype_douban_url( $book['douban_id'] ),
+		'_quietype_book_authors' => $book['authors'], '_quietype_book_publisher' => $book['publisher'], '_quietype_book_publication_year' => $book['year'], '_quietype_book_read_date' => $book['read_date'], '_quietype_book_status' => $book['status'], '_quietype_book_rating' => $book['rating'], '_quietype_book_douban_rating' => $book['douban'], '_quietype_book_douban_id' => $book['douban_id'], '_quietype_book_douban_url' => array_key_exists( 'book_url', $book ) ? $book['book_url'] : quietype_douban_url( $book['douban_id'] ),
 	) as $meta_key => $meta_value ) {
 		if ( '' !== $meta_value ) {
 			update_post_meta( $book_id, $meta_key, $meta_value );

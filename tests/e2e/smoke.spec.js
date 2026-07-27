@@ -297,7 +297,8 @@ test('book archive groups compact reading records by year', async ({ page }) => 
   await expect(page.locator('.book-year-shelf')).toHaveCount(4);
   await expect(page.locator('.book-year-heading h2')).toHaveText(['2026', '2025', '2024', '2023']);
   await expect(page.locator('.book-year-index')).toHaveClass(/book-year-index--count-4/);
-  await expect(page.locator('.book-title-row h3 a').first()).toHaveAttribute('href', /^https:\/\/book\.douban\.com\/subject\/[0-9]+\/$/);
+  await expect(page.locator('.book-title-row h3 a').first()).toHaveAttribute('href', 'https://example.com/books/programming-pearls');
+  await expect(page.locator('.book-item').filter({ hasText: '小王子' }).locator('.book-title-row h3 a')).toHaveCount(0);
   await expect(page.locator('a.book-cover')).toHaveCount(0);
   await expect(page.locator('.book-cover').first()).toHaveJSProperty('tagName', 'DIV');
 	const localCover = page.locator('.book-cover img.attachment-quietype-book-cover');

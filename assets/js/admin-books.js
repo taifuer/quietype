@@ -93,7 +93,7 @@
     setValue('quietype_book_publication_year', pendingBook.publication_year);
     setValue('quietype_book_isbn', pendingBook.isbn);
     setValue('quietype_book_douban_rating', pendingBook.douban_rating);
-    setValue('quietype_book_douban_url', pendingBook.douban_url);
+    setValue('quietype_book_url', pendingBook.douban_url);
     setValue('quietype_book_douban_id', pendingBook.douban_id);
     setValue('quietype_book_import_source_url', pendingBook.cover_url);
     subjectField.value = pendingBook.douban_url;

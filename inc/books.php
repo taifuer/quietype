@@ -106,7 +106,8 @@ function quietype_register_books() {
 		'_quietype_book_status'           => 'quietype_sanitize_book_status',
 		'_quietype_book_rating'           => 'quietype_sanitize_book_rating',
 		'_quietype_book_douban_rating'    => 'quietype_sanitize_douban_rating',
-		'_quietype_book_douban_url'       => 'quietype_sanitize_douban_url',
+		// Keep the legacy meta key so existing libraries need no data migration.
+		'_quietype_book_douban_url'       => 'quietype_sanitize_book_url',
 		'_quietype_book_douban_id'        => 'quietype_sanitize_douban_id',
 		'_quietype_book_cover_url'        => 'quietype_sanitize_book_cover_url',
 	);
@@ -268,6 +269,12 @@ function quietype_sanitize_douban_url( $value ) {
 	return quietype_douban_url( $value );
 }
 
+/** Accept an optional public reference page for a book. */
+function quietype_sanitize_book_url( $value ) {
+	$url = esc_url_raw( trim( (string) $value ), array( 'http', 'https' ) );
+	return $url && wp_parse_url( $url, PHP_URL_HOST ) ? $url : '';
+}
+
 /** Normalize ISBN-10 or ISBN-13 while retaining a manual fallback. */
 function quietype_sanitize_book_isbn( $value ) {
 	$isbn = strtoupper( preg_replace( '/[^0-9X]/i', '', (string) $value ) );
@@ -285,10 +292,10 @@ function quietype_book_data( $post_id = null ) {
 	if ( ! $read_date ) {
 		$read_date = get_the_date( 'Y-m', $post_id );
 	}
-	$douban_url = quietype_sanitize_douban_url( get_post_meta( $post_id, '_quietype_book_douban_url', true ) );
+	$book_url  = quietype_sanitize_book_url( get_post_meta( $post_id, '_quietype_book_douban_url', true ) );
 	$douban_id  = quietype_sanitize_douban_id( get_post_meta( $post_id, '_quietype_book_douban_id', true ) );
 	if ( ! $douban_id ) {
-		$douban_id = quietype_sanitize_douban_id( $douban_url );
+		$douban_id = quietype_sanitize_douban_id( $book_url );
 	}
 	return array(
 		'authors'          => (string) get_post_meta( $post_id, '_quietype_book_authors', true ),
@@ -299,7 +306,8 @@ function quietype_book_data( $post_id = null ) {
 		'status'           => quietype_sanitize_book_status( get_post_meta( $post_id, '_quietype_book_status', true ) ) ?: 'read',
 		'rating'           => (int) quietype_sanitize_book_rating( get_post_meta( $post_id, '_quietype_book_rating', true ) ),
 		'douban_rating'    => (float) get_post_meta( $post_id, '_quietype_book_douban_rating', true ),
-		'douban_url'       => $douban_url ?: quietype_douban_url( $douban_id ),
+		'book_url'         => $book_url,
+		'douban_url'       => quietype_douban_url( $douban_id ),
 		'douban_id'        => $douban_id,
 		'cover_url'        => quietype_sanitize_book_cover_url( get_post_meta( $post_id, '_quietype_book_cover_url', true ) ),
 	);
@@ -389,12 +397,12 @@ function quietype_render_book_meta_box( $post ) {
 			<tr><th><label for="quietype_book_publisher">出版社</label></th><td><input class="regular-text" id="quietype_book_publisher" name="quietype_book_publisher" type="text" value="<?php echo esc_attr( $data['publisher'] ); ?>"></td></tr>
 			<tr><th><label for="quietype_book_publication_year">出版年份</label></th><td><input class="small-text" id="quietype_book_publication_year" name="quietype_book_publication_year" type="number" min="1000" max="<?php echo esc_attr( (int) gmdate( 'Y' ) + 2 ); ?>" value="<?php echo esc_attr( $data['publication_year'] ); ?>"></td></tr>
 			<tr><th><label for="quietype_book_isbn">ISBN</label></th><td><input class="regular-text code" id="quietype_book_isbn" name="quietype_book_isbn" type="text" value="<?php echo esc_attr( $data['isbn'] ); ?>"></td></tr>
-			<tr><th><label for="quietype_book_cover_url">封面图片地址</label></th><td><input class="regular-text code" id="quietype_book_cover_url" name="quietype_book_cover_url" type="url" value="<?php echo esc_attr( $data['cover_url'] ); ?>" placeholder="https://pic.taifua.com/path/to/cover.jpg"><p class="description">可填写 HTTPS 图片地址，将优先于特色图显示；留空则使用特色图或文字封面。</p></td></tr>
+			<tr><th><label for="quietype_book_cover_url">封面图片地址</label></th><td><input class="regular-text code" id="quietype_book_cover_url" name="quietype_book_cover_url" type="url" value="<?php echo esc_attr( $data['cover_url'] ); ?>" placeholder="https://example.com/images/book-cover.jpg"><p class="description">可填写 HTTPS 图片地址，将优先于特色图显示；留空则使用特色图或文字封面。</p></td></tr>
 			<tr><th><label for="quietype_book_status">阅读状态</label></th><td><select id="quietype_book_status" name="quietype_book_status"><?php foreach ( array( 'read' => '已读', 'reading' => '在读', 'planned' => '待读' ) as $status => $label ) : ?><option value="<?php echo esc_attr( $status ); ?>" <?php selected( $data['status'], $status ); ?>><?php echo esc_html( $label ); ?></option><?php endforeach; ?></select></td></tr>
 			<tr><th><label for="quietype_book_read_date">阅读月份</label></th><td><input id="quietype_book_read_date" name="quietype_book_read_date" type="month" value="<?php echo esc_attr( $data['read_date'] ); ?>"><p class="description">用于年度分组；待读书目可填写计划月份。</p></td></tr>
 			<tr><th><label for="quietype_book_rating">我的评价</label></th><td><select id="quietype_book_rating" name="quietype_book_rating"><option value="">暂不评分</option><?php for ( $rating = 1; $rating <= 5; $rating++ ) : ?><option value="<?php echo esc_attr( $rating ); ?>" <?php selected( $data['rating'], $rating ); ?>><?php echo esc_html( str_repeat( '★', $rating ) . str_repeat( '☆', 5 - $rating ) ); ?></option><?php endfor; ?></select></td></tr>
 			<tr><th><label for="quietype_book_douban_rating">豆瓣评分</label></th><td><input class="small-text" id="quietype_book_douban_rating" name="quietype_book_douban_rating" type="number" min="0.1" max="10" step="0.1" value="<?php echo esc_attr( $data['douban_rating'] ?: '' ); ?>"></td></tr>
-			<tr><th><label for="quietype_book_douban_url">豆瓣链接</label></th><td><input class="regular-text code" id="quietype_book_douban_url" name="quietype_book_douban_url" type="url" value="<?php echo esc_attr( $data['douban_url'] ); ?>" placeholder="https://book.douban.com/subject/…/"><input id="quietype_book_douban_id" name="quietype_book_douban_id" type="hidden" value="<?php echo esc_attr( $data['douban_id'] ); ?>"></td></tr>
+			<tr><th><label for="quietype_book_url">链接</label></th><td><input class="regular-text code" id="quietype_book_url" name="quietype_book_url" type="url" value="<?php echo esc_attr( $data['book_url'] ); ?>" placeholder="https://example.com/books/example"><p class="description">可选。填写后书名将链接到豆瓣、出版社或其他资料页面；留空则不添加链接。</p><input id="quietype_book_douban_id" name="quietype_book_douban_id" type="hidden" value="<?php echo esc_attr( $data['douban_id'] ); ?>"></td></tr>
 		</table>
 		<div class="quietype-book-import" id="quietype-book-import" hidden>
 			<img id="quietype-book-cover-preview" src="" alt="" hidden>
@@ -482,6 +490,8 @@ function quietype_save_book_meta( $post_id, $post ) {
 		'_quietype_book_rating'           => array( 'quietype_book_rating', 'quietype_sanitize_book_rating' ),
 		'_quietype_book_douban_rating'    => array( 'quietype_book_douban_rating', 'quietype_sanitize_douban_rating' ),
 		'_quietype_book_cover_url'        => array( 'quietype_book_cover_url', 'quietype_sanitize_book_cover_url' ),
+		// The legacy meta key now stores the optional generic book reference URL.
+		'_quietype_book_douban_url'       => array( 'quietype_book_url', 'quietype_sanitize_book_url' ),
 	);
 	foreach ( $fields as $meta_key => $field ) {
 		$raw   = isset( $_POST[ $field[0] ] ) ? wp_unslash( $_POST[ $field[0] ] ) : '';
@@ -492,17 +502,15 @@ function quietype_save_book_meta( $post_id, $post ) {
 			update_post_meta( $post_id, $meta_key, $value );
 		}
 	}
-	$douban_source = isset( $_POST['quietype_book_douban_url'] ) ? wp_unslash( $_POST['quietype_book_douban_url'] ) : '';
-	$douban_id     = quietype_sanitize_douban_id( $douban_source );
+	$book_url  = isset( $_POST['quietype_book_url'] ) ? wp_unslash( $_POST['quietype_book_url'] ) : '';
+	$douban_id = quietype_sanitize_douban_id( $book_url );
 	if ( ! $douban_id && isset( $_POST['quietype_book_douban_id'] ) ) {
 		$douban_id = quietype_sanitize_douban_id( wp_unslash( $_POST['quietype_book_douban_id'] ) );
 	}
 	if ( $douban_id ) {
 		update_post_meta( $post_id, '_quietype_book_douban_id', $douban_id );
-		update_post_meta( $post_id, '_quietype_book_douban_url', quietype_douban_url( $douban_id ) );
 	} else {
 		delete_post_meta( $post_id, '_quietype_book_douban_id' );
-		delete_post_meta( $post_id, '_quietype_book_douban_url' );
 	}
 	if ( isset( $_POST['quietype_book_import_cover'], $_POST['quietype_book_import_source_url'] ) && current_user_can( 'upload_files' ) ) {
 		quietype_import_book_cover( $post_id, esc_url_raw( wp_unslash( $_POST['quietype_book_import_source_url'] ) ) );

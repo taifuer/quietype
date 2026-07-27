@@ -52,13 +52,15 @@ test('Douban lookup previews data before manual confirmation', async ({ page }) 
     '#quietype_book_status',
     '#quietype_book_rating',
     '#quietype_book_douban_rating',
-    '#quietype_book_douban_url'
+    '#quietype_book_url'
   ].join(',')).evaluateAll((fields) => [...new Set(fields.map((field) => Math.round(field.getBoundingClientRect().width)))]);
   expect(fieldWidths).toEqual([420]);
   await expect(page.locator('#quietype_book_read_date')).toHaveAttribute('type', 'month');
   await expect(page.locator('#quietype_book_status')).toHaveValue('read');
-	await expect(page.locator('#quietype_book_cover_url')).toHaveAttribute('placeholder', /pic\.taifua\.com/);
+	await expect(page.locator('#quietype_book_cover_url')).toHaveAttribute('placeholder', 'https://example.com/images/book-cover.jpg');
 	await expect(page.locator('#quietype_book_cover_url + .description')).toContainText('优先于特色图');
+	await expect(page.locator('label[for="quietype_book_url"]')).toHaveText('链接');
+	await expect(page.locator('#quietype_book_url + .description')).toContainText('留空则不添加链接');
   await expect(page.locator('#postexcerpt .hndle')).toContainText('点评');
   await expect(page.locator('#postexcerpt #excerpt')).toBeVisible();
   await expect(page.locator('#postexcerpt .description')).toContainText('详细的阅读总结');
@@ -71,7 +73,7 @@ test('Douban lookup previews data before manual confirmation', async ({ page }) 
   await expect(page.locator('#quietype-book-preview-cover')).toBeHidden();
   await expect(page.locator('#quietype-book-lookup-status')).toContainText('服务器尝试导入');
   await expect(page.locator('#quietype_book_authors')).toHaveValue('');
-  await expect(page.locator('#quietype_book_douban_url')).toHaveValue('');
+  await expect(page.locator('#quietype_book_url')).toHaveValue('');
 
   await page.locator('#quietype-book-confirm').click();
   const classicTitle = page.locator('#title');
@@ -83,7 +85,7 @@ test('Douban lookup previews data before manual confirmation', async ({ page }) 
   }
   await expect(page.locator('#quietype_book_authors')).toHaveValue('[法] 尼古拉·巴拉尔 著绘');
   await expect(page.locator('#quietype_book_publisher')).toHaveValue('湖南文艺出版社');
-  await expect(page.locator('#quietype_book_douban_url')).toHaveValue('https://book.douban.com/subject/38380879/');
+  await expect(page.locator('#quietype_book_url')).toHaveValue('https://book.douban.com/subject/38380879/');
   await expect(page.locator('#quietype_book_cover_url')).toHaveValue('');
   await expect(page.locator('#quietype_book_import_source_url')).toHaveValue('https://img9.doubanio.com/view/subject/s/public/s-invalid.jpg');
   await expect(page.locator('#quietype-book-import')).toBeVisible();

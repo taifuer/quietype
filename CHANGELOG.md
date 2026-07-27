@@ -13,6 +13,8 @@ All notable changes to Quietype will be documented in this file.
 
 ### Changed
 
+- Generalized the optional book-title destination from a Douban-only URL to any valid HTTP(S) reference, while retaining the assisted Douban lookup.
+- Replaced the site-specific book-cover placeholder with a neutral example URL.
 - Polished code-block keyboard focus and horizontal scroll affordances without changing the established light syntax palette.
 - Normalized the reading editor field widths and kept the footer focused on copyright, contact, and filing information.
 - Versioned local assets from their modification times so iterative deployments cannot leave month-long stale CSS or JavaScript caches.
