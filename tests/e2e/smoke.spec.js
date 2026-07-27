@@ -237,15 +237,14 @@ test('mobile lightbox arrows share the standard control visibility state', async
   })).toBeLessThan(0.5);
   const captionAlignment = await page.evaluate(() => {
     const image = document.querySelector('.pswp__item[aria-hidden="false"] .pswp__img:not(.pswp__img--placeholder)').getBoundingClientRect();
-    const copy = document.querySelector('.pswp__quietype-caption-copy').getBoundingClientRect();
-    const details = document.querySelector('.pswp__quietype-caption-details').getBoundingClientRect();
+    const caption = document.querySelector('.pswp__quietype-caption').getBoundingClientRect();
     return {
-      copyBottom: Math.abs(copy.bottom - image.bottom),
-      detailsGap: details.top - image.bottom,
+      viewportBottomGap: window.innerHeight - caption.bottom,
+      imageGap: caption.top - image.bottom,
     };
   });
-  expect(captionAlignment.copyBottom).toBeLessThan(0.5);
-  expect(captionAlignment.detailsGap).toBeGreaterThanOrEqual(6);
+  expect(Math.abs(captionAlignment.viewportBottomGap - 14)).toBeLessThan(0.5);
+  expect(captionAlignment.imageGap).toBeGreaterThan(100);
   await next.tap();
   await expect(page.locator('.pswp__quietype-caption strong')).toHaveText('窗外');
   await expect.poll(() => page.evaluate(() => !window.pswp?.mainScroll?.isShifted())).toBe(true);
