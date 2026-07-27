@@ -177,6 +177,21 @@ test('mobile lightbox arrows share the standard control visibility state', async
   await expect(next).toBeVisible();
   await expect(previous).toHaveCSS('width', '48px');
   await expect(next).toHaveCSS('width', '48px');
+  await expect(previous).toHaveCSS('opacity', '0.82');
+  await expect(next).toHaveCSS('opacity', '0.82');
+  const arrowAlignment = await page.evaluate(() => {
+    const measurements = ['prev', 'next'].map((direction) => {
+      const button = document.querySelector(`.pswp__button--arrow--${direction}`).getBoundingClientRect();
+      const icon = document.querySelector(`.pswp__button--arrow--${direction} .pswp__icn`).getBoundingClientRect();
+      return {
+        left: icon.left - button.left,
+        right: button.right - icon.right,
+      };
+    });
+    return measurements;
+  });
+  expect(Math.abs(arrowAlignment[0].left - arrowAlignment[0].right)).toBeLessThan(0.5);
+  expect(Math.abs(arrowAlignment[1].left - arrowAlignment[1].right)).toBeLessThan(0.5);
   await next.tap();
   await expect(page.locator('.pswp__quietype-caption strong')).toHaveText('窗外');
   await expect.poll(() => page.evaluate(() => !window.pswp?.mainScroll?.isShifted())).toBe(true);
@@ -185,8 +200,14 @@ test('mobile lightbox arrows share the standard control visibility state', async
   const viewport = page.viewportSize();
   await page.touchscreen.tap(viewport.width / 2, viewport.height / 2);
   await expect(page.locator('.pswp')).not.toHaveClass(/pswp--ui-visible/);
+  await expect(previous).toHaveCSS('opacity', '0');
+  await expect(next).toHaveCSS('opacity', '0');
   await expect(previous).toHaveCSS('pointer-events', 'none');
   await expect(next).toHaveCSS('pointer-events', 'none');
+  await page.touchscreen.tap(viewport.width / 2, viewport.height / 2);
+  await expect(page.locator('.pswp')).toHaveClass(/pswp--ui-visible/);
+  await expect(previous).toHaveCSS('opacity', '0.82');
+  await expect(next).toHaveCSS('opacity', '0.82');
 });
 
 test('full-resolution photo remains an explicit lightbox action', async ({ page }) => {

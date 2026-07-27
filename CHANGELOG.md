@@ -35,6 +35,7 @@ All notable changes to Quietype will be documented in this file.
 - Made browser Back close an open lightbox before leaving the current page, including mobile return gestures.
 - Removed native lazy-loading markers from JavaScript-deferred archive images, reduced adjacent PhotoSwipe preloading, and retried one failed CDN request without cache.
 - Restored compact touch-friendly previous and next controls at the middle edges of mobile photos, following the existing UI visibility state.
+- Centered PhotoSwipe's native mobile arrow artwork symmetrically and restored its shared tap-to-hide transition with the other controls.
 
 ## [0.9.0] - 2026-07-22
 
