@@ -19,6 +19,8 @@ while ( have_posts() ) {
 krsort( $books_by_year, SORT_NUMERIC );
 $years      = array_keys( $books_by_year );
 $year_count = count( $years );
+$book_total = array_sum( array_map( 'count', $books_by_year ) );
+$year_span  = $year_count ? ( 1 === $year_count ? (string) $years[0] : $years[ $year_count - 1 ] . '—' . $years[0] ) : '';
 $page_title = quietype_archive_page_text( 'book', 'title' );
 $eyebrow    = quietype_archive_page_text( 'book', 'eyebrow' );
 $intro      = quietype_archive_page_text( 'book', 'intro' );
@@ -33,9 +35,10 @@ if ( $year_count > 4 && 0 !== $year_count % 3 ) {
 			<p class="eyebrow"><?php echo esc_html( $eyebrow ); ?></p>
 			<h1><?php echo esc_html( $page_title ); ?></h1>
 		</div>
-		<?php if ( $intro ) : ?>
+		<?php if ( $intro || $book_total ) : ?>
 			<div class="books-hero__meta">
-				<p><?php echo esc_html( $intro ); ?></p>
+				<?php if ( $intro ) : ?><p class="collection-intro"><?php echo esc_html( $intro ); ?></p><?php endif; ?>
+				<?php if ( $book_total ) : ?><p class="collection-stats"><?php echo esc_html( $year_span . ' · ' . $book_total . ' 本' ); ?></p><?php endif; ?>
 			</div>
 		<?php endif; ?>
 	</header>
@@ -43,17 +46,29 @@ if ( $year_count > 4 && 0 !== $year_count % 3 ) {
 	<?php if ( $books_by_year ) : ?>
 		<nav class="<?php echo esc_attr( implode( ' ', $year_index_classes ) ); ?>" aria-label="按年份查看">
 			<?php foreach ( $books_by_year as $year => $books ) : ?>
-				<a href="#year-<?php echo esc_attr( $year ); ?>"><strong><?php echo esc_html( $year ); ?></strong><span><?php echo esc_html( count( $books ) ); ?> 本</span></a>
+				<?php
+				$year_position   = array_search( $year, $years, true );
+				$is_default_year = false !== $year_position && $year_position < 2;
+				?>
+				<a href="#year-<?php echo esc_attr( $year ); ?>" aria-controls="book-grid-<?php echo esc_attr( $year ); ?>" aria-expanded="<?php echo $is_default_year ? 'true' : 'false'; ?>"><strong><?php echo esc_html( $year ); ?></strong><span><?php echo esc_html( count( $books ) ); ?> 本</span></a>
 			<?php endforeach; ?>
 		</nav>
 
 		<?php foreach ( $books_by_year as $year => $books ) : ?>
-			<section class="book-year-shelf" id="year-<?php echo esc_attr( $year ); ?>" aria-labelledby="book-year-title-<?php echo esc_attr( $year ); ?>">
+			<?php
+			$year_position   = array_search( $year, $years, true );
+			$is_default_year = false !== $year_position && $year_position < 2;
+			?>
+			<section class="book-year-shelf" id="year-<?php echo esc_attr( $year ); ?>" aria-labelledby="book-year-title-<?php echo esc_attr( $year ); ?>" data-expanded="<?php echo $is_default_year ? 'true' : 'false'; ?>">
 				<header class="book-year-heading">
-					<h2 id="book-year-title-<?php echo esc_attr( $year ); ?>"><?php echo esc_html( $year ); ?></h2>
+					<h2 id="book-year-title-<?php echo esc_attr( $year ); ?>">
+						<button class="book-year-toggle" type="button" aria-expanded="<?php echo $is_default_year ? 'true' : 'false'; ?>" aria-controls="book-grid-<?php echo esc_attr( $year ); ?>" aria-label="<?php echo esc_attr( ( $is_default_year ? '收起 ' : '展开 ' ) . $year . ' 年书籍' ); ?>">
+							<span><?php echo esc_html( $year ); ?></span><i aria-hidden="true"></i>
+						</button>
+					</h2>
 					<p><?php echo esc_html( count( $books ) ); ?> 本</p>
 				</header>
-				<div class="book-grid">
+				<div class="book-grid" id="book-grid-<?php echo esc_attr( $year ); ?>">
 					<?php foreach ( $books as $post ) : // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited ?>
 						<?php setup_postdata( $post ); ?>
 						<?php get_template_part( 'template-parts/book', 'card' ); ?>

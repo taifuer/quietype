@@ -4,7 +4,7 @@ Theme URI: https://github.com/taifuer/quietype
 Author: taifu
 Author URI: https://github.com/taifuer
 Description: A quiet WordPress theme for thoughtful reading, designed for Chinese long-form and technical writing.
-Version: 0.10.15
+Version: 0.10.16
 Requires at least: 6.4
 Requires PHP: 8.0
 License: GNU General Public License v2 or later
@@ -296,6 +296,7 @@ figure { margin: 0; }
 .books-hero h1 { margin: 0; font: 680 clamp(42px, 5vw, 54px)/1.22 var(--sans); letter-spacing: -.035em; }
 .books-hero__meta { min-width: 0; max-width: 340px; padding-bottom: 5px; color: var(--muted); text-align: left; }
 .books-hero__meta p { margin: 0; font-size: 14px; line-height: 1.65; }
+.books-hero__meta .collection-stats, .photos-hero__meta .collection-stats { margin-top: 5px; font: 13px/1.55 var(--mono); font-variant-numeric: tabular-nums; }
 .book-year-index { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); margin-bottom: 8px; border-block: 1px solid var(--line); }
 .book-year-index a { display: flex; align-items: baseline; justify-content: center; gap: 8px; padding: 13px 10px; color: var(--muted); }
 .book-year-index a + a { border-left: 1px solid var(--line); }
@@ -307,7 +308,16 @@ figure { margin: 0; }
 .book-year-heading { position: sticky; top: 102px; align-self: start; }
 .book-year-heading h2 { margin: 0; font: 520 34px/1 var(--serif); letter-spacing: -.02em; }
 .book-year-heading p { margin: 10px 0 0; color: var(--muted); font-size: 13px; }
+.book-year-toggle, .photo-year__toggle { display: inline-flex; align-items: center; gap: 10px; padding: 2px 0; border: 0; background: transparent; color: inherit; font: inherit; letter-spacing: inherit; cursor: pointer; }
+.book-year-toggle i, .photo-year__toggle i { width: 8px; height: 8px; border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); transform: translateY(-2px) rotate(45deg); transition: transform .2s ease; }
+.book-year-toggle[aria-expanded="true"] i, .photo-year__toggle[aria-expanded="true"] i { transform: translateY(2px) rotate(225deg); }
+.book-year-toggle:hover, .photo-year__toggle:hover { color: var(--accent); }
+.book-year-toggle:focus-visible, .photo-year__toggle:focus-visible { border-radius: 2px; outline: 2px solid var(--accent); outline-offset: 5px; }
 .book-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 30px; }
+html.js .book-year-shelf[data-expanded="false"] { display: block; padding: 20px 0; }
+html.js .book-year-shelf[data-expanded="false"] .book-year-heading { position: static; display: flex; align-items: baseline; justify-content: space-between; }
+html.js .book-year-shelf[data-expanded="false"] .book-year-heading p { margin: 0; }
+html.js .book-year-shelf[data-expanded="false"] .book-grid { display: none; }
 .book-item { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 16px; min-width: 0; padding-bottom: 27px; border-bottom: 1px solid var(--line); scroll-margin-top: 88px; }
 .book-cover { position: relative; display: block; align-self: start; width: 84px; height: 124px; overflow: hidden; border: 1px solid var(--line); background: var(--code-dark); }
 .book-cover img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; padding: 2px; background: var(--paper); object-fit: contain; }
@@ -356,11 +366,6 @@ figure { margin: 0; }
 .photo-year__heading { position: sticky; top: 102px; align-self: start; }
 .photo-year__heading h2 { margin: 0; font: 520 34px/1 var(--serif); letter-spacing: -.02em; }
 .photo-year__heading p { margin: 10px 0 0; color: var(--muted); font-size: 13px; }
-.photo-year__toggle { display: inline-flex; align-items: center; gap: 10px; padding: 2px 0; border: 0; background: transparent; color: inherit; font: inherit; letter-spacing: inherit; cursor: pointer; }
-.photo-year__toggle i { width: 8px; height: 8px; border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); transform: translateY(-2px) rotate(45deg); transition: transform .2s ease; }
-.photo-year__toggle[aria-expanded="true"] i { transform: translateY(2px) rotate(225deg); }
-.photo-year__toggle:hover { color: var(--accent); }
-.photo-year__toggle:focus-visible { border-radius: 2px; outline: 2px solid var(--accent); outline-offset: 5px; }
 .photo-grid { display: grid; grid-auto-flow: dense; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 28px 10px; min-width: 0; }
 html.js .photo-year[data-expanded="false"] { display: block; padding: 20px 0; }
 html.js .photo-year[data-expanded="false"] .photo-year__heading { position: static; display: flex; align-items: baseline; justify-content: space-between; }
@@ -652,6 +657,7 @@ html:not(.js) .photo-frame img[data-photo-deferred] { display: none; }
 	.book-year-heading { position: static; display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 22px; }
 	.book-year-heading h2 { font-size: 29px; }
 	.book-year-heading p { margin: 0; }
+	html.js .book-year-shelf[data-expanded="false"] { padding: 18px 0; }
 	.book-grid { grid-template-columns: 1fr; gap: 22px; }
 	.book-item { grid-template-columns: 76px minmax(0, 1fr); gap: 14px; padding-bottom: 22px; }
 	.book-item, .photo-card { scroll-margin-top: 76px; }
@@ -742,8 +748,9 @@ html:not(.js) .photo-frame img[data-photo-deferred] { display: none; }
 }
 
 @media print {
-	.site-header, .prefooter-nav, .site-footer, .reading-tools, .article-toc, .mobile-toc, .comments-area, .heading-permalink, .photo-year-index { display: none !important; }
+	.site-header, .prefooter-nav, .site-footer, .reading-tools, .article-toc, .mobile-toc, .comments-area, .heading-permalink, .book-year-index, .photo-year-index { display: none !important; }
 	body, html { background: #fff; }
+	.book-grid[hidden] { display: grid !important; }
 	.article { padding: 0; }
 	.article-content, .article-header { width: 100%; max-width: none; }
 	.article-content { color: #000; font-size: 11pt; }

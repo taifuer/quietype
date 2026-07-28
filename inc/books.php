@@ -215,17 +215,22 @@ function quietype_sanitize_book_date( $value ) {
 	return $date && $date->format( 'Y-m' ) === $value ? $value : '';
 }
 
+function quietype_book_status_labels() {
+	return array(
+		'read'    => '读完',
+		'reading' => '在读',
+		'partial' => '读过',
+		'planned' => '待读',
+	);
+}
+
 function quietype_sanitize_book_status( $value ) {
 	$value = sanitize_key( $value );
-	return in_array( $value, array( 'read', 'reading', 'planned' ), true ) ? $value : '';
+	return array_key_exists( $value, quietype_book_status_labels() ) ? $value : '';
 }
 
 function quietype_book_status_label( $status ) {
-	$labels = array(
-		'read'    => '已读',
-		'reading' => '在读',
-		'planned' => '待读',
-	);
+	$labels = quietype_book_status_labels();
 	return $labels[ quietype_sanitize_book_status( $status ) ] ?? '';
 }
 
@@ -398,7 +403,7 @@ function quietype_render_book_meta_box( $post ) {
 			<tr><th><label for="quietype_book_publication_year">出版年份</label></th><td><input class="small-text" id="quietype_book_publication_year" name="quietype_book_publication_year" type="number" min="1000" max="<?php echo esc_attr( (int) gmdate( 'Y' ) + 2 ); ?>" value="<?php echo esc_attr( $data['publication_year'] ); ?>"></td></tr>
 			<tr><th><label for="quietype_book_isbn">ISBN</label></th><td><input class="regular-text code" id="quietype_book_isbn" name="quietype_book_isbn" type="text" value="<?php echo esc_attr( $data['isbn'] ); ?>"></td></tr>
 			<tr><th><label for="quietype_book_cover_url">封面图片地址</label></th><td><input class="regular-text code" id="quietype_book_cover_url" name="quietype_book_cover_url" type="url" value="<?php echo esc_attr( $data['cover_url'] ); ?>" placeholder="https://example.com/images/book-cover.jpg"><p class="description">可填写 HTTPS 图片地址，将优先于特色图显示；留空则使用特色图或文字封面。</p></td></tr>
-			<tr><th><label for="quietype_book_status">阅读状态</label></th><td><select id="quietype_book_status" name="quietype_book_status"><?php foreach ( array( 'read' => '已读', 'reading' => '在读', 'planned' => '待读' ) as $status => $label ) : ?><option value="<?php echo esc_attr( $status ); ?>" <?php selected( $data['status'], $status ); ?>><?php echo esc_html( $label ); ?></option><?php endforeach; ?></select></td></tr>
+			<tr><th><label for="quietype_book_status">阅读状态</label></th><td><select id="quietype_book_status" name="quietype_book_status"><?php foreach ( quietype_book_status_labels() as $status => $label ) : ?><option value="<?php echo esc_attr( $status ); ?>" <?php selected( $data['status'], $status ); ?>><?php echo esc_html( $label ); ?></option><?php endforeach; ?></select><p class="description">“读过”用于读了一部分，并且不再继续的书籍。</p></td></tr>
 			<tr><th><label for="quietype_book_read_date">阅读月份</label></th><td><input id="quietype_book_read_date" name="quietype_book_read_date" type="month" value="<?php echo esc_attr( $data['read_date'] ); ?>"><p class="description">用于年度分组；待读书目可填写计划月份。</p></td></tr>
 			<tr><th><label for="quietype_book_rating">我的评价</label></th><td><select id="quietype_book_rating" name="quietype_book_rating"><option value="">暂不评分</option><?php for ( $rating = 1; $rating <= 5; $rating++ ) : ?><option value="<?php echo esc_attr( $rating ); ?>" <?php selected( $data['rating'], $rating ); ?>><?php echo esc_html( str_repeat( '★', $rating ) . str_repeat( '☆', 5 - $rating ) ); ?></option><?php endfor; ?></select></td></tr>
 			<tr><th><label for="quietype_book_douban_rating">豆瓣评分</label></th><td><input class="small-text" id="quietype_book_douban_rating" name="quietype_book_douban_rating" type="number" min="0.1" max="10" step="0.1" value="<?php echo esc_attr( $data['douban_rating'] ?: '' ); ?>"></td></tr>

@@ -142,7 +142,7 @@ $books = array(
 		'excerpt' => '人物从来不只是人物，一座园子也不只是园子。隔几年重读，注意到的总是不同。',
 	),
 	array(
-		'title' => '设计中的设计', 'slug' => 'designing-design', 'authors' => '原研哉', 'publisher' => '广西师范大学出版社', 'year' => '2010', 'read_date' => '2025-12-01', 'status' => 'read', 'rating' => '4', 'douban' => '8.6', 'douban_id' => '1941558', 'category' => 'design', 'tags' => array( '排版', '经典' ),
+		'title' => '设计中的设计', 'slug' => 'designing-design', 'authors' => '原研哉', 'publisher' => '广西师范大学出版社', 'year' => '2010', 'read_date' => '2025-12-01', 'status' => 'partial', 'rating' => '4', 'douban' => '8.6', 'douban_id' => '1941558', 'category' => 'design', 'tags' => array( '排版', '经典' ),
 		'excerpt' => '设计不是增加装饰，而是重新发现事物原本可以被感知和使用的方式。',
 	),
 	array(

@@ -20,8 +20,10 @@ while ( have_posts() ) {
 	$photos_by_year[ $year ][] = get_post();
 }
 krsort( $photos_by_year, SORT_NUMERIC );
-$years      = array_keys( $photos_by_year );
-$year_count = count( $years );
+$years       = array_keys( $photos_by_year );
+$year_count  = count( $years );
+$photo_total = array_sum( array_map( 'count', $photos_by_year ) );
+$year_span   = $year_count ? ( 1 === $year_count ? (string) $years[0] : $years[ $year_count - 1 ] . '—' . $years[0] ) : '';
 $page_title = quietype_archive_page_text( 'photo', 'title' );
 $eyebrow    = quietype_archive_page_text( 'photo', 'eyebrow' );
 $intro      = quietype_archive_page_text( 'photo', 'intro' );
@@ -36,9 +38,10 @@ if ( $year_count > 4 && 0 !== $year_count % 3 ) {
 			<p class="eyebrow"><?php echo esc_html( $eyebrow ); ?></p>
 			<h1><?php echo esc_html( $page_title ); ?></h1>
 		</div>
-		<?php if ( $intro ) : ?>
+		<?php if ( $intro || $photo_total ) : ?>
 			<div class="photos-hero__meta">
-				<p><?php echo esc_html( $intro ); ?></p>
+				<?php if ( $intro ) : ?><p class="collection-intro"><?php echo esc_html( $intro ); ?></p><?php endif; ?>
+				<?php if ( $photo_total ) : ?><p class="collection-stats"><?php echo esc_html( $year_span . ' · ' . $photo_total . ' 张' ); ?></p><?php endif; ?>
 			</div>
 		<?php endif; ?>
 	</header>

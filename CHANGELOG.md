@@ -15,6 +15,8 @@ All notable changes to Quietype will be documented in this file.
 
 ### Changed
 
+- Added compact year-span totals to the book and photo headers, with the two newest book years expanded by default and older shelves revealed on demand or by record hash.
+- Renamed the completed reading state from “已读” to “读完” without migrating stored values, and added a distinct “读过” state for books intentionally left unfinished.
 - Consolidated sitemap discovery on `/wp-sitemap.xml`; the legacy `/sitemap.xml` path remains a permanent compatibility redirect after its stale static file is removed.
 - Reduced the directly requested photo grid from six full display files to three compact thumbnails before near-viewport hydration takes over.
 - Generalized the optional book-title destination from a Douban-only URL to any valid HTTP(S) reference, while retaining the assisted Douban lookup.

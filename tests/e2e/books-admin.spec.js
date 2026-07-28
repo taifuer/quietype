@@ -60,6 +60,8 @@ test('Douban lookup previews data before manual confirmation', async ({ page }) 
   expect(fieldWidths).toEqual([420]);
   await expect(page.locator('#quietype_book_read_date')).toHaveAttribute('type', 'month');
   await expect(page.locator('#quietype_book_status')).toHaveValue('read');
+  await expect(page.locator('#quietype_book_status option')).toHaveText(['读完', '在读', '读过', '待读']);
+  await expect(page.locator('#quietype_book_status + .description')).toContainText('读了一部分');
 	await expect(page.locator('#quietype_book_cover_url')).toHaveAttribute('placeholder', 'https://example.com/images/book-cover.jpg');
 	await expect(page.locator('#quietype_book_cover_url + .description')).toContainText('优先于特色图');
 	await expect(page.locator('label[for="quietype_book_url"]')).toHaveText('链接');
@@ -105,7 +107,7 @@ test('book list keeps only compact operational reading metadata', async ({ page 
   await expect(page.locator('th#quietype_book_reading')).toHaveText('阅读记录');
   await expect(page.locator('th#date')).toHaveCount(0);
   const programmingPearls = page.locator('#the-list tr').filter({ hasText: '编程珠玑' });
-  await expect(programmingPearls.locator('.column-quietype_book_reading')).toContainText('已读 · 2026.06');
+  await expect(programmingPearls.locator('.column-quietype_book_reading')).toContainText('读完 · 2026.06');
   const archiveLink = programmingPearls.locator('.row-actions .view a');
   await expect(archiveLink).toHaveText('在书架中查看');
   await expect(archiveLink).toHaveAttribute('href', /\/books\/?#book-[0-9]+$/);

@@ -69,7 +69,8 @@ test('photo archive groups external images and keeps details in the lightbox', a
   expect(pageHtml).not.toContain('<noscript><img');
   await expect(page.locator('.photos-hero h1')).toHaveText('万物静观');
   await expect(page.locator('.photos-hero .eyebrow')).toHaveText('PHOTOS');
-  await expect(page.locator('.photos-hero__meta')).toHaveCount(0);
+  await expect(page.locator('.photos-hero__meta .collection-intro')).toHaveCount(0);
+  await expect(page.locator('.photos-hero__meta .collection-stats')).toHaveText('2024—2026 · 6 张');
   await expect(page.locator('.photo-card')).toHaveCount(6);
   await expect(page.locator('.photo-year')).toHaveCount(3);
   await expect(page.locator('.photo-year__heading h2')).toHaveText(['2026', '2025', '2024']);
@@ -332,11 +333,19 @@ test('book archive groups compact reading records by year', async ({ page }) => 
   await page.goto('/books/');
   await expect(page.locator('.books-hero h1')).toHaveText('万卷古今');
   await expect(page.locator('.books-hero .eyebrow')).toHaveText('BOOKS');
-  await expect(page.locator('.books-hero__meta')).toHaveCount(0);
+  await expect(page.locator('.books-hero__meta .collection-intro')).toHaveCount(0);
+  await expect(page.locator('.books-hero__meta .collection-stats')).toHaveText('2023—2026 · 8 本');
   await expect(page.locator('.book-item')).toHaveCount(8);
   await expect(page.locator('.book-year-shelf')).toHaveCount(4);
   await expect(page.locator('.book-year-heading h2')).toHaveText(['2026', '2025', '2024', '2023']);
   await expect(page.locator('.book-year-index')).toHaveClass(/book-year-index--count-4/);
+  await expect(page.locator('.book-year-shelf').nth(0)).toHaveAttribute('data-expanded', 'true');
+  await expect(page.locator('.book-year-shelf').nth(1)).toHaveAttribute('data-expanded', 'true');
+  await expect(page.locator('.book-year-shelf').nth(2)).toHaveAttribute('data-expanded', 'false');
+  await expect(page.locator('.book-year-shelf').nth(3)).toHaveAttribute('data-expanded', 'false');
+  await expect(page.locator('.book-grid').nth(1)).toBeVisible();
+  await expect(page.locator('.book-grid').nth(2)).toBeHidden();
+  await expect(page.locator('.book-year-index a').nth(2)).toHaveAttribute('aria-expanded', 'false');
   await expect(page.locator('.book-title-row h3 a').first()).toHaveAttribute('href', 'https://example.com/books/programming-pearls');
   await expect(page.locator('.book-item').filter({ hasText: '小王子' }).locator('.book-title-row h3 a')).toHaveCount(0);
   await expect(page.locator('a.book-cover')).toHaveCount(0);
@@ -350,7 +359,7 @@ test('book archive groups compact reading records by year', async ({ page }) => 
   await expect(page.locator('.book-terms .post-category').first()).toBeVisible();
   await expect(page.locator('.book-terms .post-tag').first()).toContainText('#');
   await expect(page.locator('.book-cover__fallback').first()).toBeVisible();
-  await expect(page.locator('.book-status')).toContainText(['已读', '在读', '待读', '已读', '已读', '已读', '已读', '已读']);
+  await expect(page.locator('.book-status')).toContainText(['读完', '在读', '待读', '读过', '读完', '读完', '读完', '读完']);
   await expect(page.locator('.personal-rating').first()).not.toContainText('评分');
   await expect(page.locator('.personal-rating').first()).toHaveAttribute('aria-label', /^个人评分 .*满分 5 星$/);
   await expect(page.locator('.book-read-date').first()).toHaveText(/^20[0-9]{2}\.[0-9]{2}$/);
@@ -370,6 +379,23 @@ test('book archive groups compact reading records by year', async ({ page }) => 
     expect(yearBoxes[1].x).toBe(yearBoxes[3].x);
     expect(yearBoxes[2].y).toBeGreaterThan(yearBoxes[0].y);
   }
+});
+
+test('book year controls and record hashes reveal collapsed shelves', async ({ page }) => {
+  await page.goto('/books/');
+  const archivedYear = page.locator('.book-year-shelf').nth(2);
+  await archivedYear.locator('.book-year-toggle').click();
+  await expect(archivedYear).toHaveAttribute('data-expanded', 'true');
+  await expect(archivedYear.locator('.book-grid')).toBeVisible();
+  await expect(page.locator('.book-year-index a').nth(2)).toHaveAttribute('aria-expanded', 'true');
+
+  const recordId = await page.locator('.book-year-shelf').nth(3).locator('.book-item').first().getAttribute('id');
+  expect(recordId).toBeTruthy();
+  await page.goto(`/books/#${recordId}`);
+  const recordYear = page.locator('.book-year-shelf').nth(3);
+  await expect(recordYear).toHaveAttribute('data-expanded', 'true');
+  await expect(recordYear.locator('.book-grid')).toBeVisible();
+  await expect(page.locator(`#${recordId}`)).toBeVisible();
 });
 
 test('an incomplete mobile year row occupies only its real cells', async ({ page }) => {

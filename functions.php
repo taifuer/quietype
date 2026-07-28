@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'QUIETYPE_VERSION', '0.10.15' );
+define( 'QUIETYPE_VERSION', '0.10.16' );
 
 require_once get_template_directory() . '/inc/admin-settings.php';
 require_once get_template_directory() . '/inc/login-security.php';
@@ -71,6 +71,9 @@ function quietype_assets() {
 				'cooldownSeconds' => 6 * HOUR_IN_SECONDS,
 			)
 		);
+	}
+	if ( is_post_type_archive( 'book' ) ) {
+		wp_enqueue_script( 'quietype-books', get_template_directory_uri() . '/assets/js/books.js', array(), quietype_asset_version( 'assets/js/books.js' ), true );
 	}
 	$lightbox_dependencies = array();
 	if ( is_post_type_archive( 'photo' ) ) {
