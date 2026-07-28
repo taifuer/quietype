@@ -18,6 +18,7 @@ wp_installing( false );
 
 wp_set_current_user( 1 );
 switch_theme( 'quietype' );
+update_option( 'quietype_photo_thumbnail_base_url', 'https://images.example.test/photos', false );
 if ( ! function_exists( 'quietype_register_books' ) ) {
 	require_once WP_CONTENT_DIR . '/themes/quietype/functions.php';
 }
@@ -233,7 +234,7 @@ foreach ( $photos as $index => $photo ) {
 		)
 	);
 	foreach ( array(
-		'_quietype_photo_image_url'     => 'https://images.example.test/photo-' . ( $index + 1 ) . '.jpg',
+		'_quietype_photo_image_url'     => 'https://images.example.test/photos/' . substr( $photo[1], 0, 4 ) . '/photo-' . ( $index + 1 ) . '.jpg',
 		'_quietype_photo_original_url'  => 0 === $index ? 'https://images.example.test/photo-1-original.jpg' : '',
 		'_quietype_photo_captured_date' => $photo[1],
 		'_quietype_photo_location'      => $photo[2],

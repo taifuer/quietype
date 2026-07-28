@@ -1,10 +1,13 @@
 const { test, expect } = require('@playwright/test');
 
 async function logIn(page) {
-	await page.goto('/wp-login.php');
+  await page.goto('/wp-login.php');
   await page.locator('#user_login').fill('admin');
   await page.locator('#user_pass').fill('password');
-  await page.locator('#wp-submit').click();
+  await Promise.all([
+    page.waitForURL(/\/wp-admin\//),
+    page.locator('#wp-submit').click()
+  ]);
 }
 
 test('Douban lookup previews data before manual confirmation', async ({ page }) => {

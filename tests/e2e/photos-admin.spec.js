@@ -4,7 +4,10 @@ async function logIn(page) {
   await page.goto('/wp-login.php');
   await page.locator('#user_login').fill('admin');
   await page.locator('#user_pass').fill('password');
-  await page.locator('#wp-submit').click();
+  await Promise.all([
+    page.waitForURL(/\/wp-admin\//),
+    page.locator('#wp-submit').click()
+  ]);
 }
 
 test('photo lookup previews metadata before manual confirmation', async ({ page }) => {
@@ -79,4 +82,13 @@ test('photo list exposes only useful operational metadata', async ({ page }) => 
   await photo.locator('.row-title').click();
   await expect(page.locator('#sample-permalink')).toHaveCount(0);
   await expect(page.locator('#slugdiv')).toHaveCount(0);
+});
+
+test('photo thumbnail convention is configurable without per-photo fields', async ({ page }) => {
+  test.skip(page.viewportSize().width < 700, 'The settings screen is viewport-independent.');
+  await logIn(page);
+  await page.goto('/wp-admin/themes.php?page=quietype-settings', { waitUntil: 'domcontentloaded' });
+
+  await expect(page.locator('#quietype_photo_thumbnail_base_url')).toHaveValue('https://images.example.test/photos');
+  await expect(page.locator('#quietype_photo_thumbnail_base_url + .description')).toContainText('thumbs/年份/同名文件.webp');
 });

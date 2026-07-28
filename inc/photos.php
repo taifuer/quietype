@@ -91,6 +91,12 @@ function quietype_sanitize_photo_url( $value ) {
 	return wp_parse_url( $url, PHP_URL_HOST ) ? $url : '';
 }
 
+/** Normalize the optional root shared by display photos and generated thumbnails. */
+function quietype_sanitize_photo_thumbnail_base_url( $value ) {
+	$url = quietype_sanitize_photo_url( $value );
+	return $url ? untrailingslashit( $url ) : '';
+}
+
 function quietype_sanitize_photo_date( $value ) {
 	$value = sanitize_text_field( (string) $value );
 	if ( preg_match( '/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/', $value ) ) {
@@ -168,11 +174,38 @@ function quietype_photo_data( $post_id = null ) {
 	);
 }
 
+/** Derive a deterministic WebP grid URL without adding one field to every record. */
+function quietype_photo_thumbnail_url( $image_url ) {
+	$image_url = quietype_sanitize_photo_url( $image_url );
+	$base_url  = defined( 'QUIETYPE_PHOTO_THUMBNAIL_BASE_URL' ) ? QUIETYPE_PHOTO_THUMBNAIL_BASE_URL : quietype_get_setting( 'quietype_photo_thumbnail_base_url', '' );
+	$base_url  = quietype_sanitize_photo_thumbnail_base_url( $base_url );
+	if ( ! $image_url || ! $base_url ) {
+		return $image_url;
+	}
+
+	$image_parts = wp_parse_url( $image_url );
+	$base_parts  = wp_parse_url( $base_url );
+	if ( strtolower( (string) ( $image_parts['host'] ?? '' ) ) !== strtolower( (string) ( $base_parts['host'] ?? '' ) )
+		|| (int) ( $image_parts['port'] ?? 443 ) !== (int) ( $base_parts['port'] ?? 443 ) ) {
+		return $image_url;
+	}
+
+	$base_path  = untrailingslashit( (string) ( $base_parts['path'] ?? '' ) );
+	$image_path = (string) ( $image_parts['path'] ?? '' );
+	$relative   = ltrim( substr( $image_path, strlen( $base_path ) ), '/' );
+	if ( 0 !== strpos( $image_path, $base_path . '/' ) || ! preg_match( '#^([0-9]{4})/([a-z0-9_-]+)\.(?:jpe?g|png|webp)$#i', $relative, $matches ) ) {
+		return $image_url;
+	}
+
+	$thumbnail_url = $base_url . '/thumbs/' . $matches[1] . '/' . strtolower( $matches[2] ) . '.webp';
+	return quietype_sanitize_photo_url( apply_filters( 'quietype_photo_thumbnail_url', $thumbnail_url, $image_url ) ) ?: $image_url;
+}
+
 /**
  * Resolve a lightweight grid image, a restrained lightbox image and an optional original.
  *
- * External images cannot receive WordPress-generated derivatives, so their display URL is
- * used for both the grid and lightbox. The optional original is never loaded automatically.
+ * External images can use a deterministic WebP thumbnail when a matching CDN base is
+ * configured. The optional original is never loaded automatically.
  */
 function quietype_photo_image_sources( $data ) {
 	$width  = $data['width'] ?: 1600;
@@ -186,6 +219,9 @@ function quietype_photo_image_sources( $data ) {
 	);
 
 	if ( ! $data['attachment_id'] || $data['is_external'] ) {
+		if ( $data['is_external'] ) {
+			$result['grid_url'] = quietype_photo_thumbnail_url( $data['image_url'] );
+		}
 		if ( $result['original_url'] === $result['lightbox_url'] ) {
 			$result['original_url'] = '';
 		}

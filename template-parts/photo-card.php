@@ -76,7 +76,7 @@ if ( $photo_data['location'] ) {
 			echo $image_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Core markup is escaped and optionally modified by the HTML processor.
 		} else {
 			?>
-			<img <?php echo $is_deferred ? 'data-src' : 'src'; ?>="<?php echo esc_url( $photo_sources['grid_url'] ); ?>"<?php echo $is_deferred ? ' data-photo-deferred="true"' : ''; ?> alt="<?php echo esc_attr( $alt ); ?>" width="<?php echo esc_attr( $photo_data['width'] ?: 1600 ); ?>" height="<?php echo esc_attr( $photo_data['height'] ?: 1067 ); ?>" decoding="async" referrerpolicy="no-referrer">
+			<img <?php echo $is_deferred ? 'data-src' : 'src'; ?>="<?php echo esc_url( $photo_sources['grid_url'] ); ?>"<?php echo $is_deferred ? ' data-photo-deferred="true"' : ''; ?><?php if ( $photo_sources['grid_url'] !== $photo_sources['lightbox_url'] ) : ?> data-photo-fallback="<?php echo esc_url( $photo_sources['lightbox_url'] ); ?>"<?php endif; ?> alt="<?php echo esc_attr( $alt ); ?>" width="<?php echo esc_attr( $photo_data['width'] ?: 1600 ); ?>" height="<?php echo esc_attr( $photo_data['height'] ?: 1067 ); ?>" decoding="async" referrerpolicy="no-referrer">
 			<?php
 		}
 		?>

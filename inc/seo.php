@@ -28,6 +28,57 @@ function quietype_filter_sitemap_provider( $provider, $name ) {
 }
 add_filter( 'wp_sitemaps_add_provider', 'quietype_filter_sitemap_provider', 10, 2 );
 
+/** Register the two public archive pages without exposing redirect-only records. */
+function quietype_register_archive_sitemap_provider() {
+	if ( ! class_exists( 'WP_Sitemaps_Provider' ) || ! function_exists( 'wp_register_sitemap_provider' ) ) {
+		return;
+	}
+
+	$provider = new class() extends WP_Sitemaps_Provider {
+		public function __construct() {
+			$this->name        = 'quietypearchives';
+			$this->object_type = 'archive';
+		}
+
+		public function get_url_list( $page_num, $object_subtype = '' ) {
+			if ( 1 !== (int) $page_num ) {
+				return array();
+			}
+			$entries = array();
+			foreach ( array( 'book', 'photo' ) as $post_type ) {
+				$latest = get_posts(
+					array(
+						'post_type'      => $post_type,
+						'post_status'    => 'publish',
+						'posts_per_page' => 1,
+						'orderby'        => 'modified',
+						'order'          => 'DESC',
+						'fields'         => 'ids',
+					)
+				);
+				$archive_url = get_post_type_archive_link( $post_type );
+				if ( ! $latest || ! $archive_url ) {
+					continue;
+				}
+				$entry   = array( 'loc' => $archive_url );
+				$lastmod = get_post_modified_time( DATE_W3C, true, $latest[0] );
+				if ( $lastmod ) {
+					$entry['lastmod'] = $lastmod;
+				}
+				$entries[] = $entry;
+			}
+			return $entries;
+		}
+
+		public function get_max_num_pages( $object_subtype = '' ) {
+			return 1;
+		}
+	};
+
+	wp_register_sitemap_provider( 'quietypearchives', $provider );
+}
+add_action( 'wp_sitemaps_init', 'quietype_register_archive_sitemap_provider' );
+
 /** Normalize text for a search-result description. */
 function quietype_normalize_meta_text( $value, $length = 180 ) {
 	$value = html_entity_decode( wp_strip_all_tags( strip_shortcodes( (string) $value ) ), ENT_QUOTES, get_bloginfo( 'charset' ) );

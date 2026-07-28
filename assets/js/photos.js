@@ -31,9 +31,10 @@
   const watchDirectImage = (image) => {
     if (image.dataset.photoRetryReady === 'true') return;
     image.dataset.photoRetryReady = 'true';
-    const source = image.currentSrc || image.src;
+    let source = image.currentSrc || image.src;
     if (!source) return;
     let retries = 0;
+    let usedFallback = false;
 
     const onLoad = () => {
       markLoaded(image);
@@ -41,17 +42,26 @@
       image.removeEventListener('error', onError);
     };
     const onError = () => {
-      if (retries >= maximumRetries) {
-        markFailed(image);
-        image.removeEventListener('load', onLoad);
-        image.removeEventListener('error', onError);
+      if (retries < maximumRetries) {
+        retries += 1;
+        image.removeAttribute('srcset');
+        window.setTimeout(() => {
+          image.src = retrySource(source, retries);
+        }, retries * 180);
         return;
       }
-      retries += 1;
-      image.removeAttribute('srcset');
-      window.setTimeout(() => {
-        image.src = retrySource(source, retries);
-      }, retries * 180);
+      if (!usedFallback && image.dataset.photoFallback) {
+        usedFallback = true;
+        source = image.dataset.photoFallback;
+        retries = 0;
+        delete image.dataset.photoFallback;
+        image.removeAttribute('srcset');
+        image.src = source;
+        return;
+      }
+      markFailed(image);
+      image.removeEventListener('load', onLoad);
+      image.removeEventListener('error', onError);
     };
 
     image.addEventListener('load', onLoad);
@@ -65,10 +75,11 @@
   const revealImage = (image) => {
     if (image.dataset.photoLoading === 'true') return;
     const sourceSet = image.dataset.srcset;
-    const source = image.dataset.src;
+    let source = image.dataset.src;
     if (!source) return;
     image.dataset.photoLoading = 'true';
     let retries = 0;
+    let usedFallback = false;
 
     const onLoad = () => {
       markLoaded(image);
@@ -79,18 +90,27 @@
       image.removeEventListener('error', onError);
     };
     const onError = () => {
-      if (retries >= maximumRetries) {
-        markFailed(image);
-        delete image.dataset.photoLoading;
-        image.removeEventListener('load', onLoad);
-        image.removeEventListener('error', onError);
+      if (retries < maximumRetries) {
+        retries += 1;
+        image.removeAttribute('srcset');
+        window.setTimeout(() => {
+          image.src = retrySource(source, retries);
+        }, retries * 180);
         return;
       }
-      retries += 1;
-      image.removeAttribute('srcset');
-      window.setTimeout(() => {
-        image.src = retrySource(source, retries);
-      }, retries * 180);
+      if (!usedFallback && image.dataset.photoFallback) {
+        usedFallback = true;
+        source = image.dataset.photoFallback;
+        retries = 0;
+        delete image.dataset.photoFallback;
+        image.removeAttribute('srcset');
+        image.src = source;
+        return;
+      }
+      markFailed(image);
+      delete image.dataset.photoLoading;
+      image.removeEventListener('load', onLoad);
+      image.removeEventListener('error', onError);
     };
 
     image.addEventListener('load', onLoad);

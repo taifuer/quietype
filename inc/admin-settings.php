@@ -33,6 +33,7 @@ function quietype_register_admin_settings() {
 		'quietype_photos_page_title'          => array( 'string', '万物静观', 'quietype_sanitize_archive_title' ),
 		'quietype_photos_page_eyebrow'        => array( 'string', 'PHOTOS', 'quietype_sanitize_archive_eyebrow' ),
 		'quietype_photos_page_intro'          => array( 'string', '', 'quietype_sanitize_archive_intro' ),
+		'quietype_photo_thumbnail_base_url'   => array( 'string', '', 'quietype_sanitize_photo_thumbnail_base_url' ),
 		'quietype_link_check_enabled'         => array( 'boolean', true, 'quietype_sanitize_checkbox' ),
 		'quietype_article_copyright_enabled'  => array( 'boolean', true, 'quietype_sanitize_checkbox' ),
 		'quietype_article_author_name'        => array( 'string', '小傅', 'sanitize_text_field' ),
@@ -299,6 +300,7 @@ function quietype_render_settings_page() {
 					<tr><th><label for="quietype_photos_page_title">照片页标题</label></th><td><input class="regular-text" id="quietype_photos_page_title" name="quietype_photos_page_title" type="text" maxlength="80" value="<?php echo esc_attr( quietype_get_setting( 'quietype_photos_page_title', '万物静观' ) ); ?>" placeholder="万物静观"></td></tr>
 					<tr><th><label for="quietype_photos_page_eyebrow">照片页英文标识</label></th><td><input class="regular-text code" id="quietype_photos_page_eyebrow" name="quietype_photos_page_eyebrow" type="text" maxlength="32" value="<?php echo esc_attr( quietype_get_setting( 'quietype_photos_page_eyebrow', 'PHOTOS' ) ); ?>" placeholder="PHOTOS"></td></tr>
 					<tr><th><label for="quietype_photos_page_intro">照片页简介</label></th><td><textarea class="large-text" id="quietype_photos_page_intro" name="quietype_photos_page_intro" rows="2" maxlength="180" placeholder="留空不显示"><?php echo esc_textarea( quietype_get_setting( 'quietype_photos_page_intro', '' ) ); ?></textarea></td></tr>
+					<tr><th><label for="quietype_photo_thumbnail_base_url">照片 CDN 基础目录</label></th><td><input class="large-text code" id="quietype_photo_thumbnail_base_url" name="quietype_photo_thumbnail_base_url" type="url" value="<?php echo esc_attr( quietype_get_setting( 'quietype_photo_thumbnail_base_url', '' ) ); ?>" placeholder="https://example.com/photos"><p class="description">可选。填写后，网格会读取 <code>thumbs/年份/同名文件.webp</code>，灯箱仍使用展示图；缩略图缺失时自动回退。留空保持原有行为。</p></td></tr>
 				</table>
 			</section>
 

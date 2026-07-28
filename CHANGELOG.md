@@ -7,12 +7,16 @@ All notable changes to Quietype will be documented in this file.
 ### Added
 
 - Added unobtrusive, copy-aware permalinks to rendered H2 and H3 article headings.
+- Added deterministic WebP photo-grid thumbnails with an administrator-configurable CDN root, a batch generator, and automatic display-image fallback.
+- Added the public bookshelf and photo archive to the WordPress core sitemap without exposing redirect-only records.
 - Added a compact annual reading archive with administrator-defined categories and tags, short notes, whole-star ratings, covers, and direct Douban links.
 - Added administrator-only Douban metadata previews with a separate manual confirmation step and validated cover imports.
 - Added an optional navigation row between page content and the legal footer.
 
 ### Changed
 
+- Consolidated sitemap discovery on `/wp-sitemap.xml`; the legacy `/sitemap.xml` path remains a permanent compatibility redirect after its stale static file is removed.
+- Reduced the directly requested photo grid from six full display files to three compact thumbnails before near-viewport hydration takes over.
 - Generalized the optional book-title destination from a Douban-only URL to any valid HTTP(S) reference, while retaining the assisted Douban lookup.
 - Replaced the site-specific book-cover placeholder with a neutral example URL.
 - Polished code-block keyboard focus and horizontal scroll affordances without changing the established light syntax palette.
