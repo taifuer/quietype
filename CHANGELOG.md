@@ -16,6 +16,7 @@ All notable changes to Quietype will be documented in this file.
 
 ### Changed
 
+- Removed the obsolete “墨白文章归档” compatibility template now that the canonical article archive is used directly.
 - Replaced site-specific runtime defaults, examples, login branding, and third-party avatar routing with neutral opt-in configuration.
 - Restyled protected login and dashboard routes as a standalone Quietype 404 without revealing the hidden entrance.
 - Isolated the book and photo administration regression sessions so parallel browser runs no longer compete for one WordPress login token.

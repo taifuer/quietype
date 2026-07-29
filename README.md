@@ -72,7 +72,6 @@ Quietype 自有选项集中在“外观 → Quietype 设置”，包括站点与
 - `template-links.php`：友情链接
 - `archive-book.php`：按阅读年份分组的书籍清单
 - `archive-photo.php`：按拍摄年份分组的轻量照片页
-- `list-archive.php`：兼容旧归档模板
 - `list-tag.php`：兼容旧标签模板；标签入口已整合进文章归档
 
 普通页面、分类、标签、搜索和 404 按 WordPress 模板层级自动匹配。
