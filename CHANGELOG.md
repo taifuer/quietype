@@ -6,6 +6,7 @@ All notable changes to Quietype will be documented in this file.
 
 ### Added
 
+- Added configurable article licenses and WordPress-native privacy-policy guidance with an automatic footer link.
 - Added unobtrusive, copy-aware permalinks to rendered H2 and H3 article headings.
 - Added deterministic WebP photo-grid thumbnails with an administrator-configurable CDN root, a batch generator, and automatic display-image fallback.
 - Added the public bookshelf and photo archive to the WordPress core sitemap without exposing redirect-only records.
@@ -15,6 +16,8 @@ All notable changes to Quietype will be documented in this file.
 
 ### Changed
 
+- Replaced site-specific runtime defaults, examples, login branding, and third-party avatar routing with neutral opt-in configuration.
+- Restyled protected login and dashboard routes as a standalone Quietype 404 without revealing the hidden entrance.
 - Isolated the book and photo administration regression sessions so parallel browser runs no longer compete for one WordPress login token.
 - Made the initially expanded year count independently configurable for books and photos; zero keeps every year open while photo hydration remains viewport-aware.
 - Added compact year-span totals to the book and photo headers, with the two newest book years expanded by default and older shelves revealed on demand or by record hash.
@@ -33,7 +36,7 @@ All notable changes to Quietype will be documented in this file.
 - Made book notes visible by default, replaced the publishing-date column with compact reading metadata, and renamed the archive eyebrow to `BOOKS`.
 - Extended revision disabling, counting, and explicit cleanup to book records while preserving autosaves.
 - Consolidated each reading card's month, status, personal stars, and Douban score above the closing note while leaving only the title as its external link.
-- Added optional HTTPS book-cover URLs, including `pic.taifua.com`, with priority over featured images and the existing text fallback.
+- Added optional HTTPS book-cover URLs with priority over featured images and the existing text fallback.
 - Kept Douban scores adjacent to each personal reading record instead of isolating them at the card edge.
 - Normalized reading dates, states, and personal stars at 12px while tightening the vertical rhythm between book-card metadata and notes.
 - Balanced incomplete mobile year-index rows with cell-owned borders and tightened the separators inside compact reading records.

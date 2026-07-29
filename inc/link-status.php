@@ -299,7 +299,7 @@ add_action( 'admin_post_quietype_check_link', 'quietype_handle_manual_link_check
 
 /** Check five bookmarks per daily cron run to keep request time bounded. */
 function quietype_run_link_checks() {
-	if ( ! quietype_get_setting( 'quietype_link_check_enabled', true ) ) {
+	if ( ! quietype_get_setting( 'quietype_link_check_enabled', false ) ) {
 		return;
 	}
 	$bookmarks = get_bookmarks( array( 'hide_invisible' => true, 'orderby' => 'link_id', 'order' => 'ASC' ) );
@@ -319,9 +319,9 @@ add_action( 'quietype_daily_link_check', 'quietype_run_link_checks' );
 /** Keep the advisory daily task in sync with the theme setting. */
 function quietype_ensure_link_check_schedule() {
 	$scheduled = wp_next_scheduled( 'quietype_daily_link_check' );
-	if ( quietype_get_setting( 'quietype_link_check_enabled', true ) && ! $scheduled ) {
+	if ( quietype_get_setting( 'quietype_link_check_enabled', false ) && ! $scheduled ) {
 		wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', 'quietype_daily_link_check' );
-	} elseif ( ! quietype_get_setting( 'quietype_link_check_enabled', true ) && $scheduled ) {
+	} elseif ( ! quietype_get_setting( 'quietype_link_check_enabled', false ) && $scheduled ) {
 		wp_clear_scheduled_hook( 'quietype_daily_link_check' );
 	}
 }

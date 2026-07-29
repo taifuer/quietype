@@ -1,8 +1,14 @@
 {
   "name": "quietype-quality",
-  "version": "0.10.17",
+  "version": "0.10.18",
   "private": true,
   "description": "Automated regression checks for the Quietype WordPress theme.",
+  "license": "GPL-2.0-or-later",
+  "homepage": "https://github.com/taifuer/quietype",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/taifuer/quietype.git"
+  },
   "scripts": {
     "env:start": "bash tests/bin/test-env.sh start",
     "env:stop": "bash tests/bin/test-env.sh stop",

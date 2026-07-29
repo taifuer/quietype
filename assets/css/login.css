@@ -54,15 +54,9 @@ body.login::before {
 	padding: 0;
 	background: none;
 	color: var(--quietype-login-text);
-	font: 0/1 var(--quietype-login-serif);
-	text-indent: 0;
-}
-
-.login h1 a::before {
-	content: "太傅博客";
-	display: inline-block;
 	font: 600 25px/1.25 var(--quietype-login-serif);
 	letter-spacing: .08em;
+	text-indent: 0;
 }
 
 .login h1 a::after {

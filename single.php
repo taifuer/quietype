@@ -42,14 +42,15 @@ $article  = quietype_prepare_article( $rendered );
 		<?php wp_link_pages(); ?>
 	</div>
 
-	<?php if ( quietype_get_setting( 'quietype_article_copyright_enabled', true ) ) : ?>
+	<?php if ( quietype_get_setting( 'quietype_article_copyright_enabled', false ) ) : ?>
 		<?php $copyright_author = quietype_get_setting( 'quietype_article_author_name', '' ) ?: get_the_author_meta( 'display_name' ); ?>
+		<?php $copyright_author_url = quietype_get_setting( 'quietype_article_author_url', '' ) ?: get_author_posts_url( get_the_author_meta( 'ID' ) ); ?>
 		<aside class="article-license content-width" aria-label="文章版权声明">
 			<dl>
 				<div><dt>文章标题</dt><dd><?php the_title(); ?></dd></div>
 				<div><dt>文章链接</dt><dd><a href="<?php echo esc_url( get_permalink() ); ?>"><?php echo esc_html( get_permalink() ); ?></a></dd></div>
-				<div><dt>文章作者</dt><dd><a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( $copyright_author ); ?></a></dd></div>
-				<div><dt>版权声明</dt><dd>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank" rel="license noopener noreferrer">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</dd></div>
+				<div><dt>文章作者</dt><dd><a href="<?php echo esc_url( $copyright_author_url ); ?>"><?php echo esc_html( $copyright_author ); ?></a></dd></div>
+				<div><dt>版权声明</dt><dd><?php echo wp_kses_post( quietype_article_license_html() ); ?></dd></div>
 			</dl>
 		</aside>
 	<?php endif; ?>

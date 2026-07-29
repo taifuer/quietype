@@ -13,7 +13,7 @@ async function logIn(page) {
 test('photo lookup previews metadata before manual confirmation', async ({ page }) => {
   test.skip(page.viewportSize().width < 700, 'The administration flow is viewport-independent.');
   await logIn(page);
-  await page.route('https://pic.taifua.com/**', async (route) => {
+  await page.route('https://images.example.test/**', async (route) => {
     await route.fulfill({ status: 200, contentType: 'image/gif', body: Buffer.from('R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=', 'base64') });
   });
   await page.route('**/wp-admin/admin-ajax.php', async (route) => {
@@ -24,7 +24,7 @@ test('photo lookup previews metadata before manual confirmation', async ({ page 
         body: JSON.stringify({
           success: true,
           data: {
-            url: 'https://pic.taifua.com/photos/changsha.jpg',
+            url: 'https://images.example.test/photos/changsha.jpg',
             width: '6000',
             height: '4000',
             captured_date: '2026-07',
@@ -47,9 +47,9 @@ test('photo lookup previews metadata before manual confirmation', async ({ page 
   await page.goto('/wp-admin/post-new.php?post_type=photo', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('#postexcerpt .hndle')).toContainText('照片说明');
   await expect(page.locator('#quietype_photo_captured_date')).toHaveAttribute('type', 'month');
-  await expect(page.locator('#quietype_photo_image_url')).toHaveAttribute('placeholder', /pic\.taifua\.com/);
+  await expect(page.locator('#quietype_photo_image_url')).toHaveAttribute('placeholder', 'https://images.example.com/photos/photo.jpg');
 
-  await page.locator('#quietype_photo_lookup_url').fill('https://pic.taifua.com/photos/changsha.jpg');
+  await page.locator('#quietype_photo_lookup_url').fill('https://images.example.test/photos/changsha.jpg');
   await page.locator('#quietype-photo-lookup').click();
   await expect(page.locator('#quietype-photo-preview')).toBeVisible();
   await expect(page.locator('#quietype-photo-preview-size')).toHaveText('6000 × 4000 · 1.8 MB');
@@ -59,7 +59,7 @@ test('photo lookup previews metadata before manual confirmation', async ({ page 
   await expect(page.locator('#quietype_photo_width')).toHaveValue('');
 
   await page.locator('#quietype-photo-confirm').click();
-  await expect(page.locator('#quietype_photo_image_url')).toHaveValue('https://pic.taifua.com/photos/changsha.jpg');
+  await expect(page.locator('#quietype_photo_image_url')).toHaveValue('https://images.example.test/photos/changsha.jpg');
   await expect(page.locator('#quietype_photo_width')).toHaveValue('6000');
   await expect(page.locator('#quietype_photo_captured_date')).toHaveValue('2026-07');
   await expect(page.locator('#quietype_photo_aperture')).toHaveValue('f/2.8');

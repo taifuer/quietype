@@ -12,7 +12,7 @@ require '/var/www/html/wp-load.php';
 
 if ( ! is_blog_installed() ) {
 	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-	wp_install( '太傅博客', 'admin', 'admin@example.test', true, '', 'password' );
+	wp_install( 'Quietype Demo', 'admin', 'admin@example.test', true, '', 'password' );
 }
 wp_installing( false );
 
@@ -127,6 +127,15 @@ $links_id = wp_insert_post(
 		'post_status' => 'publish',
 		'post_title'  => '友情链接',
 		'post_name'   => 'links',
+	)
+);
+$privacy_id = wp_insert_post(
+	array(
+		'post_type'    => 'page',
+		'post_status'  => 'publish',
+		'post_title'   => '隐私政策',
+		'post_name'    => 'privacy-policy',
+		'post_content' => '<h2>隐私与本地存储</h2><p>这是用于自动化回归的隐私政策页面。</p>',
 	)
 );
 update_post_meta( $archive_id, '_wp_page_template', 'template-archives.php' );
@@ -307,8 +316,15 @@ wp_insert_comment(
 	)
 );
 
-update_option( 'blogname', '太傅博客' );
-update_option( 'blogdescription', '记录学习与生活' );
+update_option( 'blogname', 'Quietype Demo' );
+update_option( 'blogdescription', '安静地写作，专注地阅读' );
+update_option( 'wp_page_for_privacy_policy', $privacy_id );
+update_option( 'quietype_start_year', 2024, false );
+update_option( 'quietype_github_url', 'https://github.com/taifuer/quietype', false );
+update_option( 'quietype_contact_email', 'hello@example.test', false );
+update_option( 'quietype_article_copyright_enabled', true, false );
+update_option( 'quietype_article_author_name', 'Quietype', false );
+update_option( 'quietype_article_license', 'cc-by-nc-sa', false );
 update_option( 'permalink_structure', '/%postname%/' );
 update_option( 'timezone_string', 'Asia/Shanghai' );
 flush_rewrite_rules();

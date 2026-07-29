@@ -4,7 +4,7 @@ Theme URI: https://github.com/taifuer/quietype
 Author: taifu
 Author URI: https://github.com/taifuer
 Description: A quiet WordPress theme for thoughtful reading, designed for Chinese long-form and technical writing.
-Version: 0.10.17
+Version: 0.10.18
 Requires at least: 6.4
 Requires PHP: 8.0
 License: GNU General Public License v2 or later
@@ -498,8 +498,8 @@ html:not(.js) .photo-frame img[data-photo-deferred] { display: none; }
 .site-footer { border-top: 1px solid var(--line); }
 .site-footer__inner { position: relative; display: flex; align-items: center; justify-content: space-between; min-height: 72px; padding: 0; color: var(--muted); font-size: 14px; }
 .site-footer a:hover { color: var(--accent); }
-.footer-legal { display: contents; }
-.footer-icp { margin-left: auto; }
+.footer-legal { display: flex; align-items: center; justify-content: space-between; gap: 20px; width: 100%; }
+.footer-policies { display: flex; align-items: center; gap: 14px; margin-left: auto; }
 .footer-contact { position: absolute; left: 50%; display: flex; align-items: center; gap: 5px; transform: translateX(-50%); }
 .footer-contact a { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; color: var(--muted); }
 .footer-contact a:hover, .footer-contact a:focus-visible { background: var(--accent-soft); color: var(--accent); outline: 0; }
@@ -680,10 +680,10 @@ html:not(.js) .photo-frame img[data-photo-deferred] { display: none; }
 	.prefooter-nav__inner { min-height: 50px; }
 	.prefooter-nav__menu li + li::before { margin: 0 9px; }
 	.prefooter-nav__menu a { min-height: 34px; font-size: 14px; }
-	.footer-legal { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; white-space: nowrap; }
+	.footer-legal { justify-content: center; flex-wrap: wrap; gap: 3px 10px; white-space: nowrap; }
+	.footer-policies { justify-content: center; gap: 10px; margin-left: 0; }
 	.footer-contact { position: static; order: -1; gap: 6px; margin: 0; transform: none; }
 	.footer-contact a { width: 30px; height: 30px; }
-	.footer-icp { margin-left: 0; }
 	.reading-tools { right: max(18px, calc(env(safe-area-inset-right) + 12px)); bottom: calc(18px + env(safe-area-inset-bottom) + var(--footer-overlap, 0px)); }
 	.reading-background__options { right: 45px; }
 }

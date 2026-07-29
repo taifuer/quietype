@@ -125,6 +125,19 @@ test('revision controls describe posts, pages, and books', async ({ page }) => {
   await expect(page.locator('#quietype-section-revision-cleanup')).toContainText('文章、页面或书籍历史版本');
 });
 
+test('site policies remain configurable without site-specific defaults', async ({ page }) => {
+  test.skip(page.viewportSize().width < 700, 'The settings screen is viewport-independent.');
+  await logIn(page);
+  await page.goto('/wp-admin/themes.php?page=quietype-settings', { waitUntil: 'domcontentloaded' });
+
+  await expect(page.locator('#quietype_contact_email')).toHaveAttribute('placeholder', 'hello@example.com');
+  await expect(page.locator('#quietype_github_url')).toHaveAttribute('placeholder', 'https://github.com/example');
+  await expect(page.locator('#quietype_article_license')).toHaveValue('cc-by-nc-sa');
+  await expect(page.locator('#quietype_article_author_url')).toHaveAttribute('placeholder', 'https://example.com/about/');
+  await expect(page.locator('#quietype-section-access h2')).toHaveText('访问优化');
+  await expect(page.locator('#quietype_gravatar_base_url')).toHaveAttribute('placeholder', 'https://avatar.example.com/avatar/');
+});
+
 test('book and photo archive headings are configurable together', async ({ page }) => {
   test.skip(page.viewportSize().width < 700, 'The settings screen is viewport-independent.');
   await logIn(page);

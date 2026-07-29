@@ -19,13 +19,19 @@
 <footer class="site-footer">
 	<div class="site-footer__inner">
 		<div class="footer-legal">
-			<?php $start_year = (int) quietype_get_setting( 'quietype_start_year', 2017 ); ?>
-			<span class="footer-copyright">© <?php echo esc_html( $start_year ); ?>–<?php echo esc_html( gmdate( 'Y' ) ); ?> <a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( get_bloginfo( 'name' ) ); ?></a></span>
-			<?php $icp_number = quietype_get_setting( 'quietype_icp_number', '湘ICP备17002466号' ); ?>
-			<?php if ( $icp_number ) : ?><a class="footer-icp" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $icp_number ); ?></a><?php endif; ?>
+			<?php $current_year = (int) gmdate( 'Y' ); ?>
+			<?php $start_year = (int) quietype_get_setting( 'quietype_start_year', $current_year ); ?>
+			<?php $year_label = $start_year < $current_year ? $start_year . '–' . $current_year : (string) $current_year; ?>
+			<span class="footer-copyright">© <?php echo esc_html( $year_label ); ?> <a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( get_bloginfo( 'name' ) ); ?></a></span>
+			<div class="footer-policies">
+				<?php $privacy_url = get_privacy_policy_url(); ?>
+				<?php if ( $privacy_url ) : ?><a class="footer-privacy" href="<?php echo esc_url( $privacy_url ); ?>">隐私政策</a><?php endif; ?>
+				<?php $icp_number = quietype_get_setting( 'quietype_icp_number', '' ); ?>
+				<?php if ( $icp_number ) : ?><a class="footer-icp" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $icp_number ); ?></a><?php endif; ?>
+			</div>
 		</div>
-		<?php $github_url = quietype_get_setting( 'quietype_github_url', 'https://github.com/taifuer' ); ?>
-		<?php $contact_email = quietype_get_setting( 'quietype_contact_email', 'taifu@taifua.com' ); ?>
+		<?php $github_url = quietype_get_setting( 'quietype_github_url', '' ); ?>
+		<?php $contact_email = quietype_get_setting( 'quietype_contact_email', '' ); ?>
 		<?php if ( $github_url || $contact_email ) : ?>
 			<nav class="footer-contact" aria-label="联系方式">
 				<?php if ( $contact_email ) : ?><a href="mailto:<?php echo esc_attr( antispambot( $contact_email ) ); ?>" aria-label="发送邮件"><?php echo quietype_icon( 'mail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></a><?php endif; ?>

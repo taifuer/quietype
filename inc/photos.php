@@ -317,7 +317,7 @@ function quietype_render_photo_meta_box( $post ) {
 		<p class="description">填写 HTTPS 展示图后先读取预览；只有点击“确认填入”才会改动尺寸和拍摄参数。展示图建议控制在 1600–2560px、2MB 以内，原图另行填写且只在访客主动打开时加载。</p>
 		<div class="quietype-photo-lookup">
 			<label class="screen-reader-text" for="quietype_photo_lookup_url">外链图片地址</label>
-			<input class="large-text code" id="quietype_photo_lookup_url" type="url" value="<?php echo esc_attr( $data['image_url'] ); ?>" placeholder="https://pic.taifua.com/path/to/photo.jpg">
+			<input class="large-text code" id="quietype_photo_lookup_url" type="url" value="<?php echo esc_attr( $data['image_url'] ); ?>" placeholder="https://images.example.com/photos/photo.jpg">
 			<button class="button" id="quietype-photo-lookup" type="button">读取图片信息</button>
 			<span id="quietype-photo-lookup-status" aria-live="polite"></span>
 		</div>
@@ -331,8 +331,8 @@ function quietype_render_photo_meta_box( $post ) {
 			</div>
 		</div>
 		<table class="form-table" role="presentation">
-			<tr><th><label for="quietype_photo_image_url">展示图片地址</label></th><td><input class="large-text code" id="quietype_photo_image_url" name="quietype_photo_image_url" type="url" value="<?php echo esc_attr( $data['image_url'] ); ?>" placeholder="https://pic.taifua.com/path/to/photo.jpg"><p class="description">用于网格与灯箱；留空时使用特色图片及其响应式尺寸。</p></td></tr>
-			<tr><th><label for="quietype_photo_original_url">原图地址</label></th><td><input class="large-text code" id="quietype_photo_original_url" name="quietype_photo_original_url" type="url" value="<?php echo esc_attr( $data['original_url'] ); ?>" placeholder="https://pic.taifua.com/path/to/photo-original.jpg"><p class="description">可选。只作为灯箱中的“查看原图”入口，不会随页面或灯箱自动下载。</p></td></tr>
+			<tr><th><label for="quietype_photo_image_url">展示图片地址</label></th><td><input class="large-text code" id="quietype_photo_image_url" name="quietype_photo_image_url" type="url" value="<?php echo esc_attr( $data['image_url'] ); ?>" placeholder="https://images.example.com/photos/photo.jpg"><p class="description">用于网格与灯箱；留空时使用特色图片及其响应式尺寸。</p></td></tr>
+			<tr><th><label for="quietype_photo_original_url">原图地址</label></th><td><input class="large-text code" id="quietype_photo_original_url" name="quietype_photo_original_url" type="url" value="<?php echo esc_attr( $data['original_url'] ); ?>" placeholder="https://images.example.com/photos/photo-original.jpg"><p class="description">可选。只作为灯箱中的“查看原图”入口，不会随页面或灯箱自动下载。</p></td></tr>
 			<tr><th><label for="quietype_photo_captured_date">拍摄月份</label></th><td><input id="quietype_photo_captured_date" name="quietype_photo_captured_date" type="month" value="<?php echo esc_attr( $data['captured_date'] ); ?>" required><p class="description">用于前台按年份分组，精确到月份即可。</p></td></tr>
 			<tr><th><label for="quietype_photo_location">地点</label></th><td><input class="regular-text" id="quietype_photo_location" name="quietype_photo_location" type="text" value="<?php echo esc_attr( $data['location'] ); ?>" placeholder="湖南 · 长沙"></td></tr>
 			<tr><th>图片尺寸</th><td class="quietype-photo-pair"><label><span>宽度</span><input id="quietype_photo_width" name="quietype_photo_width" type="number" min="1" max="60000" value="<?php echo esc_attr( $data['width'] ?: '' ); ?>"></label><label><span>高度</span><input id="quietype_photo_height" name="quietype_photo_height" type="number" min="1" max="60000" value="<?php echo esc_attr( $data['height'] ?: '' ); ?>"></label></td></tr>

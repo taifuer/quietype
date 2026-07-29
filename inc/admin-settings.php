@@ -23,10 +23,10 @@ add_action( 'admin_menu', 'quietype_add_settings_page' );
 /** Register every Quietype-owned preference in one settings group. */
 function quietype_register_admin_settings() {
 	$settings = array(
-		'quietype_github_url'                 => array( 'string', 'https://github.com/taifuer', 'esc_url_raw' ),
-		'quietype_contact_email'              => array( 'string', 'taifu@taifua.com', 'sanitize_email' ),
-		'quietype_icp_number'                 => array( 'string', '湘ICP备17002466号', 'sanitize_text_field' ),
-		'quietype_start_year'                 => array( 'integer', 2017, 'quietype_sanitize_start_year' ),
+		'quietype_github_url'                 => array( 'string', '', 'esc_url_raw' ),
+		'quietype_contact_email'              => array( 'string', '', 'sanitize_email' ),
+		'quietype_icp_number'                 => array( 'string', '', 'sanitize_text_field' ),
+		'quietype_start_year'                 => array( 'integer', (int) gmdate( 'Y' ), 'quietype_sanitize_start_year' ),
 		'quietype_books_page_title'           => array( 'string', '万卷古今', 'quietype_sanitize_archive_title' ),
 		'quietype_books_page_eyebrow'         => array( 'string', 'BOOKS', 'quietype_sanitize_archive_eyebrow' ),
 		'quietype_books_page_intro'           => array( 'string', '', 'quietype_sanitize_archive_intro' ),
@@ -36,18 +36,21 @@ function quietype_register_admin_settings() {
 		'quietype_photos_page_intro'          => array( 'string', '', 'quietype_sanitize_archive_intro' ),
 		'quietype_photos_default_expanded_years' => array( 'integer', 1, 'quietype_sanitize_archive_expanded_years' ),
 		'quietype_photo_thumbnail_base_url'   => array( 'string', '', 'quietype_sanitize_photo_thumbnail_base_url' ),
-		'quietype_link_check_enabled'         => array( 'boolean', true, 'quietype_sanitize_checkbox' ),
-		'quietype_article_copyright_enabled'  => array( 'boolean', true, 'quietype_sanitize_checkbox' ),
-		'quietype_article_author_name'        => array( 'string', '小傅', 'sanitize_text_field' ),
+		'quietype_link_check_enabled'         => array( 'boolean', false, 'quietype_sanitize_checkbox' ),
+		'quietype_article_copyright_enabled'  => array( 'boolean', false, 'quietype_sanitize_checkbox' ),
+		'quietype_article_author_name'        => array( 'string', '', 'sanitize_text_field' ),
+		'quietype_article_author_url'         => array( 'string', '', 'esc_url_raw' ),
+		'quietype_article_license'            => array( 'string', 'cc-by-nc-sa', 'quietype_sanitize_article_license' ),
+		'quietype_article_custom_license'     => array( 'string', '', 'quietype_sanitize_article_custom_license' ),
 		'quietype_hide_admin_bar'             => array( 'boolean', false, 'quietype_sanitize_checkbox' ),
 		'quietype_disable_revisions'          => array( 'boolean', false, 'quietype_sanitize_checkbox' ),
 		'quietype_seo_enabled'                => array( 'boolean', true, 'quietype_sanitize_checkbox' ),
 		'quietype_seo_description'            => array( 'string', '', 'quietype_sanitize_seo_description' ),
 		'quietype_seo_keywords'               => array( 'string', '', 'quietype_sanitize_seo_keywords' ),
 		'quietype_social_image_url'           => array( 'string', '', 'esc_url_raw' ),
-		'quietype_gravatar_base_url'          => array( 'string', 'https://gravatar.loli.net/avatar/', 'quietype_sanitize_gravatar_base_url' ),
+		'quietype_gravatar_base_url'          => array( 'string', '', 'quietype_sanitize_gravatar_base_url' ),
 		'quietype_login_gate_enabled'         => array( 'boolean', false, 'quietype_sanitize_checkbox' ),
-		'quietype_login_gate_key'             => array( 'string', 'user', 'quietype_sanitize_login_gate_key' ),
+		'quietype_login_gate_key'             => array( 'string', 'entry', 'quietype_sanitize_login_gate_key' ),
 		'quietype_login_gate_value'           => array( 'string', '', 'quietype_sanitize_login_gate_value' ),
 		'quietype_login_captcha_enabled'      => array( 'boolean', false, 'quietype_sanitize_checkbox' ),
 		'quietype_xmlrpc_auth_disabled'       => array( 'boolean', false, 'quietype_sanitize_checkbox' ),
@@ -203,7 +206,34 @@ add_filter( 'document_title_parts', 'quietype_archive_document_title' );
 /** Keep the copyright range plausible and never later than the current year. */
 function quietype_sanitize_start_year( $value ) {
 	$year = absint( $value );
-	return max( 1990, min( (int) gmdate( 'Y' ), $year ?: 2017 ) );
+	return max( 1990, min( (int) gmdate( 'Y' ), $year ?: (int) gmdate( 'Y' ) ) );
+}
+
+/** Limit the article license selector to the supported policies. */
+function quietype_sanitize_article_license( $value ) {
+	$value = sanitize_key( (string) $value );
+	return in_array( $value, array( 'cc-by-nc-sa', 'cc-by-sa', 'all-rights-reserved', 'custom' ), true ) ? $value : 'cc-by-nc-sa';
+}
+
+/** Keep a custom article license concise and free of markup. */
+function quietype_sanitize_article_custom_license( $value ) {
+	return mb_substr( trim( sanitize_textarea_field( (string) $value ) ), 0, 500 );
+}
+
+/** Render the configured article license without tying it to one site owner. */
+function quietype_article_license_html() {
+	$license = quietype_sanitize_article_license( quietype_get_setting( 'quietype_article_license', 'cc-by-nc-sa' ) );
+	if ( 'cc-by-nc-sa' === $license ) {
+		return '除特别声明外，本文采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank" rel="license noopener noreferrer">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。';
+	}
+	if ( 'cc-by-sa' === $license ) {
+		return '除特别声明外，本文采用 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh-hans" target="_blank" rel="license noopener noreferrer">CC BY-SA 4.0</a> 许可协议，转载请注明出处。';
+	}
+	if ( 'all-rights-reserved' === $license ) {
+		return '本文保留所有权利，未经作者许可不得转载。';
+	}
+	$custom = quietype_get_setting( 'quietype_article_custom_license', '' );
+	return '' !== $custom ? nl2br( esc_html( $custom ) ) : '版权与转载方式请联系作者确认。';
 }
 
 /** Accept an HTTP(S) avatar base URL, or an empty value to disable rewriting. */
@@ -215,7 +245,7 @@ function quietype_sanitize_gravatar_base_url( $value ) {
 	$url = esc_url_raw( $value, array( 'http', 'https' ) );
 	if ( ! $url ) {
 		add_settings_error( 'quietype_settings', 'quietype_gravatar_url', 'Gravatar 地址必须是有效的 HTTP 或 HTTPS 地址。', 'error' );
-		return get_option( 'quietype_gravatar_base_url', 'https://gravatar.loli.net/avatar/' );
+		return get_option( 'quietype_gravatar_base_url', '' );
 	}
 	return trailingslashit( $url );
 }
@@ -300,13 +330,16 @@ function quietype_render_settings_page() {
 			<section class="quietype-settings__section" id="quietype-section-site">
 				<h2>站点与页脚</h2>
 				<table class="form-table" role="presentation">
-					<tr><th><label for="quietype_contact_email">联系邮箱</label></th><td><input class="regular-text" id="quietype_contact_email" name="quietype_contact_email" type="email" value="<?php echo esc_attr( quietype_get_setting( 'quietype_contact_email', 'taifu@taifua.com' ) ); ?>"><p class="description">留空可隐藏页脚邮件图标。</p></td></tr>
-					<tr><th><label for="quietype_github_url">GitHub 地址</label></th><td><input class="regular-text" id="quietype_github_url" name="quietype_github_url" type="url" value="<?php echo esc_attr( quietype_get_setting( 'quietype_github_url', 'https://github.com/taifuer' ) ); ?>"><p class="description">留空可隐藏页脚 GitHub 图标。</p></td></tr>
-					<tr><th><label for="quietype_icp_number">备案号</label></th><td><input class="regular-text" id="quietype_icp_number" name="quietype_icp_number" type="text" value="<?php echo esc_attr( quietype_get_setting( 'quietype_icp_number', '湘ICP备17002466号' ) ); ?>"><p class="description">留空可隐藏页脚备案信息，填写后自动链接至工信部备案系统。</p></td></tr>
-					<tr><th><label for="quietype_start_year">建站年份</label></th><td><input class="small-text" id="quietype_start_year" name="quietype_start_year" type="number" min="1990" max="<?php echo esc_attr( gmdate( 'Y' ) ); ?>" value="<?php echo esc_attr( quietype_get_setting( 'quietype_start_year', 2017 ) ); ?>"><p class="description">用于页脚版权年份范围。</p></td></tr>
-					<tr><th>友链检测</th><td><?php quietype_settings_checkbox( 'quietype_link_check_enabled', '每天分批检测友链可达性', true ); ?><p class="description">每天最多检测五条；连续失败三次只会进入“待确认”，不会自动在前台标记失联。</p></td></tr>
-					<tr><th>文章版权声明</th><td><?php quietype_settings_checkbox( 'quietype_article_copyright_enabled', '在文章正文末尾显示 CC BY-NC-SA 4.0 声明', true ); ?></td></tr>
-					<tr><th><label for="quietype_article_author_name">版权署名</label></th><td><input class="regular-text" id="quietype_article_author_name" name="quietype_article_author_name" type="text" value="<?php echo esc_attr( quietype_get_setting( 'quietype_article_author_name', '小傅' ) ); ?>"><p class="description">留空时使用文章作者的 WordPress 显示名称，署名链接回本站首页。</p></td></tr>
+					<tr><th><label for="quietype_contact_email">联系邮箱</label></th><td><input class="regular-text" id="quietype_contact_email" name="quietype_contact_email" type="email" value="<?php echo esc_attr( quietype_get_setting( 'quietype_contact_email', '' ) ); ?>" placeholder="hello@example.com"><p class="description">留空可隐藏页脚邮件图标。</p></td></tr>
+					<tr><th><label for="quietype_github_url">GitHub 地址</label></th><td><input class="regular-text" id="quietype_github_url" name="quietype_github_url" type="url" value="<?php echo esc_attr( quietype_get_setting( 'quietype_github_url', '' ) ); ?>" placeholder="https://github.com/example"><p class="description">留空可隐藏页脚 GitHub 图标。</p></td></tr>
+					<tr><th><label for="quietype_icp_number">备案号</label></th><td><input class="regular-text" id="quietype_icp_number" name="quietype_icp_number" type="text" value="<?php echo esc_attr( quietype_get_setting( 'quietype_icp_number', '' ) ); ?>" placeholder="示例ICP备12345678号"><p class="description">留空可隐藏页脚备案信息，填写后自动链接至工信部备案系统。</p></td></tr>
+					<tr><th><label for="quietype_start_year">建站年份</label></th><td><input class="small-text" id="quietype_start_year" name="quietype_start_year" type="number" min="1990" max="<?php echo esc_attr( gmdate( 'Y' ) ); ?>" value="<?php echo esc_attr( quietype_get_setting( 'quietype_start_year', (int) gmdate( 'Y' ) ) ); ?>"><p class="description">用于页脚版权年份范围。</p></td></tr>
+					<tr><th>友链检测</th><td><?php quietype_settings_checkbox( 'quietype_link_check_enabled', '每天分批检测友链可达性' ); ?><p class="description">启用后每天最多检测五条；连续失败三次只会进入“待确认”，不会自动在前台标记失联。</p></td></tr>
+					<tr><th>文章版权声明</th><td><?php quietype_settings_checkbox( 'quietype_article_copyright_enabled', '在文章正文末尾显示版权声明' ); ?></td></tr>
+					<tr><th><label for="quietype_article_author_name">版权署名</label></th><td><input class="regular-text" id="quietype_article_author_name" name="quietype_article_author_name" type="text" value="<?php echo esc_attr( quietype_get_setting( 'quietype_article_author_name', '' ) ); ?>"><p class="description">留空时使用文章作者的 WordPress 显示名称。</p></td></tr>
+					<tr><th><label for="quietype_article_author_url">作者链接</label></th><td><input class="regular-text" id="quietype_article_author_url" name="quietype_article_author_url" type="url" value="<?php echo esc_attr( quietype_get_setting( 'quietype_article_author_url', '' ) ); ?>" placeholder="https://example.com/about/"><p class="description">留空时链接到文章作者归档。</p></td></tr>
+					<tr><th><label for="quietype_article_license">许可协议</label></th><td><select id="quietype_article_license" name="quietype_article_license"><option value="cc-by-nc-sa" <?php selected( quietype_get_setting( 'quietype_article_license', 'cc-by-nc-sa' ), 'cc-by-nc-sa' ); ?>>CC BY-NC-SA 4.0</option><option value="cc-by-sa" <?php selected( quietype_get_setting( 'quietype_article_license', 'cc-by-nc-sa' ), 'cc-by-sa' ); ?>>CC BY-SA 4.0</option><option value="all-rights-reserved" <?php selected( quietype_get_setting( 'quietype_article_license', 'cc-by-nc-sa' ), 'all-rights-reserved' ); ?>>保留所有权利</option><option value="custom" <?php selected( quietype_get_setting( 'quietype_article_license', 'cc-by-nc-sa' ), 'custom' ); ?>>自定义</option></select><p class="description">只有启用版权声明后才会显示。</p></td></tr>
+					<tr><th><label for="quietype_article_custom_license">自定义声明</label></th><td><textarea class="large-text" id="quietype_article_custom_license" name="quietype_article_custom_license" rows="3" maxlength="500" placeholder="仅在许可协议选择“自定义”时使用"><?php echo esc_textarea( quietype_get_setting( 'quietype_article_custom_license', '' ) ); ?></textarea></td></tr>
 				</table>
 			</section>
 
@@ -338,8 +371,8 @@ function quietype_render_settings_page() {
 			</section>
 
 			<section class="quietype-settings__section" id="quietype-section-access">
-				<h2>中国大陆访问</h2>
-				<table class="form-table" role="presentation"><tr><th><label for="quietype_gravatar_base_url">Gravatar 地址</label></th><td><input class="regular-text code" id="quietype_gravatar_base_url" name="quietype_gravatar_base_url" type="url" value="<?php echo esc_attr( quietype_get_setting( 'quietype_gravatar_base_url', 'https://gravatar.loli.net/avatar/' ) ); ?>" placeholder="https://gravatar.loli.net/avatar/"><p class="description">留空则保留 WordPress 原始 Gravatar 地址。</p></td></tr></table>
+				<h2>访问优化</h2>
+				<table class="form-table" role="presentation"><tr><th><label for="quietype_gravatar_base_url">Gravatar 镜像地址</label></th><td><input class="regular-text code" id="quietype_gravatar_base_url" name="quietype_gravatar_base_url" type="url" value="<?php echo esc_attr( quietype_get_setting( 'quietype_gravatar_base_url', '' ) ); ?>" placeholder="https://avatar.example.com/avatar/"><p class="description">可选。留空则保留 WordPress 原始 Gravatar 地址；填写意味着访客头像请求将发送至该服务。</p></td></tr></table>
 			</section>
 
 			<section class="quietype-settings__section" id="quietype-section-wordpress">
@@ -355,7 +388,7 @@ function quietype_render_settings_page() {
 				<p>入口参数仅在首次访问时换取 12 小时安全 Cookie，随后自动跳转到不含入口值的地址。启用前请保存完整入口。</p>
 				<table class="form-table" role="presentation">
 					<tr><th>自定义登录入口</th><td><?php quietype_settings_checkbox( 'quietype_login_gate_enabled', '启用入口保护' ); ?></td></tr>
-					<tr><th><label for="quietype_login_gate_key">入口参数名</label></th><td><input class="regular-text code" id="quietype_login_gate_key" name="quietype_login_gate_key" type="text" value="<?php echo esc_attr( quietype_get_setting( 'quietype_login_gate_key', 'user' ) ); ?>"><p class="description">仅支持字母、数字、下划线和短横线。</p></td></tr>
+					<tr><th><label for="quietype_login_gate_key">入口参数名</label></th><td><input class="regular-text code" id="quietype_login_gate_key" name="quietype_login_gate_key" type="text" value="<?php echo esc_attr( quietype_get_setting( 'quietype_login_gate_key', 'entry' ) ); ?>"><p class="description">仅支持字母、数字、下划线和短横线。</p></td></tr>
 					<tr><th><label for="quietype_login_gate_value">入口参数值</label></th><td><input class="regular-text code" id="quietype_login_gate_value" name="quietype_login_gate_value" type="text" value="<?php echo esc_attr( quietype_get_setting( 'quietype_login_gate_value', '' ) ); ?>" minlength="24" autocomplete="off"><p class="description">至少 24 位随机字符串；请勿在截图、分析平台或公开文档中暴露。</p></td></tr>
 					<tr><th>登录验证码</th><td><?php quietype_settings_checkbox( 'quietype_login_captcha_enabled', '启用一次性算术验证码' ); ?></td></tr>
 					<tr><th>XML-RPC</th><td><?php quietype_settings_checkbox( 'quietype_xmlrpc_auth_disabled', '禁用 XML-RPC 认证与 Pingback' ); ?><p class="description">启用后 WordPress App 等旧式客户端将不可用。</p></td></tr>

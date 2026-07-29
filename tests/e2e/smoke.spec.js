@@ -53,6 +53,17 @@ test('core sitemap is canonical and includes the public book and photo archives'
   expect(xml).not.toContain('/quietype-photo-');
 });
 
+test('published privacy policy and configured article license stay discoverable', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('.footer-privacy')).toHaveText('隐私政策');
+  await expect(page.locator('.footer-privacy')).toHaveAttribute('href', /\/privacy-policy\/$/);
+
+  await page.goto('/quietype-reading-test/');
+  await expect(page.locator('.article-license')).toContainText('Quietype');
+  await expect(page.locator('.article-license')).toContainText('CC BY-NC-SA 4.0');
+  await expect(page.locator('.article-license a[rel~="license"]')).toHaveAttribute('href', 'https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans');
+});
+
 test('photo archive groups external images and keeps details in the lightbox', async ({ page }) => {
   const originalRequests = [];
   const deferredRequests = [];

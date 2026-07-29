@@ -17,7 +17,7 @@ function quietype_sanitize_checkbox( $value ) {
 /** Limit the entrance parameter name to URL-safe identifier characters. */
 function quietype_sanitize_login_gate_key( $value ) {
 	$value = preg_replace( '/[^A-Za-z0-9_-]/', '', (string) $value );
-	return $value ?: 'user';
+	return $value ?: 'entry';
 }
 
 /** Keep the entrance value on one line and within a practical URL length. */
@@ -30,7 +30,7 @@ function quietype_login_gate_key() {
 	if ( defined( 'QUIETYPE_LOGIN_GATE_KEY' ) ) {
 		return quietype_sanitize_login_gate_key( QUIETYPE_LOGIN_GATE_KEY );
 	}
-	return quietype_sanitize_login_gate_key( quietype_get_setting( 'quietype_login_gate_key', 'user' ) );
+	return quietype_sanitize_login_gate_key( quietype_get_setting( 'quietype_login_gate_key', 'entry' ) );
 }
 
 /** Return the configured entrance parameter value. */
@@ -155,11 +155,11 @@ function quietype_login_not_found() {
 	status_header( 404 );
 	nocache_headers();
 	header( 'Content-Type: text/html; charset=' . get_bloginfo( 'charset' ) );
-	$title = esc_html__( '页面不存在', 'quietype' );
-	echo '<!doctype html><html lang="zh-CN"><meta charset="' . esc_attr( get_bloginfo( 'charset' ) ) . '">';
-	echo '<meta name="viewport" content="width=device-width,initial-scale=1"><title>404</title>';
-	echo '<style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#f3f1eb;color:#292822;font:16px/1.8 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif}main{text-align:center}b{font:600 64px/1 Georgia,serif}p{margin:14px 0;color:#716d64}a{color:#80583f}</style>';
-	echo '<main><b>404</b><p>' . $title . '</p><a href="' . esc_url( home_url( '/' ) ) . '">' . esc_html__( '返回首页', 'quietype' ) . '</a></main></html>';
+	$title = esc_html__( '没有找到这一页。', 'quietype' );
+	echo '<!doctype html><html ' . get_language_attributes() . '><head><meta charset="' . esc_attr( get_bloginfo( 'charset' ) ) . '">';
+	echo '<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>404</title>';
+	echo '<style>:root{color-scheme:light}*{box-sizing:border-box}body{margin:0;min-width:320px;min-height:100vh;display:grid;place-items:center;padding:32px 20px;background:#fdfdfb;color:#262724;font:16px/1.75 -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif}main{width:min(100%,420px);text-align:center}.eyebrow{margin:0 0 14px;color:#858980;font:600 11px/1.4 ui-monospace,"Cascadia Code",Consolas,monospace;letter-spacing:.16em}h1{margin:0;font:650 28px/1.4 "Source Han Serif SC","Noto Serif CJK SC","Songti SC",SimSun,serif;letter-spacing:.02em}a{display:inline-block;margin-top:24px;color:#795844;text-underline-offset:.2em}a:focus-visible{outline:2px solid #795844;outline-offset:4px;border-radius:2px}</style></head>';
+	echo '<body><main><p class="eyebrow">404 · NOT FOUND</p><h1>' . $title . '</h1><a href="' . esc_url( home_url( '/' ) ) . '">' . esc_html__( '返回首页', 'quietype' ) . '</a></main></body></html>';
 	exit;
 }
 
