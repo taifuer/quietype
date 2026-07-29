@@ -17,10 +17,12 @@ while ( have_posts() ) {
 	$books_by_year[ $year ][] = get_post();
 }
 krsort( $books_by_year, SORT_NUMERIC );
-$years      = array_keys( $books_by_year );
-$year_count = count( $years );
-$book_total = array_sum( array_map( 'count', $books_by_year ) );
-$year_span  = $year_count ? ( 1 === $year_count ? (string) $years[0] : $years[ $year_count - 1 ] . '—' . $years[0] ) : '';
+$years          = array_keys( $books_by_year );
+$year_count     = count( $years );
+$book_total     = array_sum( array_map( 'count', $books_by_year ) );
+$year_span      = $year_count ? ( 1 === $year_count ? (string) $years[0] : $years[ $year_count - 1 ] . '—' . $years[0] ) : '';
+$expanded_limit = quietype_archive_expanded_years( 'book' );
+$expanded_years = 0 === $expanded_limit ? $years : array_slice( $years, 0, $expanded_limit );
 $page_title = quietype_archive_page_text( 'book', 'title' );
 $eyebrow    = quietype_archive_page_text( 'book', 'eyebrow' );
 $intro      = quietype_archive_page_text( 'book', 'intro' );
@@ -46,19 +48,13 @@ if ( $year_count > 4 && 0 !== $year_count % 3 ) {
 	<?php if ( $books_by_year ) : ?>
 		<nav class="<?php echo esc_attr( implode( ' ', $year_index_classes ) ); ?>" aria-label="按年份查看">
 			<?php foreach ( $books_by_year as $year => $books ) : ?>
-				<?php
-				$year_position   = array_search( $year, $years, true );
-				$is_default_year = false !== $year_position && $year_position < 2;
-				?>
+				<?php $is_default_year = in_array( $year, $expanded_years, true ); ?>
 				<a href="#year-<?php echo esc_attr( $year ); ?>" aria-controls="book-grid-<?php echo esc_attr( $year ); ?>" aria-expanded="<?php echo $is_default_year ? 'true' : 'false'; ?>"><strong><?php echo esc_html( $year ); ?></strong><span><?php echo esc_html( count( $books ) ); ?> 本</span></a>
 			<?php endforeach; ?>
 		</nav>
 
 		<?php foreach ( $books_by_year as $year => $books ) : ?>
-			<?php
-			$year_position   = array_search( $year, $years, true );
-			$is_default_year = false !== $year_position && $year_position < 2;
-			?>
+			<?php $is_default_year = in_array( $year, $expanded_years, true ); ?>
 			<section class="book-year-shelf" id="year-<?php echo esc_attr( $year ); ?>" aria-labelledby="book-year-title-<?php echo esc_attr( $year ); ?>" data-expanded="<?php echo $is_default_year ? 'true' : 'false'; ?>">
 				<header class="book-year-heading">
 					<h2 id="book-year-title-<?php echo esc_attr( $year ); ?>">

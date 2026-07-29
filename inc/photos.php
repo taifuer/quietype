@@ -608,3 +608,5 @@ function quietype_purge_photo_archive_cache() {
 		error_log( 'Quietype photo cache purge failed: ' . $response->get_error_message() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 	}
 }
+add_action( 'add_option_quietype_photos_default_expanded_years', 'quietype_purge_photo_archive_cache', 10, 0 );
+add_action( 'update_option_quietype_photos_default_expanded_years', 'quietype_purge_photo_archive_cache', 10, 0 );

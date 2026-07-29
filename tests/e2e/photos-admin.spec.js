@@ -2,7 +2,7 @@ const { test, expect } = require('@playwright/test');
 
 async function logIn(page) {
   await page.goto('/wp-login.php');
-  await page.locator('#user_login').fill('admin');
+  await page.locator('#user_login').fill('photos-admin');
   await page.locator('#user_pass').fill('password');
   await Promise.all([
     page.waitForURL(/\/wp-admin\//),

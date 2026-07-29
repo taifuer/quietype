@@ -577,6 +577,8 @@ function quietype_purge_book_archive_cache() {
 		error_log( 'Quietype book cache purge returned HTTP ' . $status . '.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 	}
 }
+add_action( 'add_option_quietype_books_default_expanded_years', 'quietype_purge_book_archive_cache', 10, 0 );
+add_action( 'update_option_quietype_books_default_expanded_years', 'quietype_purge_book_archive_cache', 10, 0 );
 
 /** Give programmatically inserted books a stable reading date. */
 function quietype_ensure_book_defaults( $post_id, $post ) {

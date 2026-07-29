@@ -18,6 +18,21 @@ wp_installing( false );
 
 wp_set_current_user( 1 );
 switch_theme( 'quietype' );
+
+// Keep parallel administration suites on separate sessions. WordPress stores
+// session tokens per user, so simultaneous logins to one account can race.
+foreach ( array( 'books-admin', 'photos-admin' ) as $admin_login ) {
+	$admin_id = username_exists( $admin_login );
+	if ( ! $admin_id ) {
+		$admin_id = wp_create_user( $admin_login, 'password', $admin_login . '@example.test' );
+	}
+	if ( ! is_wp_error( $admin_id ) ) {
+		wp_set_password( 'password', $admin_id );
+		$admin_user = new WP_User( $admin_id );
+		$admin_user->set_role( 'administrator' );
+	}
+}
+
 update_option( 'quietype_photo_thumbnail_base_url', 'https://images.example.test/photos', false );
 if ( ! function_exists( 'quietype_register_books' ) ) {
 	require_once WP_CONTENT_DIR . '/themes/quietype/functions.php';

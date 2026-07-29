@@ -20,10 +20,12 @@ while ( have_posts() ) {
 	$photos_by_year[ $year ][] = get_post();
 }
 krsort( $photos_by_year, SORT_NUMERIC );
-$years       = array_keys( $photos_by_year );
-$year_count  = count( $years );
-$photo_total = array_sum( array_map( 'count', $photos_by_year ) );
-$year_span   = $year_count ? ( 1 === $year_count ? (string) $years[0] : $years[ $year_count - 1 ] . '—' . $years[0] ) : '';
+$years          = array_keys( $photos_by_year );
+$year_count     = count( $years );
+$photo_total    = array_sum( array_map( 'count', $photos_by_year ) );
+$year_span      = $year_count ? ( 1 === $year_count ? (string) $years[0] : $years[ $year_count - 1 ] . '—' . $years[0] ) : '';
+$expanded_limit = quietype_archive_expanded_years( 'photo' );
+$expanded_years = 0 === $expanded_limit ? $years : array_slice( $years, 0, $expanded_limit );
 $page_title = quietype_archive_page_text( 'photo', 'title' );
 $eyebrow    = quietype_archive_page_text( 'photo', 'eyebrow' );
 $intro      = quietype_archive_page_text( 'photo', 'intro' );
@@ -49,18 +51,19 @@ if ( $year_count > 4 && 0 !== $year_count % 3 ) {
 	<?php if ( $photos_by_year ) : ?>
 		<nav class="<?php echo esc_attr( implode( ' ', $year_index_classes ) ); ?>" aria-label="按年份查看">
 			<?php foreach ( $photos_by_year as $year => $photos ) : ?>
-				<?php $is_latest_year = $year === $years[0]; ?>
-				<a href="#photo-year-<?php echo esc_attr( $year ); ?>" aria-controls="photo-grid-<?php echo esc_attr( $year ); ?>" aria-expanded="<?php echo $is_latest_year ? 'true' : 'false'; ?>"><strong><?php echo esc_html( $year ); ?></strong><span><?php echo esc_html( count( $photos ) ); ?> 张</span></a>
+				<?php $is_default_year = in_array( $year, $expanded_years, true ); ?>
+				<a href="#photo-year-<?php echo esc_attr( $year ); ?>" aria-controls="photo-grid-<?php echo esc_attr( $year ); ?>" aria-expanded="<?php echo $is_default_year ? 'true' : 'false'; ?>"><strong><?php echo esc_html( $year ); ?></strong><span><?php echo esc_html( count( $photos ) ); ?> 张</span></a>
 			<?php endforeach; ?>
 		</nav>
 
 		<?php foreach ( $photos_by_year as $year => $photos ) : ?>
 			<?php $is_latest_year = $year === $years[0]; ?>
+			<?php $is_default_year = in_array( $year, $expanded_years, true ); ?>
 			<?php set_query_var( 'quietype_photo_year_count', count( $photos ) ); ?>
-			<section class="photo-year" id="photo-year-<?php echo esc_attr( $year ); ?>" aria-labelledby="photo-year-title-<?php echo esc_attr( $year ); ?>" data-expanded="<?php echo $is_latest_year ? 'true' : 'false'; ?>">
+			<section class="photo-year" id="photo-year-<?php echo esc_attr( $year ); ?>" aria-labelledby="photo-year-title-<?php echo esc_attr( $year ); ?>" data-expanded="<?php echo $is_default_year ? 'true' : 'false'; ?>">
 				<header class="photo-year__heading">
 					<h2 id="photo-year-title-<?php echo esc_attr( $year ); ?>">
-						<button class="photo-year__toggle" type="button" aria-expanded="<?php echo $is_latest_year ? 'true' : 'false'; ?>" aria-controls="photo-grid-<?php echo esc_attr( $year ); ?>" aria-label="<?php echo esc_attr( ( $is_latest_year ? '收起 ' : '展开 ' ) . $year . ' 年照片' ); ?>">
+						<button class="photo-year__toggle" type="button" aria-expanded="<?php echo $is_default_year ? 'true' : 'false'; ?>" aria-controls="photo-grid-<?php echo esc_attr( $year ); ?>" aria-label="<?php echo esc_attr( ( $is_default_year ? '收起 ' : '展开 ' ) . $year . ' 年照片' ); ?>">
 							<span><?php echo esc_html( $year ); ?></span><i aria-hidden="true"></i>
 						</button>
 					</h2>

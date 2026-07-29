@@ -15,6 +15,8 @@ All notable changes to Quietype will be documented in this file.
 
 ### Changed
 
+- Isolated the book and photo administration regression sessions so parallel browser runs no longer compete for one WordPress login token.
+- Made the initially expanded year count independently configurable for books and photos; zero keeps every year open while photo hydration remains viewport-aware.
 - Added compact year-span totals to the book and photo headers, with the two newest book years expanded by default and older shelves revealed on demand or by record hash.
 - Renamed the completed reading state from “已读” to “读完” without migrating stored values, and added a distinct “读过” state for books intentionally left unfinished.
 - Consolidated sitemap discovery on `/wp-sitemap.xml`; the legacy `/sitemap.xml` path remains a permanent compatibility redirect after its stale static file is removed.

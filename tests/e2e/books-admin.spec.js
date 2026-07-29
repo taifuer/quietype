@@ -2,7 +2,7 @@ const { test, expect } = require('@playwright/test');
 
 async function logIn(page) {
   await page.goto('/wp-login.php');
-  await page.locator('#user_login').fill('admin');
+  await page.locator('#user_login').fill('books-admin');
   await page.locator('#user_pass').fill('password');
   await Promise.all([
     page.waitForURL(/\/wp-admin\//),
@@ -133,7 +133,13 @@ test('book and photo archive headings are configurable together', async ({ page 
   await expect(page.locator('#quietype_books_page_title')).toHaveValue('万卷古今');
   await expect(page.locator('#quietype_books_page_eyebrow')).toHaveValue('BOOKS');
   await expect(page.locator('#quietype_books_page_intro')).toHaveAttribute('placeholder', '留空不显示');
+  await expect(page.locator('#quietype_books_default_expanded_years')).toHaveValue('2');
+  await expect(page.locator('#quietype_books_default_expanded_years')).toHaveAttribute('min', '0');
+  await expect(page.locator('#quietype_books_default_expanded_years + .description')).toContainText('0 时全部展开');
   await expect(page.locator('#quietype_photos_page_title')).toHaveValue('万物静观');
   await expect(page.locator('#quietype_photos_page_eyebrow')).toHaveValue('PHOTOS');
   await expect(page.locator('#quietype_photos_page_intro')).toHaveAttribute('placeholder', '留空不显示');
+  await expect(page.locator('#quietype_photos_default_expanded_years')).toHaveValue('1');
+  await expect(page.locator('#quietype_photos_default_expanded_years')).toHaveAttribute('min', '0');
+  await expect(page.locator('#quietype_photos_default_expanded_years + .description')).toContainText('0 时全部展开');
 });
