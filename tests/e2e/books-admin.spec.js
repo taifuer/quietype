@@ -134,6 +134,7 @@ test('site policies remain configurable without site-specific defaults', async (
   await expect(page.locator('#quietype_github_url')).toHaveAttribute('placeholder', 'https://github.com/example');
   await expect(page.locator('#quietype_article_license')).toHaveValue('cc-by-nc-sa');
   await expect(page.locator('#quietype_article_author_url')).toHaveAttribute('placeholder', 'https://example.com/about/');
+  await expect(page.locator('#quietype_schema_publisher_type')).toHaveValue('person');
   await expect(page.locator('#quietype-section-access h2')).toHaveText('访问优化');
   await expect(page.locator('#quietype_gravatar_base_url')).toHaveAttribute('placeholder', 'https://avatar.example.com/avatar/');
 });

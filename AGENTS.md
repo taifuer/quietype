@@ -33,7 +33,7 @@ Playwright covers home, article, archive, search, links, about, and 404 views in
 
 ## Commit & Pull Request Guidelines
 
-Use concise, meaningful commit subjects and list key changes in the body. Commits must use `taifu <taifu@taifua.com>` as author. Agent-assisted commits must include:
+Use concise, meaningful commit subjects and list key changes in the body. External contributors use their own Git identity. Maintainer-owned commits created by an agent must use `taifu <taifu@taifua.com>` as author and include:
 
 `Co-Authored-By: Codex (GPT-5.6 Sol) <noreply@openai.com>`
 

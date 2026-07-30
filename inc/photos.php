@@ -386,7 +386,7 @@ function quietype_save_photo_meta( $post_id, $post ) {
 		'_quietype_photo_lens'          => array( 'quietype_photo_lens', 'sanitize_text_field' ),
 	);
 	foreach ( $fields as $meta_key => $field ) {
-		$value = isset( $_POST[ $field[0] ] ) ? call_user_func( $field[1], wp_unslash( $_POST[ $field[0] ] ) ) : '';
+		$value = isset( $_POST[ $field[0] ] ) ? call_user_func( $field[1], wp_unslash( $_POST[ $field[0] ] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized by the field-specific callback.
 		if ( '' !== $value ) {
 			update_post_meta( $post_id, $meta_key, $value );
 		} else {
@@ -522,7 +522,7 @@ function quietype_ajax_lookup_photo() {
 	if ( ! current_user_can( 'edit_posts' ) ) {
 		wp_send_json_error( array( 'message' => '没有读取图片信息的权限。' ), 403 );
 	}
-	$url = quietype_sanitize_photo_url( isset( $_POST['url'] ) ? wp_unslash( $_POST['url'] ) : '' );
+	$url = quietype_sanitize_photo_url( isset( $_POST['url'] ) ? wp_unslash( $_POST['url'] ) : '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized and restricted to HTTPS by quietype_sanitize_photo_url().
 	if ( ! $url ) {
 		wp_send_json_error( array( 'message' => '请输入有效的 HTTPS 图片地址。' ), 422 );
 	}

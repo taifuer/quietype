@@ -2,7 +2,41 @@
 
 All notable changes to Quietype will be documented in this file.
 
-## [Unreleased]
+## [0.10.20] - 2026-07-30
+
+### Added
+
+- Added WordPress security-focused PHPCS checks, dependency updates, issue forms, a pull-request template, and a tag-driven release workflow.
+- Added WordPress 6.6 and 6.8 compatibility smoke tests alongside the existing browser suite.
+- Added neutral article, bookshelf, photo, and mobile previews plus a dedicated configuration guide for the public repository.
+
+### Changed
+
+- Raised the declared minimum WordPress version to 6.6 to match `theme.json` v3.
+- Reorganized the README around project positioning, visual previews, installation, data ownership, and quality checks.
+- Preferred template-assigned utility pages and the concise `/archive/` convention instead of hard-coded navigation slugs.
+- Made single-author archive protection configurable and kept disabled author links as plain text.
+- Preserved WordPress Core's image loading decisions while pruning stale remote-dimension metadata.
+- Replaced comment-form render-time CAPTCHA writes with cache-friendly signed challenges while retaining expiry, honeypot checks, and per-visitor throttling.
+- Made the published privacy-policy link an explicit, default-off footer option instead of automatic output.
+
+### Removed
+
+- Removed the redundant standalone tag-page compatibility template.
+
+## [0.10.19] - 2026-07-29
+
+### Changed
+
+- Removed the obsolete “墨白文章归档” compatibility template now that the canonical article archive is used directly.
+
+## [0.10.18] - 2026-07-29
+
+### Changed
+
+- Replaced site-specific runtime defaults, examples, login branding, and third-party avatar routing with neutral opt-in configuration.
+
+## [0.10.17] - 2026-07-29
 
 ### Added
 
@@ -16,8 +50,6 @@ All notable changes to Quietype will be documented in this file.
 
 ### Changed
 
-- Removed the obsolete “墨白文章归档” compatibility template now that the canonical article archive is used directly.
-- Replaced site-specific runtime defaults, examples, login branding, and third-party avatar routing with neutral opt-in configuration.
 - Restyled protected login and dashboard routes as a standalone Quietype 404 without revealing the hidden entrance.
 - Isolated the book and photo administration regression sessions so parallel browser runs no longer compete for one WordPress login token.
 - Made the initially expanded year count independently configurable for books and photos; zero keeps every year open while photo hydration remains viewport-aware.

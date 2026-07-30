@@ -19,6 +19,8 @@ PHP and JavaScript changes should also pass:
 
 ```bash
 find . -name '*.php' -not -path './node_modules/*' -print0 | xargs -0 -n1 php -l
+composer install
+composer lint -- --warning-severity=0
 npm run test:js
 git diff --check
 ```
@@ -32,3 +34,5 @@ git diff --check
 - Include third-party code only when it can be distributed under a GPL-compatible license, and retain its license file.
 
 Pull requests should describe user-visible behavior, migration considerations, tests performed, and any new outbound requests or stored data. Include screenshots for layout changes and link related issues where applicable.
+
+Contributors should commit with their own Git identity. The maintainer-specific author and co-author rules in `AGENTS.md` apply only to automated work performed for this repository owner.

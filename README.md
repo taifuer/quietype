@@ -4,201 +4,89 @@
 
 Quietype 是一款面向中文长文与技术写作的经典 WordPress 主题。它以简约、素雅、明亮为设计基调，把排版、导航和交互集中在持续阅读这件事上，同时兼顾 Markdown 技术内容、移动端体验、访问性能与站点管理。
 
+[在线演示](https://taifua.com/) · [版本发布](https://github.com/taifuer/quietype/releases) · [更新记录](CHANGELOG.md)
+
 ![Quietype 首页预览](screenshot.png)
 
-## 设计与能力
+## 页面预览
 
-### 阅读体验
+| 文章阅读 | 年度书架 |
+| --- | --- |
+| ![文章阅读页](docs/images/article.png) | ![年度书架](docs/images/books.png) |
 
-- 800px 长文阅读区与适合中英文混排的系统字体栈
-- 纸白、米杏、浅绿三种亮色背景，选择仅保存在浏览器本地
+![年度照片页](docs/images/photos.png)
+
+<details>
+<summary>查看移动端文章页</summary>
+
+<p align="center">
+  <img src="docs/images/article-mobile.png" alt="Quietype 移动端文章页" width="390">
+</p>
+
+</details>
+
+演示图由隔离测试环境生成，不依赖线上文章、书籍封面或私人照片。
+
+## 设计原则
+
+- **阅读优先**：800px 长文区、克制的标题层级和适合中英文混排的系统字体栈。
+- **安静但不简陋**：纸白、米杏、浅绿三种亮色阅读背景，保留必要反馈而减少视觉噪音。
+- **技术写作友好**：支持常见 Markdown 结构、KaTeX、Prism、表格、脚注、多级列表和长标识符换行。
+- **保持轻量**：不加载网络字体，图片预览组件本地分发，代码、公式和图库资源按内容加载。
+
+## 主要能力
+
+### 阅读与交互
+
 - H2/H3 自动目录、章节永久链接、阅读进度和移动端折叠目录
-- 克制的标题层级、段落节奏、分类标签、元信息与打印样式
-- 固定移动 Header、抽屉导航、背景切换和返回顶部工具
+- 固定移动 Header、抽屉导航、搜索、背景切换与返回顶部工具
+- 亮色代码配色、语言标记、行号、复制按钮和键盘可访问的横向滚动
+- 响应式图片、图注、打印样式及 PhotoSwipe 图片预览
+- 首页、文章、分类、标签、搜索、年度归档、友链、关于与 404 模板
 
-### 技术内容
+### 内容与管理
 
-- Markdown 常见元素、KaTeX 公式、表格、脚注与多级列表
-- 自有亮色代码配色、语言标记、行号、复制按钮和横向滚动
-- 图片边框与图注、响应式媒体、懒加载及 PhotoSwipe 图片预览
-- 长链接、行内代码和中英文长标识符的细粒度换行处理
+- `/books/` 年度书架：分类、标签、短评、阅读状态、评分及可选资料链接
+- `/photos/` 轻量图库：外链图片、缩略图、拍摄信息、年度折叠及原图入口
+- 可配置文章版权声明、浏览量、友链状态、SMTP、轻量 SEO 与隐私说明
+- 自定义登录入口、评论验证及面向单作者站点的 WordPress 常用优化
+- 不写入主题私有短代码；普通文章正文不会因切换主题而锁定
 
-### 站点页面与管理
+## 环境与安装
 
-- 首页、文章、分类、标签、搜索、年度归档、友链、关于与 404
-- “万卷古今”年度阅读清单，支持分类、标签、短评、评分与豆瓣资料预览
-- 轻量年度照片页，支持 HTTPS 外链、可选拍摄参数与 PhotoSwipe 放大查看
-- 浏览量、评论验证、可配置文章版权声明和友链状态管理
-- 轻量 SEO、SMTP 通知、自定义登录入口与 WordPress 常用优化
-- 键盘焦点、`prefers-reduced-motion` 和基础无障碍支持
-- 不写入主题私有短代码，切换主题不会锁定正文内容
-
-## 环境要求与安装
-
-- WordPress 6.4+
+- WordPress 6.6+
 - PHP 8.0+
 
-推荐从 [GitHub Releases](https://github.com/taifuer/quietype/releases) 下载 `quietype-<版本号>.zip`，在 WordPress 后台进入“外观 → 主题 → 安装主题 → 上传主题”完成安装。发布包已经包含顶层 `quietype/` 目录。
+推荐从 [GitHub Releases](https://github.com/taifuer/quietype/releases) 下载 `quietype-<版本号>.zip`，然后在 WordPress 后台进入“外观 → 主题 → 安装主题 → 上传主题”。发布包已经包含顶层 `quietype/` 目录。
 
-也可以直接克隆到主题目录：
+也可以直接安装开发版本：
 
 ```bash
 cd wp-content/themes
-git clone git@github.com:taifuer/quietype.git
+git clone https://github.com/taifuer/quietype.git
 ```
 
-启用后，WordPress 使用的主题目录标识为 `quietype`。
+启用后建议依次完成：
 
-## 主题配置
+1. 在“外观 → 菜单”分配顶部主导航；需要时再分配正文之后的页尾上方导航。
+2. 创建 `/archive/` 页面并指定“文章归档”模板；友链页指定“友情链接”模板。
+3. 在“外观 → Quietype 设置”配置站点信息、内容页面、SEO、访问、安全和邮件。
+4. 访问“设置 → 固定链接”并保存一次，使 `/books/` 与 `/photos/` 路由生效。
 
-### 设置入口
+完整字段、缓存、登录保护、SMTP、书籍和照片配置见 [配置指南](docs/CONFIGURATION.md)。
 
-Quietype 自有选项集中在“外观 → Quietype 设置”，包括站点与页脚、文章版权声明、SEO、访问、WordPress 优化、登录安全、SMTP 通知和自定义代码。站点标题、菜单和额外 CSS 继续使用 WordPress 原生界面；旧版本保存在 Customizer 中的 Quietype 设置会自动迁移。
+## 内容与数据
 
-统计脚本、站点验证代码等可分别写入 Head 或 Footer。设置页使用 WordPress 自带代码编辑器，只有具备 `unfiltered_html` 权限的管理员可以保存可执行代码；样式仍建议使用“外观 → 自定义 → 额外 CSS”。
+Quietype 使用 WordPress 数据库存储书籍、照片、浏览量和主题选项。切换主题不会删除这些数据或普通文章正文，但书籍、照片的管理入口与归档路由会暂停注册，重新启用后恢复。集成内容类型使用 `book`、`photo`、`book_category` 和 `book_tag` 标识，安装注册同名类型的插件前请先检查冲突。
 
-### 菜单与页面模板
+主题没有遥测或广告脚本。启用头像镜像、友链检测、SMTP、远程图片或自定义统计后，站点可能产生相应的外部请求；请在隐私政策中据实说明。部署或迁移前始终备份数据库与 `wp-content/uploads`。
 
-主题提供两个菜单位置：
+## 开发与质量
 
-- `primary`：顶部主导航
-- `prefooter`：正文之后、Footer 之前的页尾上方导航；未分配菜单时不输出
-
-页尾上方导航使用单独的细线与居中链接呈现，不属于 Footer。Footer 保留版权、联系方式与备案信息；在 WordPress 发布并指定隐私政策页后，还会自动显示“隐私政策”入口。
-
-内置页面模板：
-
-- `template-archives.php`：年度文章归档与标签汇总
-- `template-links.php`：友情链接
-- `archive-book.php`：按阅读年份分组的书籍清单
-- `archive-photo.php`：按拍摄年份分组的轻量照片页
-- `list-tag.php`：兼容旧标签模板；标签入口已整合进文章归档
-
-普通页面、分类、标签、搜索和 404 按 WordPress 模板层级自动匹配。
-
-### 阅读背景
-
-背景选择保存在浏览器 `localStorage` 的 `quietype-reading-bg` 中，不写 Cookie 或数据库：
-
-- `paper`：纸白
-- `warm`：米杏
-- `green`：浅绿
-
-Quietype 目前只提供亮色阅读背景。
-
-### 友链状态
-
-主题启用期间会恢复 WordPress 原生“链接”管理入口，并提供友链状态、分组顺序和可达性检测。前台按照后台创建的链接分类动态分组，空分类不显示；“链接分类”中的数字顺序越小越靠前，留空时按名称排列，主题不写死站点专属分类。
-
-友链检测默认关闭，管理员启用后每天轮换检测至多五条可见友链。连续失败三次只进入后台“待确认”，不会自动在前台标记失联；管理员确认后才显示低调角标，恢复为“正常”即可移除。检测结果保存在 WordPress Options 中，不修改核心链接表。
-
-### 书籍与阅读
-
-后台“阅读”使用 WordPress 原生内容类型保存个人书目，分类与标签均由管理员创建。每条记录包含标题、作者、出版社、出版年份、ISBN、阅读月份、阅读状态、豆瓣评分、个人整星评价和一段简短点评。状态分为读完、在读、读过和待读，其中“读过”专指读了一部分且不再继续；已有 `read` 数据继续保留，只将前台文字由“已读”调整为“读完”。封面可使用特色图，也可填写任意稳定的 HTTPS 图片地址；外链优先展示，加载失败时回退到文字封面。编辑页默认显示原生点评字段，列表以“状态 · 月份”集中呈现阅读记录，不把点评塞进快速编辑。公开总览位于 `/books/`，按阅读年份分组、月份倒序呈现；默认展开年份数可在主题设置中修改（默认 2，填写 0 时全部展开），年份导航和记录锚点会自动显示目标书架。旧 `/reading/` 地址会永久跳转到新书架。阅读状态、月份、个人星级和豆瓣评分集中在点评上方，封面仅作展示。可选的书籍链接支持豆瓣、出版社或其他 HTTP(S) 资料页；填写时标题链接到对应页面，留空时标题保持为普通文字。书籍不另设本站详情页或可编辑固定链接，后台“在书架中查看”只定位到 `/books/` 中的对应记录；详细阅读总结仍适合写成普通博客文章。
-
-书籍编辑页接受豆瓣读书链接或条目 ID。点击“读取豆瓣资料”只生成标题、作者、出版社、出版年份、ISBN、评分和封面的预览，不会修改现有字段；核对后还需要点击独立的“确认填入”按钮。浏览器因豆瓣防盗链无法直接显示预览时，主题仍会保留已确认的封面地址，并在保存时由服务器经过来源、格式和大小校验后尝试导入媒体库；抓取、导入或前台加载失败时自动回退到文字封面。豆瓣页面结构或访问策略变化时，所有字段仍可手工填写。
-
-“Quietype 设置 → 内容页面”可以分别修改书籍页和照片页的中文标题、英文标识与简短介绍。标题同步用于浏览器和社交分享标题，简介也作为该归档页的 SEO 描述；简介留空时不输出对应区域。
-
-### 照片
-
-后台“照片”用于维护 `/photos/` 年度图库，每条记录只需要标题、HTTPS 展示图片地址和拍摄月份，也可以补充独立原图地址、地点、简短说明、尺寸、焦距、光圈、快门、ISO、相机与镜头。页面按拍摄年份和月份倒序排列，默认展开年份数可在主题设置中修改（默认 1，填写 0 时全部展开），较早照片仍只在接近视口时加载；横幅、竖幅和方图依据已记录比例组成克制的编辑式网格。照片说明和拍摄参数不挤占列表，只在 PhotoSwipe 放大查看时出现。展示图用于灯箱，原图只在访客主动点击“查看原图”时请求；使用 WordPress 特色图片时，主题自动输出 1280px 网格尺寸、2560px 灯箱尺寸及响应式 `srcset`。照片不提供独立详情页或可编辑固定链接，后台“在图库中查看”直接定位到 `/photos/` 中的对应记录。
-
-外链图库可以在“Quietype 设置 → 内容页面”填写照片 CDN 基础目录。主题随后按 `thumbs/年份/同名文件.webp` 读取网格缩略图，灯箱继续使用展示图，缩略图缺失时自动回退；这个约定不增加逐张配置字段。仓库中的工具可批量生成长边 1000px、质量 82 的 WebP 文件：
-
-```bash
-php tools/generate-photo-thumbnails.php ../photos-cdn ../photos-thumbs
-```
-
-将输出目录中的 `thumbs/` 文件夹上传到 CDN 的 `/photos/` 前缀，最终地址形如 `/photos/thumbs/2026/<uuid>.webp`。
-
-填写外链后点击“读取图片信息”只会生成尺寸与 EXIF 预览，确认填入后才会修改表单。远程图床可能清除 EXIF，PHP 也可能未启用 EXIF 扩展，因此所有参数都是可选项并可手工填写。主题不会读取或公开 GPS 坐标。使用特色图片可以完全本地托管；外链图片建议由稳定、可控的 HTTPS 图床提供。
-
-## 内容渲染与代码呈现
-
-主题通过标准 `the_content` 渲染文章，不修改编辑器保存的 Markdown 原文。WP Editor.md、KaTeX 和 Prism 都不是运行主题的强制依赖；使用 WP Editor.md 时，Markdown 仍保存在 `post_content_filtered`，Quietype 只处理最终前台输出。
-
-文章目录根据渲染后的 H2/H3 自动生成，章节锚点不会写回数据库。存在 Prism 时，它只负责语法解析、语言标记与行号；代码块的亮色 token 配色、语言标签和中文复制按钮由 Quietype 提供，不依赖远程代码样式或 ClipboardJS CDN。
-
-Quietype 会检查当前正文，只在确实存在代码、公式、图表或图片时保留相关资源；普通页面和纯文本文章不会加载整套编辑器前端依赖。
-
-## SEO
-
-未检测到 Yoast SEO、Rank Math、All in One SEO、SEOPress 或 The SEO Framework 时，Quietype 输出轻量的 description、keywords、Open Graph、社交摘要和 Schema.org JSON-LD；启用专用 SEO 插件后会停止输出整组元数据，避免重复。
-
-文章描述按“自定义描述 → 手工摘要 → 自动摘要”取值，关键词按“自定义关键词 → 标签 → 分类 → 站点关键词”取值，社交图片按“特色图 → 第一张正文图片 → 默认分享图”取值。文章与页面编辑页中的“Quietype SEO”区域可以覆盖自动结果。
-
-`meta keywords` 对主流搜索引擎作用有限，仅作为兼容字段保留；规范标题、描述、结构化数据和可读内容更重要。
-
-站点地图以 WordPress 核心生成的 `/wp-sitemap.xml` 为唯一来源。主题会排除没有独立详情页的书籍、照片记录，并把可索引的 `/books/` 与 `/photos/` 归档加入地图；WordPress 保留的 `/sitemap.xml` 兼容入口会永久跳转到核心地图。不要同时维护静态 `sitemap.xml`，以免过期 URL 与规范地址冲突。
-
-## 访问优化
-
-主题不加载网络字体，PhotoSwipe 随主题本地分发，正文相关资源按内容条件保留。图片支持原生懒加载、远程尺寸缓存和替代文字发布检查，减少布局偏移与无效请求。
-
-使用 Nginx FastCGI 等整页缓存时，可以在 Web 服务器配置一个仅允许本机访问、用于清理 `/books` 的 PURGE 入口，再在 `wp-config.php` 中定义 `QUIETYPE_CACHE_PURGE_ENDPOINT`。Quietype 会在书籍保存、状态变化或永久删除后的请求末尾调用一次该入口；未定义常量时不会发起额外请求。缓存清理失败不会阻止内容保存，服务器原有 TTL 仍作为兜底。
-
-照片归档使用相同策略，但独立读取 `QUIETYPE_PHOTO_CACHE_PURGE_ENDPOINT`，以便精确清理 `/photos` 而不扩大缓存失效范围。
-
-评论头像默认使用 WordPress 原始 Gravatar 地址。“外观 → Quietype 设置 → 访问”可以选填自有或可信的镜像基础地址；配置后，访客头像请求会发送到该服务。开发者也可以通过过滤器覆盖：
-
-```php
-add_filter( 'quietype_avatar_base_url', function () {
-	return 'https://avatar.example.com/avatar/';
-} );
-```
-
-## 版权、隐私与数据
-
-文章版权声明默认关闭。启用后可以选择 CC BY-NC-SA 4.0、CC BY-SA 4.0、保留所有权利或自定义文字，并分别设置署名与作者链接；未填写署名时使用文章作者，未填写链接时使用作者归档。许可证是站点运营者的内容政策，启用前应确认与实际授权方式一致。
-
-Quietype 不包含遥测、广告脚本或无条件 Cookie 弹窗。阅读背景和文章浏览量的最近计数时间保存在浏览器 `localStorage`；服务器仅短时保存带站点密钥的访客散列以避免重复计数。启用自定义登录入口后，已通过校验的浏览器会收到最长十二小时的 HttpOnly、SameSite Cookie。
-
-主题通过 WordPress 原生隐私政策指南提供可复制的建议文本。站点应在“设置 → 隐私”中建立并发布自己的政策页，并根据实际使用的 Gravatar 镜像、统计代码、外链图片和其他第三方服务补充接收方与用途。发布并指定隐私政策页后，Quietype 会在 Footer 自动输出入口；未配置时不显示。主题本身不会猜测第三方统计代码是否需要同意，因此不会展示没有实际控制能力的通用 Cookie 横幅。
-
-书籍、照片、浏览量和主题选项保存在 WordPress 数据库中。切换主题不会删除这些数据或普通文章正文，但书籍、照片的管理入口和归档路由会停止注册，重新启用 Quietype 后恢复。卸载或迁移前应先备份数据库。
-
-## 登录、评论与安全
-
-Quietype 重设登录、找回密码和密码重置页面的视觉样式，并可启用自定义入口参数、一次性算术验证码和 XML-RPC 认证保护。参数名为 `entry`、参数值为至少 24 位私有随机字符串时，初始入口形如 `wp-login.php?entry=<私有值>`；校验成功后会换取 12 小时、HttpOnly、SameSite 的签名 Cookie，并跳转到不含入口值的地址。
-
-入口保护启用后，默认入口、错误参数和未登录的 `/wp-admin/` 返回 404。启用前请保存完整入口地址，不要把真实值写入仓库、截图或统计平台。需要文件级配置时，可在 `wp-config.php` 定义 `QUIETYPE_LOGIN_GATE_KEY` 和 `QUIETYPE_LOGIN_GATE_VALUE`，常量优先于后台字段。
-
-公开评论使用十分钟有效、提交后立即作废的四位数字验证，并配有蜜罐和短时提交节流。隐藏入口和简单验证码用于减少自动扫描与垃圾提交，不能替代强密码、双重验证和服务器限速；切换主题会恢复 WordPress 默认登录行为。
-
-## SMTP 与通知
-
-“外观 → Quietype 设置 → 邮件”可以让 WordPress 内置 `wp_mail()` 使用 SMTP，并发送测试邮件。支持 TLS、SMTPS、无加密连接、可选身份验证、自定义发件地址，以及管理员登录和新评论通知。Quietype 通知使用无外部资源的响应式 HTML 模板。
-
-SMTP 密码以原值保存在 WordPress 数据库中，建议使用邮箱服务商提供的独立授权码；也可以在 `wp-config.php` 定义 `QUIETYPE_SMTP_PASSWORD`。正式使用前还应配置 SPF、DKIM 与 DMARC，并通过测试邮件确认投递。
-
-## WordPress 优化
-
-“外观 → Quietype 设置 → WordPress”可以隐藏登录用户在前台看到的管理工具栏，并停止为文章和页面创建新的历史版本；后台工具栏和自动保存不受影响。已有历史版本不会被静默删除，需要管理员核对数量后单独确认。
-
-## 开发与自动化回归
-
-主题没有前端构建步骤。修改 PHP、CSS 或 JavaScript 后可以直接在本地 WordPress 中预览。仓库提供独立于真实博客数据的自动化回归环境，运行它需要 Node.js 22、Docker Compose 和 Chromium 所需系统依赖。
-
-- 根目录 PHP 文件：WordPress 模板和主题功能
-- `template-parts/`：文章列表组件
-- `assets/js/`：主题交互与图片预览
-- `assets/vendor/`：随主题分发的第三方依赖及许可证
-- `inc/books.php`：阅读数据、豆瓣资料预览、封面导入和年度排序
-- `inc/photos.php`：照片字段、远程图片信息预览和年度排序
-- `inc/archive-records.php`：书籍与照片共用的无详情页链接行为
-- `tools/generate-photo-thumbnails.php`：按年度批量生成同名 WebP 网格缩略图
-- `style.css`：主题声明与前台样式
-- `theme.json`：编辑器基础设置
-- `screenshot.png`：README 与 WordPress 后台主题预览图
-- `tests/`：固定种子内容、浏览器测试和桌面/移动视觉基线
-- `.github/workflows/quality.yml`：PHP 兼容性与浏览器质量门禁
-
-首次运行：
+主题没有前端构建步骤。仓库提供隔离的 Docker WordPress、固定测试内容、Playwright、axe、视觉回归和 Lighthouse 预算：
 
 ```bash
 npm ci
-npx playwright install --with-deps chromium
 npm run env:start
 npm run env:seed
 npm run test:e2e
@@ -206,15 +94,23 @@ npm run test:performance
 npm run env:stop
 ```
 
-测试站默认使用 `http://localhost:8888`，停止时会删除测试 WordPress 与数据库卷，不读取真实博客。Playwright 覆盖首页、文章、书籍、照片、归档、友链、关于、搜索和 404，并检查控制台错误、关键交互、HTML 结构、axe 严重无障碍问题及 390px/1440px 视觉基线。Lighthouse 检查首页与代表文章的性能、无障碍、最佳实践、SEO 和资源体积预算。
-
-只有确认视觉变化符合预期时才更新基线：
+PHP 安全基线与静态检查：
 
 ```bash
-npm run test:e2e:update
+composer install
+composer lint -- --warning-severity=0
+find . -name '*.php' -not -path './node_modules/*' -print0 | xargs -0 -n1 php -l
+npm run test:js
+git diff --check
 ```
 
-失败截图、trace、HTML 报告和 Lighthouse 报告输出到 `artifacts/`，GitHub Actions 保留这些文件 14 天。
+GitHub Actions 在 PHP 8.0、8.2、8.4 以及 WordPress 6.6、6.8 上执行检查。推送 `v*` Tag 前，版本号必须同时匹配 `style.css`、`package.json` 和 `CHANGELOG.md`；通过后发布工作流会生成可安装 ZIP 与 SHA-256 校验文件。
+
+## 参与与安全
+
+- 贡献流程与代码约定：[CONTRIBUTING.md](CONTRIBUTING.md)
+- 安全问题与私密报告方式：[SECURITY.md](SECURITY.md)
+- 版本变化与迁移说明：[CHANGELOG.md](CHANGELOG.md)
 
 ## 许可证
 

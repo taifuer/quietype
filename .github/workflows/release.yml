@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    name: Validate and package theme
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
+      - name: Validate release version
+        run: bash tools/check-release-version.sh "${GITHUB_REF_NAME}"
+      - name: Build installable archive
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          archive="quietype-${version}.zip"
+          git archive --format=zip --prefix=quietype/ --output="${archive}" "${GITHUB_SHA}"
+          unzip -t "${archive}"
+          if unzip -Z1 "${archive}" | grep -Eq '^quietype/(\.editorconfig|\.github|AGENTS\.md|CONTRIBUTING\.md|SECURITY\.md|docs|tests|node_modules|composer\.(json|lock)|lighthouserc\.cjs|package(-lock)?\.json|phpcs\.xml\.dist|playwright\.config\.js|tools/check-release-version\.sh)(/|$)'; then
+            echo 'Development-only files leaked into the installable archive.' >&2
+            exit 1
+          fi
+          sha256sum "${archive}" > "${archive}.sha256"
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          archive="quietype-${version}.zip"
+          gh release create "${GITHUB_REF_NAME}" "${archive}" "${archive}.sha256" --verify-tag --generate-notes --title "Quietype ${version}"

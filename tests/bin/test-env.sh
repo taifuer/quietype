@@ -21,11 +21,14 @@ case "${1:-}" in
   seed)
     "${compose[@]}" exec -T wordpress php /var/www/html/wp-content/themes/quietype/tests/bin/seed-wordpress.php
     ;;
+  check)
+    "${compose[@]}" exec -T wordpress php /var/www/html/wp-content/themes/quietype/tests/bin/check-wordpress.php
+    ;;
   stop)
     "${compose[@]}" down --volumes --remove-orphans
     ;;
   *)
-    printf 'Usage: %s {start|seed|stop}\n' "$0" >&2
+    printf 'Usage: %s {start|seed|check|stop}\n' "$0" >&2
     exit 2
     ;;
 esac

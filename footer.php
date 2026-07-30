@@ -23,12 +23,14 @@
 			<?php $start_year = (int) quietype_get_setting( 'quietype_start_year', $current_year ); ?>
 			<?php $year_label = $start_year < $current_year ? $start_year . '–' . $current_year : (string) $current_year; ?>
 			<span class="footer-copyright">© <?php echo esc_html( $year_label ); ?> <a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( get_bloginfo( 'name' ) ); ?></a></span>
-			<div class="footer-policies">
-				<?php $privacy_url = get_privacy_policy_url(); ?>
-				<?php if ( $privacy_url ) : ?><a class="footer-privacy" href="<?php echo esc_url( $privacy_url ); ?>">隐私政策</a><?php endif; ?>
-				<?php $icp_number = quietype_get_setting( 'quietype_icp_number', '' ); ?>
-				<?php if ( $icp_number ) : ?><a class="footer-icp" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $icp_number ); ?></a><?php endif; ?>
-			</div>
+			<?php $privacy_url = quietype_get_setting( 'quietype_footer_privacy_link_enabled', false ) ? get_privacy_policy_url() : ''; ?>
+			<?php $icp_number = quietype_get_setting( 'quietype_icp_number', '' ); ?>
+			<?php if ( $privacy_url || $icp_number ) : ?>
+				<div class="footer-policies">
+					<?php if ( $privacy_url ) : ?><a class="footer-privacy" href="<?php echo esc_url( $privacy_url ); ?>">隐私政策</a><?php endif; ?>
+					<?php if ( $icp_number ) : ?><a class="footer-icp" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $icp_number ); ?></a><?php endif; ?>
+				</div>
+			<?php endif; ?>
 		</div>
 		<?php $github_url = quietype_get_setting( 'quietype_github_url', '' ); ?>
 		<?php $contact_email = quietype_get_setting( 'quietype_contact_email', '' ); ?>

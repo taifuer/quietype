@@ -42,7 +42,9 @@ test('core sitemap is canonical and includes the public book and photo archives'
 
   const index = await request.get('/wp-sitemap.xml');
   expect(index.status()).toBe(200);
-  expect(await index.text()).toContain('/wp-sitemap-quietypearchives-1.xml');
+  const indexXml = await index.text();
+  expect(indexXml).toContain('/wp-sitemap-quietypearchives-1.xml');
+  expect(indexXml).not.toContain('/wp-sitemap-users-');
 
   const archives = await request.get('/wp-sitemap-quietypearchives-1.xml');
   expect(archives.status()).toBe(200);
@@ -53,15 +55,32 @@ test('core sitemap is canonical and includes the public book and photo archives'
   expect(xml).not.toContain('/quietype-photo-');
 });
 
-test('published privacy policy and configured article license stay discoverable', async ({ page }) => {
+test('the retired article archive slug redirects only to the configured archive page', async ({ request }) => {
+  const legacy = await request.get('/articlearchive/', { maxRedirects: 0 });
+  expect(legacy.status()).toBe(301);
+  expect(legacy.headers().location).toMatch(/\/archive\/$/);
+});
+
+test('privacy footer link is opt-in and configured article license stays discoverable', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('.footer-privacy')).toHaveText('隐私政策');
-  await expect(page.locator('.footer-privacy')).toHaveAttribute('href', /\/privacy-policy\/$/);
+  await expect(page.locator('.footer-privacy')).toHaveCount(0);
 
   await page.goto('/quietype-reading-test/');
   await expect(page.locator('.article-license')).toContainText('Quietype');
   await expect(page.locator('.article-license')).toContainText('CC BY-NC-SA 4.0');
   await expect(page.locator('.article-license a[rel~="license"]')).toHaveAttribute('href', 'https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans');
+  await expect(page.locator('.article-license dt').filter({ hasText: '文章作者' }).locator('..').locator('a')).toHaveCount(0);
+});
+
+test('single-author protection and content image loading remain coherent', async ({ page, request }) => {
+  const author = await request.get('/author/admin/');
+  expect(author.status()).toBe(404);
+
+  await page.goto('/quietype-reading-test/');
+  const firstImage = page.locator('.article-content img').first();
+  await expect(firstImage).toHaveAttribute('decoding', 'async');
+  await expect(firstImage).not.toHaveAttribute('loading', 'lazy');
+  await expect(page.locator('input[name="quietype_comment_captcha_token"]')).toHaveAttribute('value', /^\d{10}\.[a-f0-9]{64}$/);
 });
 
 test('photo archive groups external images and keeps details in the lightbox', async ({ page }) => {

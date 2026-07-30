@@ -44,12 +44,17 @@ $article  = quietype_prepare_article( $rendered );
 
 	<?php if ( quietype_get_setting( 'quietype_article_copyright_enabled', false ) ) : ?>
 		<?php $copyright_author = quietype_get_setting( 'quietype_article_author_name', '' ) ?: get_the_author_meta( 'display_name' ); ?>
-		<?php $copyright_author_url = quietype_get_setting( 'quietype_article_author_url', '' ) ?: get_author_posts_url( get_the_author_meta( 'ID' ) ); ?>
+		<?php
+		$copyright_author_url = quietype_get_setting( 'quietype_article_author_url', '' );
+		if ( ! $copyright_author_url && ! quietype_get_setting( 'quietype_disable_author_archives', true ) ) {
+			$copyright_author_url = get_author_posts_url( get_the_author_meta( 'ID' ) );
+		}
+		?>
 		<aside class="article-license content-width" aria-label="文章版权声明">
 			<dl>
 				<div><dt>文章标题</dt><dd><?php the_title(); ?></dd></div>
 				<div><dt>文章链接</dt><dd><a href="<?php echo esc_url( get_permalink() ); ?>"><?php echo esc_html( get_permalink() ); ?></a></dd></div>
-				<div><dt>文章作者</dt><dd><a href="<?php echo esc_url( $copyright_author_url ); ?>"><?php echo esc_html( $copyright_author ); ?></a></dd></div>
+				<div><dt>文章作者</dt><dd><?php if ( $copyright_author_url ) : ?><a href="<?php echo esc_url( $copyright_author_url ); ?>"><?php echo esc_html( $copyright_author ); ?></a><?php else : ?><?php echo esc_html( $copyright_author ); ?><?php endif; ?></dd></div>
 				<div><dt>版权声明</dt><dd><?php echo wp_kses_post( quietype_article_license_html() ); ?></dd></div>
 			</dl>
 		</aside>

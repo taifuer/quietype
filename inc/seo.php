@@ -11,17 +11,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** Do not compete with dedicated SEO plugins. */
 function quietype_has_dedicated_seo_plugin() {
-	return defined( 'WPSEO_VERSION' )
+	$detected = defined( 'WPSEO_VERSION' )
 		|| defined( 'RANK_MATH_VERSION' )
 		|| defined( 'AIOSEO_VERSION' )
 		|| defined( 'SEOPRESS_VERSION' )
 		|| defined( 'THE_SEO_FRAMEWORK_VERSION' )
 		|| class_exists( 'The_SEO_Framework\Load' );
+	return (bool) apply_filters( 'quietype_has_dedicated_seo_plugin', $detected );
 }
 
 /** Keep disabled single-author archives out of the WordPress sitemap index. */
 function quietype_filter_sitemap_provider( $provider, $name ) {
-	if ( 'users' === $name ) {
+	if ( 'users' === $name && quietype_get_setting( 'quietype_disable_author_archives', true ) ) {
 		return false;
 	}
 	return $provider;
@@ -196,7 +197,7 @@ function quietype_get_social_image() {
 		}
 	}
 	$custom = (string) quietype_get_setting( 'quietype_social_image_url', '' );
-	return $custom ?: get_template_directory_uri() . '/screenshot.png';
+	return $custom;
 }
 
 /** Print concise metadata only when no dedicated SEO plugin owns the page. */
@@ -259,10 +260,12 @@ function quietype_print_seo_meta() {
 		$schema['dateModified']     = get_the_modified_date( DATE_W3C );
 		$schema['mainEntityOfPage'] = array( '@type' => 'WebPage', '@id' => $url );
 		$schema['author']           = array( '@type' => 'Person', 'name' => get_the_author_meta( 'display_name', $post->post_author ) );
-		$schema['publisher']        = array( '@type' => 'Organization', 'name' => get_bloginfo( 'name' ) );
+		$publisher_type             = 'organization' === quietype_get_setting( 'quietype_schema_publisher_type', 'person' ) ? 'Organization' : 'Person';
+		$schema['publisher']        = array( '@type' => $publisher_type, 'name' => get_bloginfo( 'name' ) );
 		$site_icon                  = get_site_icon_url( 512 );
 		if ( $site_icon ) {
-			$schema['publisher']['logo'] = array( '@type' => 'ImageObject', 'url' => $site_icon );
+			$publisher_image_key = 'Organization' === $publisher_type ? 'logo' : 'image';
+			$schema['publisher'][ $publisher_image_key ] = array( '@type' => 'ImageObject', 'url' => $site_icon );
 		}
 		if ( $image ) {
 			$schema['image'] = $image;
@@ -299,8 +302,8 @@ function quietype_save_seo_meta( $post_id ) {
 	if ( ! current_user_can( 'edit_post', $post_id ) ) {
 		return;
 	}
-	$description = isset( $_POST['quietype_seo_post_description'] ) ? quietype_sanitize_seo_description( wp_unslash( $_POST['quietype_seo_post_description'] ) ) : '';
-	$keywords    = isset( $_POST['quietype_seo_post_keywords'] ) ? quietype_sanitize_seo_keywords( wp_unslash( $_POST['quietype_seo_post_keywords'] ) ) : '';
+	$description = isset( $_POST['quietype_seo_post_description'] ) ? quietype_sanitize_seo_description( wp_unslash( $_POST['quietype_seo_post_description'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized by the dedicated callback.
+	$keywords    = isset( $_POST['quietype_seo_post_keywords'] ) ? quietype_sanitize_seo_keywords( wp_unslash( $_POST['quietype_seo_post_keywords'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized by the dedicated callback.
 	foreach ( array( '_quietype_seo_description' => $description, '_quietype_seo_keywords' => $keywords ) as $key => $value ) {
 		if ( '' === $value ) {
 			delete_post_meta( $post_id, $key );

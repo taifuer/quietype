@@ -499,7 +499,7 @@ function quietype_save_book_meta( $post_id, $post ) {
 		'_quietype_book_douban_url'       => array( 'quietype_book_url', 'quietype_sanitize_book_url' ),
 	);
 	foreach ( $fields as $meta_key => $field ) {
-		$raw   = isset( $_POST[ $field[0] ] ) ? wp_unslash( $_POST[ $field[0] ] ) : '';
+		$raw   = isset( $_POST[ $field[0] ] ) ? wp_unslash( $_POST[ $field[0] ] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized by the field-specific callback on the next line.
 		$value = call_user_func( $field[1], $raw );
 		if ( '' === $value ) {
 			delete_post_meta( $post_id, $meta_key );
@@ -507,10 +507,10 @@ function quietype_save_book_meta( $post_id, $post ) {
 			update_post_meta( $post_id, $meta_key, $value );
 		}
 	}
-	$book_url  = isset( $_POST['quietype_book_url'] ) ? wp_unslash( $_POST['quietype_book_url'] ) : '';
+	$book_url  = isset( $_POST['quietype_book_url'] ) ? wp_unslash( $_POST['quietype_book_url'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Passed directly to the strict Douban ID sanitizer.
 	$douban_id = quietype_sanitize_douban_id( $book_url );
 	if ( ! $douban_id && isset( $_POST['quietype_book_douban_id'] ) ) {
-		$douban_id = quietype_sanitize_douban_id( wp_unslash( $_POST['quietype_book_douban_id'] ) );
+		$douban_id = quietype_sanitize_douban_id( wp_unslash( $_POST['quietype_book_douban_id'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized by quietype_sanitize_douban_id().
 	}
 	if ( $douban_id ) {
 		update_post_meta( $post_id, '_quietype_book_douban_id', $douban_id );
@@ -667,7 +667,7 @@ function quietype_ajax_lookup_book() {
 	if ( ! current_user_can( 'edit_posts' ) ) {
 		wp_send_json_error( array( 'message' => '没有查询书籍资料的权限。' ), 403 );
 	}
-	$subject_id = quietype_sanitize_douban_id( isset( $_POST['subject'] ) ? wp_unslash( $_POST['subject'] ) : '' );
+	$subject_id = quietype_sanitize_douban_id( isset( $_POST['subject'] ) ? wp_unslash( $_POST['subject'] ) : '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized by quietype_sanitize_douban_id().
 	if ( ! $subject_id ) {
 		wp_send_json_error( array( 'message' => '请输入有效的豆瓣读书链接或条目 ID。' ), 422 );
 	}

@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 私下报告安全问题
+    url: https://github.com/taifuer/quietype/security/advisories/new
+    about: 认证绕过、跨站脚本、密钥泄露等问题不要公开提交。

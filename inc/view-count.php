@@ -53,8 +53,8 @@ function quietype_increment_post_views( $post_id ) {
 /** Return the latest count and optionally record one cache-independent view. */
 function quietype_record_post_view() {
 	nocache_headers();
-	$post_id = isset( $_POST['post_id'] ) ? absint( wp_unslash( $_POST['post_id'] ) ) : 0;
-	$token   = isset( $_POST['token'] ) ? sanitize_text_field( wp_unslash( $_POST['token'] ) ) : '';
+	$post_id = isset( $_POST['post_id'] ) ? absint( wp_unslash( $_POST['post_id'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The public counter is authenticated by the time-bound HMAC token below.
+	$token   = isset( $_POST['token'] ) ? sanitize_text_field( wp_unslash( $_POST['token'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The token is the request authenticator.
 	if ( ! hash_equals( quietype_view_token( $post_id ), $token ) ) {
 		wp_send_json_error( array( 'message' => 'Invalid request.' ), 403 );
 	}
@@ -65,7 +65,7 @@ function quietype_record_post_view() {
 	}
 
 	$counted   = false;
-	$increment = ! empty( $_POST['increment'] ) && '1' === sanitize_text_field( wp_unslash( $_POST['increment'] ) );
+	$increment = ! empty( $_POST['increment'] ) && '1' === sanitize_text_field( wp_unslash( $_POST['increment'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The request is authenticated before this flag is read.
 	if ( $increment && ! quietype_is_view_bot() ) {
 		$fingerprint = quietype_view_fingerprint( $post_id );
 		if ( false === get_transient( $fingerprint ) ) {

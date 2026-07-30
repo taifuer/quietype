@@ -44,7 +44,11 @@ function quietype_schedule_image_metadata( $post_id, $post ) {
 	if ( wp_is_post_revision( $post_id ) || ! $post instanceof WP_Post || ! in_array( $post->post_type, array( 'post', 'page' ), true ) ) {
 		return;
 	}
-	if ( quietype_remote_image_urls( $post->post_content ) && ! wp_next_scheduled( 'quietype_refresh_image_metadata', array( $post_id ) ) ) {
+	if ( ! quietype_remote_image_urls( $post->post_content ) ) {
+		delete_post_meta( $post_id, '_quietype_image_dimensions' );
+		return;
+	}
+	if ( ! wp_next_scheduled( 'quietype_refresh_image_metadata', array( $post_id ) ) ) {
 		wp_schedule_single_event( time() + MINUTE_IN_SECONDS, 'quietype_refresh_image_metadata', array( $post_id ) );
 	}
 }
@@ -56,8 +60,9 @@ function quietype_refresh_image_metadata( $post_id ) {
 	if ( ! $post instanceof WP_Post ) {
 		return;
 	}
-	$dimensions = (array) get_post_meta( $post_id, '_quietype_image_dimensions', true );
-	foreach ( array_slice( quietype_remote_image_urls( $post->post_content ), 0, 30 ) as $url ) {
+	$urls       = array_slice( quietype_remote_image_urls( $post->post_content ), 0, 30 );
+	$dimensions = array_intersect_key( (array) get_post_meta( $post_id, '_quietype_image_dimensions', true ), array_flip( $urls ) );
+	foreach ( $urls as $url ) {
 		if ( isset( $dimensions[ $url ]['width'], $dimensions[ $url ]['height'] ) ) {
 			continue;
 		}
@@ -82,7 +87,7 @@ function quietype_refresh_image_metadata( $post_id ) {
 }
 add_action( 'quietype_refresh_image_metadata', 'quietype_refresh_image_metadata' );
 
-/** Add native lazy loading and known intrinsic dimensions after Markdown renders. */
+/** Add non-blocking decoding and known intrinsic dimensions after Markdown renders. */
 function quietype_optimize_content_images( $content ) {
 	if ( ! is_singular() || false === stripos( $content, '<img' ) || ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
 		return $content;
@@ -90,8 +95,9 @@ function quietype_optimize_content_images( $content ) {
 	$dimensions = (array) get_post_meta( get_queried_object_id(), '_quietype_image_dimensions', true );
 	$processor  = new WP_HTML_Tag_Processor( $content );
 	while ( $processor->next_tag( 'img' ) ) {
-		$processor->set_attribute( 'loading', 'lazy' );
-		$processor->set_attribute( 'decoding', 'async' );
+		if ( ! $processor->get_attribute( 'decoding' ) ) {
+			$processor->set_attribute( 'decoding', 'async' );
+		}
 		$src = html_entity_decode( (string) $processor->get_attribute( 'src' ), ENT_QUOTES, get_bloginfo( 'charset' ) );
 		if ( ! $processor->get_attribute( 'width' ) && ! $processor->get_attribute( 'height' ) && isset( $dimensions[ $src ] ) ) {
 			$processor->set_attribute( 'width', (string) absint( $dimensions[ $src ]['width'] ) );

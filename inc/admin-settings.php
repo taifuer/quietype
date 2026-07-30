@@ -26,6 +26,7 @@ function quietype_register_admin_settings() {
 		'quietype_github_url'                 => array( 'string', '', 'esc_url_raw' ),
 		'quietype_contact_email'              => array( 'string', '', 'sanitize_email' ),
 		'quietype_icp_number'                 => array( 'string', '', 'sanitize_text_field' ),
+		'quietype_footer_privacy_link_enabled' => array( 'boolean', false, 'quietype_sanitize_checkbox' ),
 		'quietype_start_year'                 => array( 'integer', (int) gmdate( 'Y' ), 'quietype_sanitize_start_year' ),
 		'quietype_books_page_title'           => array( 'string', '万卷古今', 'quietype_sanitize_archive_title' ),
 		'quietype_books_page_eyebrow'         => array( 'string', 'BOOKS', 'quietype_sanitize_archive_eyebrow' ),
@@ -44,10 +45,12 @@ function quietype_register_admin_settings() {
 		'quietype_article_custom_license'     => array( 'string', '', 'quietype_sanitize_article_custom_license' ),
 		'quietype_hide_admin_bar'             => array( 'boolean', false, 'quietype_sanitize_checkbox' ),
 		'quietype_disable_revisions'          => array( 'boolean', false, 'quietype_sanitize_checkbox' ),
+		'quietype_disable_author_archives'    => array( 'boolean', true, 'quietype_sanitize_checkbox' ),
 		'quietype_seo_enabled'                => array( 'boolean', true, 'quietype_sanitize_checkbox' ),
 		'quietype_seo_description'            => array( 'string', '', 'quietype_sanitize_seo_description' ),
 		'quietype_seo_keywords'               => array( 'string', '', 'quietype_sanitize_seo_keywords' ),
 		'quietype_social_image_url'           => array( 'string', '', 'esc_url_raw' ),
+		'quietype_schema_publisher_type'       => array( 'string', 'person', 'quietype_sanitize_schema_publisher_type' ),
 		'quietype_gravatar_base_url'          => array( 'string', '', 'quietype_sanitize_gravatar_base_url' ),
 		'quietype_login_gate_enabled'         => array( 'boolean', false, 'quietype_sanitize_checkbox' ),
 		'quietype_login_gate_key'             => array( 'string', 'entry', 'quietype_sanitize_login_gate_key' ),
@@ -134,6 +137,11 @@ function quietype_sanitize_seo_keywords( $value ) {
 	$value = preg_replace( '/[\r\n，、]+/u', ',', wp_strip_all_tags( (string) $value ) );
 	$parts = array_filter( array_map( 'trim', explode( ',', $value ) ) );
 	return mb_substr( implode( ',', array_unique( $parts ) ), 0, 500 );
+}
+
+/** Restrict Schema.org publisher output to the two supported site identities. */
+function quietype_sanitize_schema_publisher_type( $value ) {
+	return in_array( $value, array( 'person', 'organization' ), true ) ? $value : 'person';
 }
 
 /** Keep archive display copy concise and free of markup. */
@@ -333,11 +341,12 @@ function quietype_render_settings_page() {
 					<tr><th><label for="quietype_contact_email">联系邮箱</label></th><td><input class="regular-text" id="quietype_contact_email" name="quietype_contact_email" type="email" value="<?php echo esc_attr( quietype_get_setting( 'quietype_contact_email', '' ) ); ?>" placeholder="hello@example.com"><p class="description">留空可隐藏页脚邮件图标。</p></td></tr>
 					<tr><th><label for="quietype_github_url">GitHub 地址</label></th><td><input class="regular-text" id="quietype_github_url" name="quietype_github_url" type="url" value="<?php echo esc_attr( quietype_get_setting( 'quietype_github_url', '' ) ); ?>" placeholder="https://github.com/example"><p class="description">留空可隐藏页脚 GitHub 图标。</p></td></tr>
 					<tr><th><label for="quietype_icp_number">备案号</label></th><td><input class="regular-text" id="quietype_icp_number" name="quietype_icp_number" type="text" value="<?php echo esc_attr( quietype_get_setting( 'quietype_icp_number', '' ) ); ?>" placeholder="示例ICP备12345678号"><p class="description">留空可隐藏页脚备案信息，填写后自动链接至工信部备案系统。</p></td></tr>
+					<tr><th>隐私政策入口</th><td><?php quietype_settings_checkbox( 'quietype_footer_privacy_link_enabled', '在页脚显示已发布的隐私政策链接' ); ?><p class="description">默认不显示；启用前请先在“设置 → 隐私”中发布并指定政策页。</p></td></tr>
 					<tr><th><label for="quietype_start_year">建站年份</label></th><td><input class="small-text" id="quietype_start_year" name="quietype_start_year" type="number" min="1990" max="<?php echo esc_attr( gmdate( 'Y' ) ); ?>" value="<?php echo esc_attr( quietype_get_setting( 'quietype_start_year', (int) gmdate( 'Y' ) ) ); ?>"><p class="description">用于页脚版权年份范围。</p></td></tr>
 					<tr><th>友链检测</th><td><?php quietype_settings_checkbox( 'quietype_link_check_enabled', '每天分批检测友链可达性' ); ?><p class="description">启用后每天最多检测五条；连续失败三次只会进入“待确认”，不会自动在前台标记失联。</p></td></tr>
 					<tr><th>文章版权声明</th><td><?php quietype_settings_checkbox( 'quietype_article_copyright_enabled', '在文章正文末尾显示版权声明' ); ?></td></tr>
 					<tr><th><label for="quietype_article_author_name">版权署名</label></th><td><input class="regular-text" id="quietype_article_author_name" name="quietype_article_author_name" type="text" value="<?php echo esc_attr( quietype_get_setting( 'quietype_article_author_name', '' ) ); ?>"><p class="description">留空时使用文章作者的 WordPress 显示名称。</p></td></tr>
-					<tr><th><label for="quietype_article_author_url">作者链接</label></th><td><input class="regular-text" id="quietype_article_author_url" name="quietype_article_author_url" type="url" value="<?php echo esc_attr( quietype_get_setting( 'quietype_article_author_url', '' ) ); ?>" placeholder="https://example.com/about/"><p class="description">留空时链接到文章作者归档。</p></td></tr>
+					<tr><th><label for="quietype_article_author_url">作者链接</label></th><td><input class="regular-text" id="quietype_article_author_url" name="quietype_article_author_url" type="url" value="<?php echo esc_attr( quietype_get_setting( 'quietype_article_author_url', '' ) ); ?>" placeholder="https://example.com/about/"><p class="description">留空时仅在作者归档已启用的情况下链接到归档，否则显示普通文字。</p></td></tr>
 					<tr><th><label for="quietype_article_license">许可协议</label></th><td><select id="quietype_article_license" name="quietype_article_license"><option value="cc-by-nc-sa" <?php selected( quietype_get_setting( 'quietype_article_license', 'cc-by-nc-sa' ), 'cc-by-nc-sa' ); ?>>CC BY-NC-SA 4.0</option><option value="cc-by-sa" <?php selected( quietype_get_setting( 'quietype_article_license', 'cc-by-nc-sa' ), 'cc-by-sa' ); ?>>CC BY-SA 4.0</option><option value="all-rights-reserved" <?php selected( quietype_get_setting( 'quietype_article_license', 'cc-by-nc-sa' ), 'all-rights-reserved' ); ?>>保留所有权利</option><option value="custom" <?php selected( quietype_get_setting( 'quietype_article_license', 'cc-by-nc-sa' ), 'custom' ); ?>>自定义</option></select><p class="description">只有启用版权声明后才会显示。</p></td></tr>
 					<tr><th><label for="quietype_article_custom_license">自定义声明</label></th><td><textarea class="large-text" id="quietype_article_custom_license" name="quietype_article_custom_license" rows="3" maxlength="500" placeholder="仅在许可协议选择“自定义”时使用"><?php echo esc_textarea( quietype_get_setting( 'quietype_article_custom_license', '' ) ); ?></textarea></td></tr>
 				</table>
@@ -366,7 +375,8 @@ function quietype_render_settings_page() {
 					<tr><th>主题 SEO</th><td><?php quietype_settings_checkbox( 'quietype_seo_enabled', '启用轻量 SEO 元数据', true ); ?><p class="description">检测到 Yoast SEO、Rank Math、All in One SEO、SEOPress 或 The SEO Framework 时自动停用输出，避免重复。</p></td></tr>
 					<tr><th><label for="quietype_seo_description">站点描述</label></th><td><textarea class="large-text" id="quietype_seo_description" name="quietype_seo_description" rows="3" maxlength="300"><?php echo esc_textarea( quietype_get_setting( 'quietype_seo_description', '' ) ); ?></textarea><p class="description">首页和无法提取独立摘要的页面使用；留空则使用 WordPress 站点副标题。</p></td></tr>
 					<tr><th><label for="quietype_seo_keywords">站点关键词</label></th><td><input class="large-text" id="quietype_seo_keywords" name="quietype_seo_keywords" type="text" value="<?php echo esc_attr( quietype_get_setting( 'quietype_seo_keywords', '' ) ); ?>"><p class="description">使用英文逗号分隔。搜索引擎通常不再依赖 keywords，但可为部分中文检索服务保留。</p></td></tr>
-					<tr><th><label for="quietype_social_image_url">默认分享图</label></th><td><input class="large-text code" id="quietype_social_image_url" name="quietype_social_image_url" type="url" value="<?php echo esc_attr( quietype_get_setting( 'quietype_social_image_url', '' ) ); ?>" placeholder="https://example.com/social-card.jpg"><p class="description">建议使用 1200×630 的 JPG 或 PNG。留空使用主题预览图；文章仍优先使用特色图和第一张正文图片。</p></td></tr>
+					<tr><th><label for="quietype_social_image_url">默认分享图</label></th><td><input class="large-text code" id="quietype_social_image_url" name="quietype_social_image_url" type="url" value="<?php echo esc_attr( quietype_get_setting( 'quietype_social_image_url', '' ) ); ?>" placeholder="https://example.com/social-card.jpg"><p class="description">建议使用 1200×630 的 JPG 或 PNG。留空时不为没有配图的页面强行输出图片；文章仍优先使用特色图和第一张正文图片。</p></td></tr>
+					<tr><th><label for="quietype_schema_publisher_type">结构化数据发布者</label></th><td><select id="quietype_schema_publisher_type" name="quietype_schema_publisher_type"><option value="person" <?php selected( quietype_get_setting( 'quietype_schema_publisher_type', 'person' ), 'person' ); ?>>个人</option><option value="organization" <?php selected( quietype_get_setting( 'quietype_schema_publisher_type', 'person' ), 'organization' ); ?>>组织</option></select><p class="description">个人博客通常选择“个人”，团队或企业博客选择“组织”。</p></td></tr>
 				</table>
 			</section>
 
@@ -380,6 +390,7 @@ function quietype_render_settings_page() {
 				<table class="form-table" role="presentation">
 					<tr><th>前台工具栏</th><td><?php quietype_settings_checkbox( 'quietype_hide_admin_bar', '登录后隐藏网站前台顶部管理工具栏' ); ?><p class="description">仅影响网站前台，WordPress 后台工具栏保持不变。</p></td></tr>
 					<tr><th>内容历史版本</th><td><?php quietype_settings_checkbox( 'quietype_disable_revisions', '停止为文章、页面和书籍保存新的历史版本' ); ?><p class="description">自动保存仍然保留；此开关不会自动删除数据库中已有的历史版本。</p></td></tr>
+					<tr><th>作者公开信息</th><td><?php quietype_settings_checkbox( 'quietype_disable_author_archives', '禁用作者归档和未登录用户的 REST 用户列表', true ); ?><p class="description">适合单作者站点，可减少公开账户信息；多作者博客应关闭。</p></td></tr>
 				</table>
 			</section>
 

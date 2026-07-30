@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'QUIETYPE_VERSION', '0.10.19' );
+define( 'QUIETYPE_VERSION', '0.10.20' );
 
 require_once get_template_directory() . '/inc/admin-settings.php';
 require_once get_template_directory() . '/inc/login-security.php';
@@ -327,25 +327,34 @@ function quietype_archive_stats() {
 	);
 }
 
-/** Custom home menu items in the imported database should follow each environment. */
-function quietype_normalize_home_menu_link( $items ) {
-	foreach ( $items as $item ) {
-		if ( '首页' === trim( wp_strip_all_tags( $item->title ) ) ) {
-			$item->url = home_url( '/' );
+/** Render a useful fallback without assuming optional pages or fixed slugs exist. */
+function quietype_menu_fallback() {
+	$archive_url = quietype_archive_url( false );
+	$links_url   = quietype_page_url( 'template-links.php', array( 'links' ) );
+	$about       = get_page_by_path( 'about', OBJECT, 'page' );
+	$items       = array(
+		array( '首页', home_url( '/' ) ),
+	);
+	if ( $archive_url ) {
+		$items[] = array( '归档', $archive_url );
+	}
+	foreach ( array( 'book' => '阅读', 'photo' => '照片' ) as $post_type => $label ) {
+		$url = post_type_exists( $post_type ) ? get_post_type_archive_link( $post_type ) : false;
+		if ( $url ) {
+			$items[] = array( $label, $url );
 		}
 	}
-	return $items;
-}
-add_filter( 'wp_nav_menu_objects', 'quietype_normalize_home_menu_link' );
+	if ( $links_url ) {
+		$items[] = array( '友链', $links_url );
+	}
+	if ( $about instanceof WP_Post && 'publish' === $about->post_status ) {
+		$items[] = array( '关于', get_permalink( $about ) );
+	}
 
-function quietype_menu_fallback() {
 	echo '<ul class="menu">';
-	echo '<li><a href="' . esc_url( home_url( '/' ) ) . '">首页</a></li>';
-	echo '<li><a href="' . esc_url( home_url( '/articlearchive/' ) ) . '">归档</a></li>';
-	echo '<li><a href="' . esc_url( get_post_type_archive_link( 'book' ) ) . '">阅读</a></li>';
-	echo '<li><a href="' . esc_url( get_post_type_archive_link( 'photo' ) ) . '">照片</a></li>';
-	echo '<li><a href="' . esc_url( home_url( '/links/' ) ) . '">友链</a></li>';
-	echo '<li><a href="' . esc_url( home_url( '/about/' ) ) . '">关于</a></li>';
+	foreach ( $items as $item ) {
+		echo '<li><a href="' . esc_url( $item[1] ) . '">' . esc_html( $item[0] ) . '</a></li>';
+	}
 	echo '</ul>';
 }
 
@@ -540,13 +549,62 @@ function quietype_pagination() {
 	}
 }
 
-function quietype_archive_url() {
-	$page = get_page_by_path( 'articlearchive' );
-	if ( ! $page ) {
-		$page = get_page_by_path( 'archive' );
+/** Find a published utility page by template first, then by compatible slugs. */
+function quietype_page_url( $template, $fallback_slugs = array() ) {
+	$pages = get_posts(
+		array(
+			'post_type'      => 'page',
+			'post_status'    => 'publish',
+			'posts_per_page' => 1,
+			'orderby'        => array( 'menu_order' => 'ASC', 'title' => 'ASC' ),
+			'meta_key'       => '_wp_page_template',
+			'meta_value'     => $template,
+			'no_found_rows'  => true,
+		)
+	);
+	if ( $pages ) {
+		return get_permalink( $pages[0] );
 	}
-	return $page ? get_permalink( $page ) : home_url( '/?post_type=post' );
+	foreach ( $fallback_slugs as $slug ) {
+		$page = get_page_by_path( $slug, OBJECT, 'page' );
+		if ( $page instanceof WP_Post && 'publish' === $page->post_status ) {
+			return get_permalink( $page );
+		}
+	}
+	return '';
 }
+
+/** Return the canonical article archive, preferring the concise /archive/ slug. */
+function quietype_archive_url( $fallback = true ) {
+	$url = quietype_page_url( 'template-archives.php', array( 'archive', 'articlearchive' ) );
+	if ( $url ) {
+		return $url;
+	}
+	$posts_page_id = (int) get_option( 'page_for_posts' );
+	if ( $posts_page_id && 'publish' === get_post_status( $posts_page_id ) ) {
+		return get_permalink( $posts_page_id );
+	}
+	return $fallback ? home_url( '/' ) : '';
+}
+
+/** Redirect the retired default slug only after a canonical archive exists. */
+function quietype_redirect_legacy_archive_path() {
+	if ( ! is_404() ) {
+		return;
+	}
+	$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing check.
+	$request_path = wp_parse_url( $request_uri, PHP_URL_PATH );
+	$legacy_path  = wp_parse_url( home_url( '/articlearchive/' ), PHP_URL_PATH );
+	if ( ! is_string( $request_path ) || ! is_string( $legacy_path ) || untrailingslashit( $request_path ) !== untrailingslashit( $legacy_path ) ) {
+		return;
+	}
+	$archive_url = quietype_archive_url( false );
+	if ( $archive_url ) {
+		wp_safe_redirect( $archive_url, 301, 'Quietype' );
+		exit;
+	}
+}
+add_action( 'template_redirect', 'quietype_redirect_legacy_archive_path', 8 );
 
 function quietype_comment_form_defaults( $defaults ) {
 	$defaults['title_reply']          = '写下评论';
@@ -556,7 +614,13 @@ function quietype_comment_form_defaults( $defaults ) {
 }
 add_filter( 'comment_form_defaults', 'quietype_comment_form_defaults' );
 
-/** Add a short-lived, one-time four-digit challenge and an invisible honeypot. */
+/** Sign a comment challenge without writing a transient during page rendering. */
+function quietype_comment_captcha_signature( $challenge, $issued_at, $post_id ) {
+	$payload = implode( '|', array( $challenge, absint( $issued_at ), absint( $post_id ) ) );
+	return hash_hmac( 'sha256', $payload, wp_salt( 'nonce' ) );
+}
+
+/** Add a short-lived four-digit challenge and an invisible honeypot. */
 function quietype_comment_captcha_field( $fields ) {
 	if ( is_user_logged_in() ) {
 		return $fields;
@@ -566,8 +630,8 @@ function quietype_comment_captcha_field( $fields ) {
 		$fields['url'] = str_replace( 'autocomplete="url"', 'autocomplete="url" placeholder="example.com 或 https://example.com"', $fields['url'] );
 	}
 	$challenge = (string) wp_rand( 1000, 9999 );
-	$token     = wp_generate_uuid4();
-	set_transient( 'quietype_comment_captcha_' . md5( $token ), $challenge, 10 * MINUTE_IN_SECONDS );
+	$issued_at = time();
+	$token     = $issued_at . '.' . quietype_comment_captcha_signature( $challenge, $issued_at, get_queried_object_id() );
 
 	$captcha  = '<p class="comment-form-captcha">';
 	$captcha .= '<label for="quietype_comment_captcha">验证 <span class="comment-captcha-code">' . esc_html( $challenge ) . '</span> <span class="required" aria-hidden="true">*</span></label>';
@@ -619,12 +683,15 @@ function quietype_validate_comment_captcha( $commentdata ) {
 	$token   = isset( $_POST['quietype_comment_captcha_token'] ) ? sanitize_text_field( wp_unslash( $_POST['quietype_comment_captcha_token'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 	$answer  = isset( $_POST['quietype_comment_captcha'] ) ? sanitize_text_field( wp_unslash( $_POST['quietype_comment_captcha'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 	$honeypot = isset( $_POST['quietype_comment_company'] ) ? trim( sanitize_text_field( wp_unslash( $_POST['quietype_comment_company'] ) ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
-	$key       = $token ? 'quietype_comment_captcha_' . md5( $token ) : '';
-	$expected  = $key ? get_transient( $key ) : false;
-	if ( $key ) {
-		delete_transient( $key );
+	$issued_at = 0;
+	$signature = '';
+	if ( preg_match( '/^(\d{10})\.([a-f0-9]{64})$/', $token, $matches ) ) {
+		$issued_at = (int) $matches[1];
+		$signature = $matches[2];
 	}
-	$valid = '' === $honeypot && false !== $expected && hash_equals( (string) $expected, trim( $answer ) );
+	$age       = time() - $issued_at;
+	$expected  = quietype_comment_captcha_signature( trim( $answer ), $issued_at, absint( $commentdata['comment_post_ID'] ?? 0 ) );
+	$valid     = '' === $honeypot && $issued_at > 0 && $age >= -60 && $age <= 10 * MINUTE_IN_SECONDS && $signature && hash_equals( $expected, $signature );
 	if ( ! $valid ) {
 		wp_die( '验证数字不正确或已过期，请返回页面重新填写。', '评论验证失败', array( 'response' => 403, 'back_link' => true ) );
 	}
@@ -648,7 +715,7 @@ add_action( 'pre_get_posts', 'quietype_search_posts_only' );
 
 /** Keep public REST responses from becoming an account-enumeration endpoint. */
 function quietype_limit_public_user_rest_routes( $endpoints ) {
-	if ( ! is_user_logged_in() ) {
+	if ( quietype_get_setting( 'quietype_disable_author_archives', true ) && ! is_user_logged_in() ) {
 		unset( $endpoints['/wp/v2/users'], $endpoints['/wp/v2/users/(?P<id>[\d]+)'] );
 	}
 	return $endpoints;
@@ -657,7 +724,7 @@ add_filter( 'rest_endpoints', 'quietype_limit_public_user_rest_routes' );
 
 /** A single-author site does not need public account-shaped author archives. */
 function quietype_disable_author_archives() {
-	if ( is_author() ) {
+	if ( quietype_get_setting( 'quietype_disable_author_archives', true ) && is_author() ) {
 		global $wp_query;
 		$wp_query->set_404();
 		status_header( 404 );

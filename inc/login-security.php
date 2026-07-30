@@ -92,7 +92,8 @@ function quietype_login_gate_matches() {
 
 /** Exchange a valid query parameter for a secure cookie and a clean URL. */
 function quietype_login_gate_exchange_query() {
-	if ( ! quietype_login_gate_enabled() || 'GET' !== strtoupper( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
+	$request_method = isset( $_SERVER['REQUEST_METHOD'] ) ? strtoupper( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) ) : '';
+	if ( ! quietype_login_gate_enabled() || 'GET' !== $request_method ) {
 		return;
 	}
 	$key = quietype_login_gate_key();
@@ -156,10 +157,10 @@ function quietype_login_not_found() {
 	nocache_headers();
 	header( 'Content-Type: text/html; charset=' . get_bloginfo( 'charset' ) );
 	$title = esc_html__( '没有找到这一页。', 'quietype' );
-	echo '<!doctype html><html ' . get_language_attributes() . '><head><meta charset="' . esc_attr( get_bloginfo( 'charset' ) ) . '">';
+	echo '<!doctype html><html ' . get_language_attributes() . '><head><meta charset="' . esc_attr( get_bloginfo( 'charset' ) ) . '">'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Core returns a pre-escaped language attribute string.
 	echo '<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>404</title>';
 	echo '<style>:root{color-scheme:light}*{box-sizing:border-box}body{margin:0;min-width:320px;min-height:100vh;display:grid;place-items:center;padding:32px 20px;background:#fdfdfb;color:#262724;font:16px/1.75 -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif}main{width:min(100%,420px);text-align:center}.eyebrow{margin:0 0 14px;color:#858980;font:600 11px/1.4 ui-monospace,"Cascadia Code",Consolas,monospace;letter-spacing:.16em}h1{margin:0;font:650 28px/1.4 "Source Han Serif SC","Noto Serif CJK SC","Songti SC",SimSun,serif;letter-spacing:.02em}a{display:inline-block;margin-top:24px;color:#795844;text-underline-offset:.2em}a:focus-visible{outline:2px solid #795844;outline-offset:4px;border-radius:2px}</style></head>';
-	echo '<body><main><p class="eyebrow">404 · NOT FOUND</p><h1>' . $title . '</h1><a href="' . esc_url( home_url( '/' ) ) . '">' . esc_html__( '返回首页', 'quietype' ) . '</a></main></body></html>';
+	echo '<body><main><p class="eyebrow">404 · NOT FOUND</p><h1>' . $title . '</h1><a href="' . esc_url( home_url( '/' ) ) . '">' . esc_html__( '返回首页', 'quietype' ) . '</a></main></body></html>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $title is escaped above and all other dynamic values are escaped inline.
 	exit;
 }
 
@@ -250,7 +251,8 @@ add_action( 'login_form', 'quietype_login_captcha_field', 5 );
 
 /** Reject a missing, expired, reused, or incorrect arithmetic answer. */
 function quietype_validate_login_captcha( $user ) {
-	if ( ! quietype_get_setting( 'quietype_login_captcha_enabled', false ) || 'POST' !== strtoupper( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
+	$request_method = isset( $_SERVER['REQUEST_METHOD'] ) ? strtoupper( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) ) : '';
+	if ( ! quietype_get_setting( 'quietype_login_captcha_enabled', false ) || 'POST' !== $request_method ) {
 		return $user;
 	}
 	if ( ! isset( $_POST['log'], $_POST['pwd'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
