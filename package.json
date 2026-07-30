@@ -23,7 +23,7 @@
     "@axe-core/playwright": "4.12.1",
     "@lhci/cli": "0.15.1",
     "@playwright/test": "1.61.1",
-    "html-validate": "9.7.1"
+    "html-validate": "11.6.0"
   },
   "overrides": {
     "brace-expansion": "5.0.8",
