@@ -18,6 +18,7 @@ wp_installing( false );
 
 wp_set_current_user( 1 );
 switch_theme( 'quietype' );
+require_once ABSPATH . 'wp-admin/includes/bookmark.php';
 
 // Keep parallel administration suites on separate sessions. WordPress stores
 // session tokens per user, so simultaneous logins to one account can race.
@@ -56,8 +57,11 @@ foreach ( $existing_posts as $existing_post_id ) {
 	wp_delete_post( $existing_post_id, true );
 }
 
+foreach ( get_bookmarks( array( 'hide_invisible' => false ) ) as $existing_bookmark ) {
+	wp_delete_link( $existing_bookmark->link_id );
+}
 
-foreach ( array( 'category', 'post_tag', 'book_category', 'book_tag' ) as $taxonomy ) {
+foreach ( array( 'category', 'post_tag', 'book_category', 'book_tag', 'link_category' ) as $taxonomy ) {
 	foreach ( get_terms( array( 'taxonomy' => $taxonomy, 'hide_empty' => false ) ) as $existing_term ) {
 		$term_slug = is_object( $existing_term ) ? $existing_term->slug : ( $existing_term['slug'] ?? '' );
 		$term_id   = is_object( $existing_term ) ? $existing_term->term_id : ( $existing_term['term_id'] ?? 0 );
@@ -67,8 +71,8 @@ foreach ( array( 'category', 'post_tag', 'book_category', 'book_tag' ) as $taxon
 	}
 }
 
-$practice = wp_insert_term( '实践', 'category', array( 'slug' => 'practice' ) );
-$notes    = wp_insert_term( '笔迹', 'category', array( 'slug' => 'notes' ) );
+$practice = wp_insert_term( '技术', 'category', array( 'slug' => 'technology' ) );
+$notes    = wp_insert_term( '生活', 'category', array( 'slug' => 'life' ) );
 wp_insert_term( 'Agent', 'post_tag', array( 'slug' => 'agent' ) );
 wp_insert_term( 'WordPress', 'post_tag', array( 'slug' => 'wordpress' ) );
 
@@ -77,8 +81,9 @@ $article_id      = wp_insert_post(
 	array(
 		'post_type'    => 'post',
 		'post_status'  => 'publish',
-		'post_title'   => 'Quietype 阅读体验回归测试',
+		'post_title'   => '把长文重新交给阅读',
 		'post_name'    => 'quietype-reading-test',
+		'post_excerpt' => '从中文排印到技术内容，重新整理一篇文章被阅读时真正需要的细节。',
 		'post_content' => $article_content,
 		'post_date'    => '2026-06-16 09:30:00',
 	)
@@ -87,15 +92,23 @@ wp_set_post_terms( $article_id, array( $practice['term_id'] ), 'category' );
 wp_set_post_terms( $article_id, array( 'agent', 'wordpress' ), 'post_tag', false );
 update_post_meta( $article_id, 'views', 42 );
 
-for ( $post_number = 1; $post_number <= 5; $post_number++ ) {
+$demo_posts = array(
+	array( '一页博客应该保留什么', '从导航、摘要到页脚，留下真正帮助阅读的部分。' ),
+	array( '在终端之外散步', '合上电脑以后，沿着河岸重新认识一天的光线。' ),
+	array( '为旧文章整理目录', '给零散多年的文字重新找到清楚、稳定的位置。' ),
+	array( '纸张、屏幕与留白', '留白不是空缺，而是内容彼此呼吸的距离。' ),
+	array( '写给下一个版本', '不急着增加功能，先让已经存在的细节变得可靠。' ),
+);
+foreach ( $demo_posts as $post_index => $demo_post ) {
+	$post_number = $post_index + 1;
 	$test_post_id = wp_insert_post(
 		array(
 			'post_type'    => 'post',
 			'post_status'  => 'publish',
-			'post_title'   => '安静写作示例 ' . $post_number,
+			'post_title'   => $demo_post[0],
 			'post_name'    => 'quiet-writing-' . $post_number,
-			'post_excerpt' => '用于检查首页文章列表在不同屏幕宽度下的标题、摘要和元信息排版。',
-			'post_content' => '<p>用于首页、归档和分页回归的示例文章。</p>',
+			'post_excerpt' => $demo_post[1],
+			'post_content' => '<p>' . esc_html( $demo_post[1] ) . '</p>',
 			'post_date'    => sprintf( '2026-05-%02d 10:00:00', $post_number ),
 		)
 	);
@@ -110,7 +123,7 @@ $about_id = wp_insert_post(
 		'post_status'  => 'publish',
 		'post_title'   => '关于',
 		'post_name'    => 'about',
-		'post_content' => '<h2>关于本站</h2><p>这是用于自动化回归的关于页面。</p><hr><p>保持写作，也保持阅读。</p>',
+		'post_content' => '<p>这里记录技术、阅读与日常生活中值得反复回看的片段。文章不追逐时效，只希望在下一次打开时仍然清楚。</p><h2>写些什么</h2><p>长文用于整理完整的思考，短记保存尚未成形的线索。偶尔也读书、拍照，把屏幕之外的经验留在这里。</p><ul><li>技术实践与问题复盘</li><li>阅读笔记与书籍短评</li><li>旅行、照片和日常观察</li></ul><h2>关于 Quietype</h2><p>本站使用 Quietype：一款面向中文长文与技术写作的 WordPress 主题。它关注排印、结构和跨设备阅读，不用装饰替代内容。</p>',
 	)
 );
 $archive_id = wp_insert_post(
@@ -140,6 +153,43 @@ $privacy_id = wp_insert_post(
 );
 update_post_meta( $archive_id, '_wp_page_template', 'template-archives.php' );
 update_post_meta( $links_id, '_wp_page_template', 'template-links.php' );
+
+$link_categories = array(
+	'personal' => wp_insert_term( '个人站点', 'link_category', array( 'slug' => 'personal-sites' ) ),
+	'friends'  => wp_insert_term( '独立写作', 'link_category', array( 'slug' => 'independent-writing' ) ),
+	'reading'  => wp_insert_term( '阅读与参考', 'link_category', array( 'slug' => 'reading-reference' ) ),
+);
+foreach ( array_values( $link_categories ) as $link_order => $link_category ) {
+	if ( ! is_wp_error( $link_category ) ) {
+		update_term_meta( $link_category['term_id'], 'quietype_link_category_order', $link_order + 1 );
+	}
+}
+$demo_links = array(
+	array( '纸上路径', 'https://notes.example.test/', '写作、阅读与缓慢积累', 'personal', 10 ),
+	array( '微光手记', 'https://light.example.test/', '在技术和生活之间做笔记', 'personal', 9 ),
+	array( '山茶书房', 'https://camellia.example.test/', '长期写作与个人知识整理', 'friends', 10 ),
+	array( '留白之间', 'https://margin.example.test/', '设计、排版与独立出版', 'friends', 9 ),
+	array( '开放笔记', 'https://open-notes.example.test/', '可被复用的学习记录', 'friends', 8 ),
+	array( 'WordPress', 'https://wordpress.org/', '开放的内容管理系统', 'reading', 10 ),
+	array( 'MDN Web Docs', 'https://developer.mozilla.org/', '面向 Web 开发者的参考资料', 'reading', 9 ),
+);
+foreach ( $demo_links as $demo_link ) {
+	$category = $link_categories[ $demo_link[3] ];
+	if ( is_wp_error( $category ) ) {
+		continue;
+	}
+	wp_insert_link(
+		array(
+			'link_name'        => $demo_link[0],
+			'link_url'         => $demo_link[1],
+			'link_description' => $demo_link[2],
+			'link_category'    => array( $category['term_id'] ),
+			'link_rating'      => $demo_link[4],
+			'link_target'      => '_blank',
+			'link_visible'     => 'Y',
+		)
+	);
+}
 
 $book_categories = array(
 	'technology' => wp_insert_term( '技术与工程', 'book_category', array( 'slug' => 'technology' ) ),
@@ -239,12 +289,12 @@ if ( $book_ids && function_exists( 'imagecreatetruecolor' ) ) {
 }
 
 $photos = array(
-	array( '雨后屋檐', '2026-07', '安徽 · 宏村', 1800, 1200, '35mm', 'f/4', '1/320s', '160' ),
-	array( '窗外', '2026-05', '京广线', 1200, 1500, '50mm', 'f/2.8', '1/500s', '200' ),
-	array( '水田', '2026-04', '云南 · 元阳', 1600, 1067, '28mm', 'f/5.6', '1/250s', '100' ),
-	array( '暮色归舟', '2025-11', '湖南 · 洞庭湖', 1800, 1125, '85mm', 'f/4', '1/400s', '320' ),
-	array( '雾林', '2025-09', '江西 · 武功山', 1200, 1500, '35mm', 'f/2.8', '1/160s', '400' ),
-	array( '林间公路', '2024-10', '川西', 1800, 1200, '24mm', 'f/8', '1/125s', '100' ),
+	array( '光落群山', '2026-07', '南岛 · 山野', 1800, 1200, '35mm', 'f/4', '1/320s', '160' ),
+	array( '秋路入林', '2026-05', '捷克 · Vendryně', 1200, 1500, '50mm', 'f/2.8', '1/500s', '200' ),
+	array( '雪线以外', '2026-04', '高山湖区', 1600, 1067, '28mm', 'f/5.6', '1/250s', '100' ),
+	array( '暮色山谷', '2025-11', '山间', 1800, 1125, '85mm', 'f/4', '1/400s', '320' ),
+	array( '林间公路', '2025-09', '英国 · Arundel', 1200, 1500, '35mm', 'f/2.8', '1/160s', '400' ),
+	array( '风过湖面', '2024-10', '高山湖区', 1800, 1200, '24mm', 'f/8', '1/125s', '100' ),
 );
 foreach ( $photos as $index => $photo ) {
 	$photo_id = wp_insert_post(
@@ -289,16 +339,14 @@ foreach ( wp_get_nav_menus() as $existing_menu ) {
 }
 $quietype_primary_menu_id = $quietype_test_menus['主导航'] ?? wp_create_nav_menu( '主导航' );
 wp_update_nav_menu_item( $quietype_primary_menu_id, 0, array( 'menu-item-title' => '首页', 'menu-item-url' => home_url( '/' ), 'menu-item-status' => 'publish' ) );
-wp_update_nav_menu_item( $quietype_primary_menu_id, 0, array( 'menu-item-title' => '实践', 'menu-item-object' => 'category', 'menu-item-object-id' => $practice['term_id'], 'menu-item-type' => 'taxonomy', 'menu-item-status' => 'publish' ) );
-foreach ( array( $archive_id, $links_id, $about_id ) as $page_id ) {
-	wp_update_nav_menu_item( $quietype_primary_menu_id, 0, array( 'menu-item-title' => get_the_title( $page_id ), 'menu-item-object' => 'page', 'menu-item-object-id' => $page_id, 'menu-item-type' => 'post_type', 'menu-item-status' => 'publish' ) );
-}
-wp_update_nav_menu_item( $quietype_primary_menu_id, 0, array( 'menu-item-title' => '阅读', 'menu-item-url' => get_post_type_archive_link( 'book' ), 'menu-item-type' => 'custom', 'menu-item-status' => 'publish' ) );
-$quietype_prefooter_menu_id = $quietype_test_menus['页尾导航'] ?? wp_create_nav_menu( '页尾导航' );
-wp_update_nav_menu_item( $quietype_prefooter_menu_id, 0, array( 'menu-item-title' => '书籍', 'menu-item-url' => get_post_type_archive_link( 'book' ), 'menu-item-type' => 'custom', 'menu-item-status' => 'publish' ) );
+wp_update_nav_menu_item( $quietype_primary_menu_id, 0, array( 'menu-item-title' => '技术', 'menu-item-object' => 'category', 'menu-item-object-id' => $practice['term_id'], 'menu-item-type' => 'taxonomy', 'menu-item-status' => 'publish' ) );
+wp_update_nav_menu_item( $quietype_primary_menu_id, 0, array( 'menu-item-title' => '生活', 'menu-item-object' => 'category', 'menu-item-object-id' => $notes['term_id'], 'menu-item-type' => 'taxonomy', 'menu-item-status' => 'publish' ) );
 foreach ( array( '归档' => $archive_id, '友链' => $links_id, '关于' => $about_id ) as $menu_title => $page_id ) {
-	wp_update_nav_menu_item( $quietype_prefooter_menu_id, 0, array( 'menu-item-title' => $menu_title, 'menu-item-url' => get_permalink( $page_id ), 'menu-item-type' => 'custom', 'menu-item-status' => 'publish' ) );
+	wp_update_nav_menu_item( $quietype_primary_menu_id, 0, array( 'menu-item-title' => $menu_title, 'menu-item-object' => 'page', 'menu-item-object-id' => $page_id, 'menu-item-type' => 'post_type', 'menu-item-status' => 'publish' ) );
 }
+$quietype_prefooter_menu_id = $quietype_test_menus['页尾导航'] ?? wp_create_nav_menu( '页尾导航' );
+wp_update_nav_menu_item( $quietype_prefooter_menu_id, 0, array( 'menu-item-title' => '阅读', 'menu-item-url' => get_post_type_archive_link( 'book' ), 'menu-item-type' => 'custom', 'menu-item-status' => 'publish' ) );
+wp_update_nav_menu_item( $quietype_prefooter_menu_id, 0, array( 'menu-item-title' => '摄影', 'menu-item-url' => get_post_type_archive_link( 'photo' ), 'menu-item-type' => 'custom', 'menu-item-status' => 'publish' ) );
 $quietype_theme_mods                       = get_option( 'theme_mods_quietype', array() );
 $quietype_theme_mods['nav_menu_locations'] = array(
 	'primary'   => (int) $quietype_primary_menu_id,

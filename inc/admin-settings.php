@@ -318,16 +318,18 @@ function quietype_render_settings_page() {
 	$can_edit_code = current_user_can( 'unfiltered_html' );
 	$smtp_password_saved = '' !== quietype_get_setting( 'quietype_smtp_password', '' ) || defined( 'QUIETYPE_SMTP_PASSWORD' );
 	$mail_error = get_transient( 'quietype_last_mail_error' );
+	$mail_status = isset( $_GET['quietype_mail'] ) ? sanitize_key( wp_unslash( $_GET['quietype_mail'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only status set after a nonce-protected administrator action.
+	$revisions_deleted = isset( $_GET['quietype_revisions_deleted'] ) ? absint( wp_unslash( $_GET['quietype_revisions_deleted'] ) ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only status set after a nonce-protected administrator action.
 	?>
 	<div class="wrap quietype-settings">
 		<h1>Quietype 设置</h1>
 		<p class="quietype-settings__note">主题专属功能集中在这里；站点标题、菜单和额外 CSS 继续使用 WordPress 原生界面。</p>
 		<?php settings_errors( 'quietype_settings' ); ?>
-		<?php if ( isset( $_GET['quietype_mail'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
-			<div class="notice <?php echo 'sent' === $_GET['quietype_mail'] ? 'notice-success' : 'notice-error'; ?> is-dismissible"><p><?php echo 'sent' === $_GET['quietype_mail'] ? '测试邮件已交给 SMTP 服务器。' : '测试邮件发送失败，请检查 SMTP 参数和服务器日志。'; ?></p></div>
-		<?php endif; ?>
-		<?php if ( isset( $_GET['quietype_revisions_deleted'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
-			<div class="notice notice-success is-dismissible"><p>已永久删除 <?php echo esc_html( absint( $_GET['quietype_revisions_deleted'] ) ); ?> 条内容历史版本。</p></div>
+			<?php if ( $mail_status ) : ?>
+				<div class="notice <?php echo 'sent' === $mail_status ? 'notice-success' : 'notice-error'; ?> is-dismissible"><p><?php echo 'sent' === $mail_status ? '测试邮件已交给 SMTP 服务器。' : '测试邮件发送失败，请检查 SMTP 参数和服务器日志。'; ?></p></div>
+			<?php endif; ?>
+			<?php if ( null !== $revisions_deleted ) : ?>
+				<div class="notice notice-success is-dismissible"><p>已永久删除 <?php echo esc_html( $revisions_deleted ); ?> 条内容历史版本。</p></div>
 		<?php endif; ?>
 		<nav class="quietype-settings__nav" aria-label="设置分区">
 			<a href="#quietype-section-site">站点</a><a href="#quietype-section-archives">内容页面</a><a href="#quietype-section-seo">SEO</a><a href="#quietype-section-access">访问</a><a href="#quietype-section-wordpress">WordPress</a><a href="#quietype-section-security">安全</a><a href="#quietype-section-mail">邮件</a><a href="#quietype-section-code">代码</a>

@@ -197,6 +197,8 @@
   };
 
   const enhanceCodeBlocks = () => document.querySelectorAll('.article-content pre').forEach((pre) => {
+    if (!pre.hasAttribute('tabindex')) pre.tabIndex = 0;
+
     let wrapper = pre.closest('.code-toolbar');
     if (!wrapper) {
       wrapper = document.createElement('div');

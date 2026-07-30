@@ -73,8 +73,8 @@ test('photo list exposes only useful operational metadata', async ({ page }) => 
   await page.goto('/wp-admin/edit.php?post_type=photo', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('th#quietype_photo_record')).toHaveText('拍摄记录');
   await expect(page.locator('th#date')).toHaveCount(0);
-  const photo = page.locator('#the-list tr').filter({ hasText: '雨后屋檐' });
-  await expect(photo.locator('.column-quietype_photo_record')).toContainText('2026.07 · 安徽 · 宏村');
+  const photo = page.locator('#the-list tr').filter({ hasText: '光落群山' });
+  await expect(photo.locator('.column-quietype_photo_record')).toContainText('2026.07 · 南岛 · 山野');
   await expect(photo.locator('.column-quietype_photo_record')).toContainText('1800×1200');
   const archiveLink = photo.locator('.row-actions .view a');
   await expect(archiveLink).toHaveText('在图库中查看');

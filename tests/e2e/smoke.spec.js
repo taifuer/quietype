@@ -119,8 +119,8 @@ test('photo archive groups external images and keeps details in the lightbox', a
   expect(deferredRequests).toEqual([]);
   await expect(page.locator('.photo-frame').first()).toHaveAttribute('data-photo-exif', '35mm · f/4 · 1/320s · ISO 160');
   await expect(page.locator('.photo-frame').first()).toHaveAttribute('data-photo-device', 'Xiaomi');
-  await expect(page.locator('.photo-frame').first()).toHaveAttribute('data-photo-meta', '安徽 · 宏村 · 2026年7月');
-  await expect(page.locator('.photo-caption small').first()).toHaveText('安徽 · 宏村 · 2026年7月');
+  await expect(page.locator('.photo-frame').first()).toHaveAttribute('data-photo-meta', '南岛 · 山野 · 2026年7月');
+  await expect(page.locator('.photo-caption small').first()).toHaveText('南岛 · 山野 · 2026年7月');
   await expect(page.locator('.photo-frame').first()).toHaveAttribute('data-photo-original', 'https://images.example.test/photo-1-original.jpg');
   await expect(page.locator('.photo-frame').first()).toHaveAttribute('data-pswp-src', 'https://images.example.test/photos/2026/photo-1.jpg');
   await expect(page.locator('.photo-frame img').first()).toHaveAttribute('referrerpolicy', 'no-referrer');
@@ -138,7 +138,7 @@ test('photo archive groups external images and keeps details in the lightbox', a
   await expect(page.locator('.pswp__button--quietype-zoom')).toHaveCount(2);
   await expect(page.locator('.pswp__button--quietype-zoom').first()).toHaveCSS('color', 'rgb(255, 255, 255)');
   await expect(page.locator('.pswp__top-bar')).toHaveCSS('background-image', /linear-gradient/);
-  await expect(page.locator('.pswp__quietype-caption')).toContainText('雨后屋檐');
+  await expect(page.locator('.pswp__quietype-caption')).toContainText('光落群山');
   await expect(page.locator('.pswp__quietype-caption')).toContainText('35mm · f/4 · 1/320s · ISO 160');
   await expect(page.locator('.pswp__quietype-caption p')).toBeVisible();
   await expect(page.locator('.pswp__quietype-caption small')).toBeVisible();
@@ -167,8 +167,8 @@ test('photo grid retries a transient CDN failure and preserves its lightbox deta
   await expect(archivedYear.locator('.photo-frame').first()).not.toHaveClass(/is-photo-error/);
 
   await archivedYear.locator('.photo-frame').first().click();
-  await expect(page.locator('.pswp__quietype-caption strong')).toHaveText('暮色归舟');
-  await expect(page.locator('.pswp__quietype-caption span')).toHaveText('湖南 · 洞庭湖 · 2025年11月');
+  await expect(page.locator('.pswp__quietype-caption strong')).toHaveText('暮色山谷');
+  await expect(page.locator('.pswp__quietype-caption span')).toHaveText('山间 · 2025年11月');
   await expect(page.locator('.pswp__quietype-caption p')).not.toBeEmpty();
   await expect(page.locator('.pswp__quietype-caption small')).not.toBeEmpty();
 });
@@ -223,8 +223,8 @@ test('photo lightbox loads deferred slides and browser Back closes it in place',
   await expect.poll(() => page.evaluate(() => Boolean(history.state?.quietypeLightbox))).toBe(true);
 
   await page.evaluate(() => window.pswp.goTo(3));
-  await expect(page.locator('.pswp__quietype-caption strong')).toHaveText('暮色归舟');
-  await expect(page.locator('.pswp__quietype-caption span')).toHaveText('湖南 · 洞庭湖 · 2025年11月');
+  await expect(page.locator('.pswp__quietype-caption strong')).toHaveText('暮色山谷');
+  await expect(page.locator('.pswp__quietype-caption span')).toHaveText('山间 · 2025年11月');
   await expect(page.locator('.pswp__quietype-caption p')).not.toBeEmpty();
   await expect(page.locator('.pswp__quietype-caption small')).not.toBeEmpty();
   const activeImage = page.locator('.pswp__item[aria-hidden="false"] .pswp__img:not(.pswp__img--placeholder)');
@@ -261,7 +261,7 @@ test('photo lightbox retries one failed archive image without reusing its cache 
   await page.locator('.photo-frame img').first().click();
   await expect(page.locator('.pswp')).toBeVisible();
   await page.evaluate(() => window.pswp.goTo(3));
-  await expect(page.locator('.pswp__quietype-caption strong')).toHaveText('暮色归舟');
+  await expect(page.locator('.pswp__quietype-caption strong')).toHaveText('暮色山谷');
   await expect.poll(() => retryRequests.length).toBe(1);
   const activeImage = page.locator('.pswp__item[aria-hidden="false"] .pswp__img:not(.pswp__img--placeholder)');
   await expect(activeImage).toHaveAttribute('src', /photo-4\.jpg\?quietype_retry=[0-9]+$/);
@@ -317,7 +317,7 @@ test('mobile lightbox arrows share the standard control visibility state', async
   expect(Math.abs(captionAlignment.viewportBottomGap - 14)).toBeLessThan(0.5);
   expect(captionAlignment.imageGap).toBeGreaterThan(100);
   await next.tap();
-  await expect(page.locator('.pswp__quietype-caption strong')).toHaveText('窗外');
+  await expect(page.locator('.pswp__quietype-caption strong')).toHaveText('秋路入林');
   await expect.poll(() => page.evaluate(() => !window.pswp?.mainScroll?.isShifted())).toBe(true);
   await expect.poll(() => page.evaluate(() => window.pswp?.animations?.activeAnimations?.length || 0)).toBe(0);
 
@@ -474,7 +474,7 @@ test('pre-footer navigation stays separate from legal footer content', async ({ 
   await page.goto('/');
   const navigation = page.locator('nav.prefooter-nav');
   await expect(navigation).toBeVisible();
-  await expect(navigation.locator('a')).toHaveText(['书籍', '归档', '友链', '关于']);
+  await expect(navigation.locator('a')).toHaveText(['阅读', '摄影']);
   await expect(page.locator('footer.site-footer nav.prefooter-nav')).toHaveCount(0);
   await expect(navigation).toHaveCSS('border-top-width', '1px');
   await expect(page.locator('footer.site-footer')).toHaveCSS('border-top-width', '1px');

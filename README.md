@@ -6,26 +6,36 @@ Quietype 是一款面向中文长文与技术写作的经典 WordPress 主题。
 
 [在线演示](https://taifua.com/) · [版本发布](https://github.com/taifuer/quietype/releases) · [更新记录](CHANGELOG.md)
 
-![Quietype 首页预览](screenshot.png)
-
 ## 页面预览
 
-| 文章阅读 | 年度书架 |
+| 首页 | 关于 |
 | --- | --- |
-| ![文章阅读页](docs/images/article.png) | ![年度书架](docs/images/books.png) |
+| ![Quietype 首页](docs/images/home.png) | ![关于页面](docs/images/about.png) |
 
-![年度照片页](docs/images/photos.png)
+| 文章排版 | 代码与公式 |
+| --- | --- |
+| ![文章阅读页](docs/images/article.png) | ![文章代码与公式](docs/images/article-code.png) |
+
+| 年度书架 | 年度照片 |
+| --- | --- |
+| ![年度书架](docs/images/books.png) | ![年度照片页](docs/images/photos.png) |
+
+| 文章归档 | 友情链接 |
+| --- | --- |
+| ![文章归档页](docs/images/archive.png) | ![友情链接页](docs/images/links.png) |
+
+![页尾导航与 Footer](docs/images/footer.png)
 
 <details>
-<summary>查看移动端文章页</summary>
+<summary>查看移动端页面</summary>
 
-<p align="center">
-  <img src="docs/images/article-mobile.png" alt="Quietype 移动端文章页" width="390">
-</p>
+| 首页 | 文章 |
+| --- | --- |
+| <img src="docs/images/home-mobile.png" alt="Quietype 移动端首页" width="390"> | <img src="docs/images/article-mobile.png" alt="Quietype 移动端文章页" width="390"> |
 
 </details>
 
-演示图由隔离测试环境生成，不依赖线上文章、书籍封面或私人照片。
+演示图由隔离测试环境和固定内容生成，不依赖线上文章、私人书目或个人照片；图库素材的来源与许可记录在[演示照片来源](tests/fixtures/photos/README.md)。
 
 ## 设计原则
 

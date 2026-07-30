@@ -1,7 +1,7 @@
-<p>这是一篇用于 Quietype 自动化回归的长文，覆盖中文、English words、<code>virConnectDomainEventRegisterAny</code> 与长链接等常见技术内容。</p>
+<p>一套阅读主题不需要争夺注意力。它只需要把标题、正文、注释与工具放在恰当的位置，让内容自然地向前展开。</p>
 <blockquote><p>好的阅读界面应当让结构清晰，同时保持克制。</p></blockquote>
 <h2>排版与长内容</h2>
-<p>段落中包含一个很长的可见链接：<a href="https://example.com/projects/quietype/commit/2895aaa139b3f916b3650ca516b35dceb9c0d4c4">https://example.com/projects/quietype/commit/2895aaa139b3f916b3650ca516b35dceb9c0d4c4</a>，它应当充分利用当前行。</p>
+<p>中文段落、English words、<code>virConnectDomainEventRegisterAny</code> 与长链接经常同时出现在技术文章中。可见链接 <a href="https://example.com/projects/quietype/commit/2895aaa139b3f916b3650ca516b35dceb9c0d4c4">https://example.com/projects/quietype/commit/2895aaa139b3f916b3650ca516b35dceb9c0d4c4</a> 应当充分利用当前行。</p>
 <h3>多级列表</h3>
 <ul>
   <li>一级列表
@@ -13,10 +13,21 @@
   </li>
   <li>列表后的内容保持紧凑。</li>
 </ul>
-<h2>代码与表格</h2>
-<pre class="language-php"><code class="language-php">function quietype_example( $value ) {
-	return esc_html( $value );
-}</code></pre>
+<h2>代码与公式</h2>
+<p>代码块保留语言、复制操作和舒适的行高；行内公式 <math aria-label="E 等于 m c 平方"><mi>E</mi><mo>=</mo><mi>m</mi><msup><mi>c</mi><mn>2</mn></msup></math> 仍然跟随正文流动。</p>
+<pre class="language-javascript"><code class="language-javascript"><span class="token keyword">const</span> readingTime <span class="token operator">=</span> <span class="token function">estimateReadingTime</span><span class="token punctuation">(</span>words<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">if</span> <span class="token punctuation">(</span>readingTime <span class="token operator">&gt;</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	<span class="token keyword">return</span> <span class="token string">`${readingTime} 分钟`</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<div class="katex-display">
+  <math display="block" aria-label="阅读时间等于中文字数除以每分钟四百字，加上英文字数除以每分钟二百二十词">
+    <mrow>
+      <mi>T</mi><mo>=</mo><mfrac><msub><mi>N</mi><mi>zh</mi></msub><mn>400</mn></mfrac><mo>+</mo><mfrac><msub><mi>N</mi><mi>en</mi></msub><mn>220</mn></mfrac>
+    </mrow>
+  </math>
+</div>
+<h3>表格</h3>
 <table>
   <thead><tr><th>项目</th><th>说明</th></tr></thead>
   <tbody><tr><td>正文</td><td>适合持续阅读</td></tr><tr><td>目录</td><td>定位当前章节</td></tr></tbody>
