@@ -4,7 +4,7 @@ Quietype is a Chinese-first, integrated WordPress theme. Contributions should pr
 
 ## Development setup
 
-Use the disposable WordPress environment when possible:
+Use Node.js 22.22 or newer and Docker Compose. Run the disposable WordPress environment when possible:
 
 ```bash
 npm ci

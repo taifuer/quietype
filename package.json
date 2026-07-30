@@ -9,6 +9,9 @@
     "type": "git",
     "url": "git+https://github.com/taifuer/quietype.git"
   },
+  "engines": {
+    "node": "^22.22.0 || >=24.8.0"
+  },
   "scripts": {
     "env:start": "bash tests/bin/test-env.sh start",
     "env:stop": "bash tests/bin/test-env.sh stop",
@@ -22,8 +25,8 @@
   "devDependencies": {
     "@axe-core/playwright": "4.12.1",
     "@lhci/cli": "0.15.1",
-    "@playwright/test": "1.61.1",
-    "html-validate": "9.7.1"
+    "@playwright/test": "1.62.0",
+    "html-validate": "11.6.0"
   },
   "overrides": {
     "brace-expansion": "5.0.8",

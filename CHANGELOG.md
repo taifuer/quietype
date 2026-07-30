@@ -2,6 +2,12 @@
 
 All notable changes to Quietype will be documented in this file.
 
+## [Unreleased]
+
+### Changed
+
+- Updated Playwright and HTML validation tooling, documented the resulting Node.js 22.22+ development requirement, and reduced obsolete transitive dependencies.
+
 ## [0.10.20] - 2026-07-30
 
 ### Added

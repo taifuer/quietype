@@ -83,7 +83,7 @@ Quietype 使用 WordPress 数据库存储书籍、照片、浏览量和主题选
 
 ## 开发与质量
 
-主题没有前端构建步骤。仓库提供隔离的 Docker WordPress、固定测试内容、Playwright、axe、视觉回归和 Lighthouse 预算：
+主题没有前端构建步骤。自动化回归需要 Node.js 22.22+ 与 Docker Compose；仓库提供隔离的 WordPress、固定测试内容、Playwright、axe、视觉回归和 Lighthouse 预算：
 
 ```bash
 npm ci
