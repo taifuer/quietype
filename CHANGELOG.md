@@ -7,7 +7,7 @@ All notable changes to Quietype will be documented in this file.
 ### Changed
 
 - Updated Playwright and HTML validation tooling, documented the resulting Node.js 22.22+ development requirement, and reduced obsolete transitive dependencies.
-- Rebuilt the public previews with deterministic, license-documented demo content across paired home, article, bookshelf, gallery, archive, links, and about views.
+- Rebuilt the public previews with deterministic, license-documented demo content across paired home, article, archive, links, bookshelf, gallery, and about views, including full-page desktop and representative mobile layouts.
 - Made horizontally scrollable article code blocks keyboard-focusable and extended the visual and accessibility regression coverage for code and formulas.
 - Normalized administrator notice query values before rendering so the default WordPress Coding Standards check completes without warnings.
 

@@ -47,6 +47,15 @@ for (const [name, path] of [
   });
 }
 
+test('complete home page includes its footer', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop-chromium', 'README uses the compact mobile viewport baseline');
+  await page.goto('/', { waitUntil: 'networkidle' });
+  await expect(page).toHaveScreenshot('home-full.png', {
+    fullPage: true,
+    caret: 'hide'
+  });
+});
+
 test('article code and formulas match the approved viewport', async ({ page }) => {
   await page.goto('/quietype-reading-test/', { waitUntil: 'networkidle' });
   const section = page.locator('.article-content h2').filter({ hasText: '代码与公式' }).first();

@@ -16,22 +16,20 @@ Quietype 是一款面向中文长文与技术写作的经典 WordPress 主题。
 | --- | --- |
 | ![文章阅读页](docs/images/article.png) | ![文章代码与公式](docs/images/article-code.png) |
 
-| 年度书架 | 年度照片 |
-| --- | --- |
-| ![年度书架](docs/images/books.png) | ![年度照片页](docs/images/photos.png) |
-
 | 文章归档 | 友情链接 |
 | --- | --- |
 | ![文章归档页](docs/images/archive.png) | ![友情链接页](docs/images/links.png) |
 
-![页尾导航与 Footer](docs/images/footer.png)
+| 年度书架 | 年度照片 |
+| --- | --- |
+| ![年度书架](docs/images/books.png) | ![年度照片页](docs/images/photos.png) |
 
 <details>
 <summary>查看移动端页面</summary>
 
-| 首页 | 文章 |
-| --- | --- |
-| <img src="docs/images/home-mobile.png" alt="Quietype 移动端首页" width="390"> | <img src="docs/images/article-mobile.png" alt="Quietype 移动端文章页" width="390"> |
+| 首页 | 文章 | 归档 |
+| --- | --- | --- |
+| <img src="docs/images/home-mobile.png" alt="Quietype 移动端首页" width="390"> | <img src="docs/images/article-mobile.png" alt="Quietype 移动端文章页" width="390"> | <img src="docs/images/archive-mobile.png" alt="Quietype 移动端归档页" width="390"> |
 
 </details>
 
