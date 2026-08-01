@@ -105,6 +105,7 @@ function quietype_register_books() {
 		'_quietype_book_read_date'        => 'quietype_sanitize_book_date',
 		'_quietype_book_status'           => 'quietype_sanitize_book_status',
 		'_quietype_book_rating'           => 'quietype_sanitize_book_rating',
+		'_quietype_book_recommended'      => 'quietype_sanitize_book_recommended',
 		'_quietype_book_douban_rating'    => 'quietype_sanitize_douban_rating',
 		// Keep the legacy meta key so existing libraries need no data migration.
 		'_quietype_book_douban_url'       => 'quietype_sanitize_book_url',
@@ -239,6 +240,11 @@ function quietype_sanitize_book_rating( $value ) {
 	return $rating >= 1 && $rating <= 5 ? (string) $rating : '';
 }
 
+/** Normalize the optional recommendation marker to a compact stored flag. */
+function quietype_sanitize_book_recommended( $value ) {
+	return in_array( $value, array( 1, '1', true, 'true', 'on' ), true ) ? '1' : '';
+}
+
 function quietype_sanitize_douban_rating( $value ) {
 	$rating = round( (float) $value, 1 );
 	return $rating > 0 && $rating <= 10 ? number_format( $rating, 1, '.', '' ) : '';
@@ -310,6 +316,7 @@ function quietype_book_data( $post_id = null ) {
 		'read_date'        => $read_date,
 		'status'           => quietype_sanitize_book_status( get_post_meta( $post_id, '_quietype_book_status', true ) ) ?: 'read',
 		'rating'           => (int) quietype_sanitize_book_rating( get_post_meta( $post_id, '_quietype_book_rating', true ) ),
+		'recommended'      => '1' === quietype_sanitize_book_recommended( get_post_meta( $post_id, '_quietype_book_recommended', true ) ),
 		'douban_rating'    => (float) get_post_meta( $post_id, '_quietype_book_douban_rating', true ),
 		'book_url'         => $book_url,
 		'douban_url'       => quietype_douban_url( $douban_id ),
@@ -399,13 +406,14 @@ function quietype_render_book_meta_box( $post ) {
 		</div>
 		<table class="form-table" role="presentation">
 			<tr><th><label for="quietype_book_authors">作者</label></th><td><input class="regular-text" id="quietype_book_authors" name="quietype_book_authors" type="text" value="<?php echo esc_attr( $data['authors'] ); ?>" placeholder="多位作者使用顿号分隔"></td></tr>
-			<tr><th><label for="quietype_book_publisher">出版社</label></th><td><input class="regular-text" id="quietype_book_publisher" name="quietype_book_publisher" type="text" value="<?php echo esc_attr( $data['publisher'] ); ?>"></td></tr>
 			<tr><th><label for="quietype_book_publication_year">出版年份</label></th><td><input class="small-text" id="quietype_book_publication_year" name="quietype_book_publication_year" type="number" min="1000" max="<?php echo esc_attr( (int) gmdate( 'Y' ) + 2 ); ?>" value="<?php echo esc_attr( $data['publication_year'] ); ?>"></td></tr>
+			<tr><th><label for="quietype_book_publisher">出版社</label></th><td><input class="regular-text" id="quietype_book_publisher" name="quietype_book_publisher" type="text" value="<?php echo esc_attr( $data['publisher'] ); ?>"></td></tr>
 			<tr><th><label for="quietype_book_isbn">ISBN</label></th><td><input class="regular-text code" id="quietype_book_isbn" name="quietype_book_isbn" type="text" value="<?php echo esc_attr( $data['isbn'] ); ?>"></td></tr>
 			<tr><th><label for="quietype_book_cover_url">封面图片地址</label></th><td><input class="regular-text code" id="quietype_book_cover_url" name="quietype_book_cover_url" type="url" value="<?php echo esc_attr( $data['cover_url'] ); ?>" placeholder="https://example.com/images/book-cover.jpg"><p class="description">可填写 HTTPS 图片地址，将优先于特色图显示；留空则使用特色图或文字封面。</p></td></tr>
 			<tr><th><label for="quietype_book_status">阅读状态</label></th><td><select id="quietype_book_status" name="quietype_book_status"><?php foreach ( quietype_book_status_labels() as $status => $label ) : ?><option value="<?php echo esc_attr( $status ); ?>" <?php selected( $data['status'], $status ); ?>><?php echo esc_html( $label ); ?></option><?php endforeach; ?></select><p class="description">“读过”用于读了一部分，并且不再继续的书籍。</p></td></tr>
 			<tr><th><label for="quietype_book_read_date">阅读月份</label></th><td><input id="quietype_book_read_date" name="quietype_book_read_date" type="month" value="<?php echo esc_attr( $data['read_date'] ); ?>"><p class="description">用于年度分组；待读书目可填写计划月份。</p></td></tr>
 			<tr><th><label for="quietype_book_rating">我的评价</label></th><td><select id="quietype_book_rating" name="quietype_book_rating"><option value="">暂不评分</option><?php for ( $rating = 1; $rating <= 5; $rating++ ) : ?><option value="<?php echo esc_attr( $rating ); ?>" <?php selected( $data['rating'], $rating ); ?>><?php echo esc_html( str_repeat( '★', $rating ) . str_repeat( '☆', 5 - $rating ) ); ?></option><?php endfor; ?></select></td></tr>
+			<tr><th><label for="quietype_book_recommended">推荐标记</label></th><td><label><input id="quietype_book_recommended" name="quietype_book_recommended" type="checkbox" value="1" <?php checked( $data['recommended'] ); ?>> 推荐这本书</label><p class="description">勾选后在书架封面右上角显示暖黄色五角星；选择五星评价时会自动勾选，仍可手动取消。</p></td></tr>
 			<tr><th><label for="quietype_book_douban_rating">豆瓣评分</label></th><td><input class="small-text" id="quietype_book_douban_rating" name="quietype_book_douban_rating" type="number" min="0.1" max="10" step="0.1" value="<?php echo esc_attr( $data['douban_rating'] ?: '' ); ?>"></td></tr>
 			<tr><th><label for="quietype_book_url">链接</label></th><td><input class="regular-text code" id="quietype_book_url" name="quietype_book_url" type="url" value="<?php echo esc_attr( $data['book_url'] ); ?>" placeholder="https://example.com/books/example"><p class="description">可选。填写后书名将链接到豆瓣、出版社或其他资料页面；留空则不添加链接。</p><input id="quietype_book_douban_id" name="quietype_book_douban_id" type="hidden" value="<?php echo esc_attr( $data['douban_id'] ); ?>"></td></tr>
 		</table>
@@ -493,6 +501,7 @@ function quietype_save_book_meta( $post_id, $post ) {
 		'_quietype_book_read_date'        => array( 'quietype_book_read_date', 'quietype_sanitize_book_date' ),
 		'_quietype_book_status'           => array( 'quietype_book_status', 'quietype_sanitize_book_status' ),
 		'_quietype_book_rating'           => array( 'quietype_book_rating', 'quietype_sanitize_book_rating' ),
+		'_quietype_book_recommended'      => array( 'quietype_book_recommended', 'quietype_sanitize_book_recommended' ),
 		'_quietype_book_douban_rating'    => array( 'quietype_book_douban_rating', 'quietype_sanitize_douban_rating' ),
 		'_quietype_book_cover_url'        => array( 'quietype_book_cover_url', 'quietype_sanitize_book_cover_url' ),
 		// The legacy meta key now stores the optional generic book reference URL.

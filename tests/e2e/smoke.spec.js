@@ -377,6 +377,22 @@ test('book archive groups compact reading records by year', async ({ page }) => 
   await expect(page.locator('.book-grid').nth(2)).toBeHidden();
   await expect(page.locator('.book-year-index a').nth(2)).toHaveAttribute('aria-expanded', 'false');
   await expect(page.locator('.book-title-row h3 a').first()).toHaveAttribute('href', 'https://example.com/books/programming-pearls');
+  await expect(page.locator('.book-meta').first()).toHaveText('Jon Bentley · 2015 · 人民邮电出版社');
+  await expect(page.locator('.book-item.is-recommended')).toHaveCount(2);
+  await expect(page.locator('.book-recommendation')).toHaveCount(2);
+  await expect(page.locator('.book-recommendation').first()).toHaveAttribute('aria-label', '推荐书籍');
+  const recommendationGeometry = await page.locator('.book-item.is-recommended .book-cover').first().evaluate((cover) => {
+    const marker = cover.querySelector('.book-recommendation');
+    const coverBox = cover.getBoundingClientRect();
+    const markerBox = marker.getBoundingClientRect();
+    return {
+      insideHorizontally: markerBox.left >= coverBox.left && markerBox.right <= coverBox.right,
+      insideVertically: markerBox.top >= coverBox.top - 1 && markerBox.bottom <= coverBox.bottom,
+      width: Math.round(markerBox.width),
+      height: Math.round(markerBox.height),
+    };
+  });
+  expect(recommendationGeometry).toEqual({ insideHorizontally: true, insideVertically: true, width: 16, height: 16 });
   await expect(page.locator('.book-item').filter({ hasText: '小王子' }).locator('.book-title-row h3 a')).toHaveCount(0);
   await expect(page.locator('a.book-cover')).toHaveCount(0);
   await expect(page.locator('.book-cover').first()).toHaveJSProperty('tagName', 'DIV');

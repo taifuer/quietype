@@ -8,11 +8,11 @@
 $book_data = quietype_book_data();
 $excerpt   = get_the_excerpt();
 $book_url  = $book_data['book_url'];
-$book_meta = array_filter( array( $book_data['authors'], $book_data['publisher'], $book_data['publication_year'] ) );
+$book_meta = array_filter( array( $book_data['authors'], $book_data['publication_year'], $book_data['publisher'] ) );
 $has_cover = $book_data['cover_url'] || has_post_thumbnail();
 $cover_fallback = '<span class="book-cover__fallback"><i>' . esc_html( mb_substr( get_the_title(), 0, 4 ) ) . '</i><small>' . esc_html( $book_data['authors'] ?: get_bloginfo( 'name' ) ) . '</small></span>';
 ?>
-<article id="book-<?php the_ID(); ?>" <?php post_class( 'book-item' ); ?>>
+<article id="book-<?php the_ID(); ?>" <?php post_class( $book_data['recommended'] ? 'book-item is-recommended' : 'book-item' ); ?>>
 	<div class="book-cover<?php echo $has_cover ? ' has-cover' : ''; ?>">
 		<?php echo $cover_fallback; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- assembled from escaped text only. ?>
 		<?php if ( $book_data['cover_url'] ) : ?>
@@ -32,6 +32,7 @@ $cover_fallback = '<span class="book-cover__fallback"><i>' . esc_html( mb_substr
 			); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- WordPress builds and escapes the image markup.
 			?>
 		<?php endif; ?>
+		<?php if ( $book_data['recommended'] ) : ?><span class="book-recommendation" role="img" aria-label="推荐书籍"><?php echo quietype_icon( 'star' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Fixed theme-owned SVG markup. ?></span><?php endif; ?>
 	</div>
 	<div class="book-body">
 		<div class="book-title-row">

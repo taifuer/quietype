@@ -1,4 +1,30 @@
 (() => {
+  const ratingField = document.querySelector('#quietype_book_rating');
+  const recommendationField = document.querySelector('#quietype_book_recommended');
+
+  if (ratingField && recommendationField) {
+    let recommendationWasAutoSelected = false;
+
+    ratingField.addEventListener('change', () => {
+      if (ratingField.value === '5') {
+        if (!recommendationField.checked) {
+          recommendationField.checked = true;
+          recommendationWasAutoSelected = true;
+        }
+        return;
+      }
+
+      if (recommendationWasAutoSelected) {
+        recommendationField.checked = false;
+        recommendationWasAutoSelected = false;
+      }
+    });
+
+    recommendationField.addEventListener('change', () => {
+      recommendationWasAutoSelected = false;
+    });
+  }
+
   const lookupButton = document.querySelector('#quietype-book-lookup');
   const confirmButton = document.querySelector('#quietype-book-confirm');
   const subjectField = document.querySelector('#quietype_book_douban_input');

@@ -326,6 +326,8 @@ html.js .book-year-shelf[data-expanded="false"] .book-grid { display: none; }
 .book-cover.has-cover .book-cover__fallback { display: none; }
 .book-cover.has-cover.is-cover-missing .book-cover__fallback { display: flex; }
 .book-cover.is-cover-missing img { display: none; }
+.book-recommendation { position: absolute; z-index: 2; top: 0; right: 0; display: block; width: 16px; height: 16px; color: #d09a2f; filter: drop-shadow(0 0 1px var(--paper)); }
+.book-recommendation .quietype-icon { width: 16px; height: 16px; fill: currentColor; stroke: var(--accent); stroke-width: .8; }
 .book-cover i { font: 600 17px/1.55 var(--serif); font-style: normal; letter-spacing: .03em; }
 .book-cover small { max-width: 100%; overflow: hidden; color: var(--muted); font-size: 11px; line-height: 1.45; text-overflow: ellipsis; }
 .book-body { display: flex; min-width: 0; flex-direction: column; }

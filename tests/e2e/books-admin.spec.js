@@ -62,6 +62,16 @@ test('Douban lookup previews data before manual confirmation', async ({ page }) 
   await expect(page.locator('#quietype_book_status')).toHaveValue('read');
   await expect(page.locator('#quietype_book_status option')).toHaveText(['读完', '在读', '读过', '待读']);
   await expect(page.locator('#quietype_book_status + .description')).toContainText('读了一部分');
+  await expect(page.locator('#quietype_book_recommended')).not.toBeChecked();
+  await expect(page.locator('label:has(#quietype_book_recommended) + .description')).toContainText('选择五星评价时会自动勾选');
+  await page.locator('#quietype_book_rating').selectOption('5');
+  await expect(page.locator('#quietype_book_recommended')).toBeChecked();
+  await page.locator('#quietype_book_rating').selectOption('4');
+  await expect(page.locator('#quietype_book_recommended')).not.toBeChecked();
+  await page.locator('#quietype_book_rating').selectOption('5');
+  await page.locator('#quietype_book_recommended').uncheck();
+  await page.locator('#quietype_book_rating').selectOption('4');
+  await expect(page.locator('#quietype_book_recommended')).not.toBeChecked();
 	await expect(page.locator('#quietype_book_cover_url')).toHaveAttribute('placeholder', 'https://example.com/images/book-cover.jpg');
 	await expect(page.locator('#quietype_book_cover_url + .description')).toContainText('优先于特色图');
 	await expect(page.locator('label[for="quietype_book_url"]')).toHaveText('链接');
@@ -114,6 +124,17 @@ test('book list keeps only compact operational reading metadata', async ({ page 
   await programmingPearls.locator('.row-title').click();
   await expect(page.locator('#sample-permalink')).toHaveCount(0);
   await expect(page.locator('#slugdiv')).toHaveCount(0);
+});
+
+test('an existing five-star rating does not force recommendation on load', async ({ page }) => {
+  test.skip(page.viewportSize().width < 700, 'The administration editor is viewport-independent.');
+  await logIn(page);
+  await page.goto('/wp-admin/edit.php?post_type=book', { waitUntil: 'domcontentloaded' });
+
+  const dreamOfTheRedChamber = page.locator('#the-list tr').filter({ hasText: '红楼梦' });
+  await dreamOfTheRedChamber.locator('.row-title').click();
+  await expect(page.locator('#quietype_book_rating')).toHaveValue('5');
+  await expect(page.locator('#quietype_book_recommended')).not.toBeChecked();
 });
 
 test('revision controls describe posts, pages, and books', async ({ page }) => {
