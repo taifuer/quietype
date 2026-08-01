@@ -386,13 +386,13 @@ test('book archive groups compact reading records by year', async ({ page }) => 
     const coverBox = cover.getBoundingClientRect();
     const markerBox = marker.getBoundingClientRect();
     return {
-      insideHorizontally: markerBox.left >= coverBox.left && markerBox.right <= coverBox.right,
-      insideVertically: markerBox.top >= coverBox.top - 1 && markerBox.bottom <= coverBox.bottom,
+      centerFromTop: Math.round(markerBox.top + markerBox.height / 2 - coverBox.top),
+      centerFromRight: Math.round(coverBox.right - markerBox.left - markerBox.width / 2),
       width: Math.round(markerBox.width),
       height: Math.round(markerBox.height),
     };
   });
-  expect(recommendationGeometry).toEqual({ insideHorizontally: true, insideVertically: true, width: 16, height: 16 });
+  expect(recommendationGeometry).toEqual({ centerFromTop: 9, centerFromRight: 9, width: 20, height: 20 });
   await expect(page.locator('.book-item').filter({ hasText: '小王子' }).locator('.book-title-row h3 a')).toHaveCount(0);
   await expect(page.locator('a.book-cover')).toHaveCount(0);
   await expect(page.locator('.book-cover').first()).toHaveJSProperty('tagName', 'DIV');
