@@ -4,7 +4,7 @@
 
 Quietype 是一款面向中文长文与技术写作的经典 WordPress 主题。它以简约、素雅、明亮为设计基调，把排版、导航和交互集中在持续阅读这件事上，同时兼顾 Markdown 技术内容、移动端体验、访问性能与站点管理。
 
-[在线演示](https://taifua.com/) · [版本发布](https://github.com/taifuer/quietype/releases) · [更新记录](CHANGELOG.md)
+[在线演示](https://taifua.com/) · [版本发布](https://github.com/taifuer/quietype/releases) · [更新记录](CHANGELOG.md) · [开发复盘](BUILDING-QUIETYPE.md)
 
 ## 页面预览
 
@@ -119,6 +119,12 @@ GitHub Actions 在 PHP 8.0、8.2、8.4 以及 WordPress 6.6、6.8 上执行检�
 - 贡献流程与代码约定：[CONTRIBUTING.md](CONTRIBUTING.md)
 - 安全问题与私密报告方式：[SECURITY.md](SECURITY.md)
 - 版本变化与迁移说明：[CHANGELOG.md](CHANGELOG.md)
+
+## 鸣谢
+
+Quietype 在研究阶段参考了不同生态中优秀阅读主题与独立博客的信息层级、中文排版和交互取舍，包括 [Retypeset](https://retypeset.radishzz.cc/)、[Hugo PaperMod](https://adityatelange.github.io/hugo-PaperMod/)、[Hugo Stack](https://demo.stack.cai.im/)、[Adams](https://github.com/Tokinx/Adams)、[writings.sh 存档](https://web.archive.org/web/20250807154239/https://writings.sh/)以及 [Typora 主题库](https://theme.typora.io/)。搬砖日记、笔记、三迹、Moeyua、Joway、Halo 主题商店和 NiceTheme 等站点与主题生态，也帮助我们比较了阅读密度、归档方式和后台能力。完整参考清单及具体经验见[开发复盘](BUILDING-QUIETYPE.md#六参考与鸣谢)。
+
+主题建立在 [WordPress](https://wordpress.org/) 之上，图片预览使用 [PhotoSwipe](https://photoswipe.com/)；自动化质量体系使用 Playwright、axe-core、Lighthouse CI、html-validate 与 WordPress Coding Standards。感谢这些项目及其维护者。Quietype 没有复刻某个主题，仓库内直接分发的第三方代码及许可均单独保留。
 
 ## 许可证
 

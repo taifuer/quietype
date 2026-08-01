@@ -2,11 +2,15 @@
 
 All notable changes to Quietype will be documented in this file.
 
-## [Unreleased]
+## [0.10.21] - 2026-08-01
+
+### Added
+
+- Added a high-contrast, corner-anchored warm-gold recommended-book star, a reversible five-star editor suggestion, and publication years between authors and publishers in bookshelf metadata.
+- Added a detailed development retrospective and acknowledgements covering Quietype's design decisions, reusable engineering lessons, references, and human-Agent workflow.
 
 ### Changed
 
-- Added a high-contrast, corner-anchored warm-gold recommended-book star, a reversible five-star editor suggestion, and publication years between authors and publishers in bookshelf metadata.
 - Updated Playwright and HTML validation tooling, documented the resulting Node.js 22.22+ development requirement, and reduced obsolete transitive dependencies.
 - Rebuilt the public previews with deterministic, license-documented demo content across paired home, article, archive, links, bookshelf, gallery, and about views, including full-page desktop and representative mobile layouts.
 - Made horizontally scrollable article code blocks keyboard-focusable and extended the visual and accessibility regression coverage for code and formulas.
