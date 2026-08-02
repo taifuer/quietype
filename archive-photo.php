@@ -26,6 +26,13 @@ $photo_total    = array_sum( array_map( 'count', $photos_by_year ) );
 $year_span      = $year_count ? ( 1 === $year_count ? (string) $years[0] : $years[ $year_count - 1 ] . '—' . $years[0] ) : '';
 $expanded_limit = quietype_archive_expanded_years( 'photo' );
 $expanded_years = 0 === $expanded_limit ? $years : array_slice( $years, 0, $expanded_limit );
+$all_years_expanded = $year_count > 0 && count( $expanded_years ) === $year_count;
+$year_grid_ids = array_map(
+	static function ( $year ) {
+		return 'photo-grid-' . $year;
+	},
+	$years
+);
 $page_title = quietype_archive_page_text( 'photo', 'title' );
 $eyebrow    = quietype_archive_page_text( 'photo', 'eyebrow' );
 $intro      = quietype_archive_page_text( 'photo', 'intro' );
@@ -36,7 +43,7 @@ if ( $year_count > 4 && 0 !== $year_count % 3 ) {
 ?>
 <section class="photos-page section-wrap">
 	<header class="photos-hero">
-		<div>
+		<div class="collection-hero__title">
 			<p class="eyebrow"><?php echo esc_html( $eyebrow ); ?></p>
 			<h1><?php echo esc_html( $page_title ); ?></h1>
 		</div>
@@ -44,6 +51,13 @@ if ( $year_count > 4 && 0 !== $year_count % 3 ) {
 			<div class="photos-hero__meta">
 				<?php if ( $intro ) : ?><p class="collection-intro"><?php echo esc_html( $intro ); ?></p><?php endif; ?>
 				<?php if ( $photo_total ) : ?><p class="collection-stats"><?php echo esc_html( $year_span . ' · ' . $photo_total . ' 张' ); ?></p><?php endif; ?>
+			</div>
+		<?php endif; ?>
+		<?php if ( $photos_by_year && $year_count > 1 ) : ?>
+			<div class="collection-year-actions">
+				<button class="collection-years-toggle" type="button" data-photo-years-toggle aria-expanded="<?php echo $all_years_expanded ? 'true' : 'false'; ?>" aria-controls="<?php echo esc_attr( implode( ' ', $year_grid_ids ) ); ?>">
+					<?php echo esc_html( $all_years_expanded ? '收起全部' : '展开全部' ); ?>
+				</button>
 			</div>
 		<?php endif; ?>
 	</header>

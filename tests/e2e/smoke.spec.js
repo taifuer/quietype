@@ -146,6 +146,67 @@ test('photo archive groups external images and keeps details in the lightbox', a
   expect(originalRequests).toEqual([]);
 });
 
+test('book and photo archives expand and collapse every year together', async ({ page }) => {
+  await page.route('https://images.example.test/**', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'image/gif', body: Buffer.from('R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=', 'base64') });
+  });
+
+  for (const archive of [
+    { path: '/books/', hero: '.books-hero', toggle: '[data-book-years-toggle]', section: '.book-year-shelf', grid: '.book-grid', index: '.book-year-index a' },
+    { path: '/photos/', hero: '.photos-hero', toggle: '[data-photo-years-toggle]', section: '.photo-year', grid: '.photo-grid', index: '.photo-year-index a' }
+  ]) {
+    await page.goto(archive.path);
+    const toggle = page.locator(archive.toggle);
+    const sections = page.locator(archive.section);
+
+    const layout = await page.locator(archive.hero).evaluate((hero) => {
+      const rect = (selector) => {
+        const box = hero.querySelector(selector).getBoundingClientRect();
+        return { top: box.top, right: box.right, bottom: box.bottom };
+      };
+
+      const heroBox = hero.getBoundingClientRect();
+      return {
+        heroRight: heroBox.right,
+        title: rect('h1'),
+        meta: rect('.collection-stats'),
+        toggle: rect('.collection-years-toggle')
+      };
+    });
+
+    expect(Math.abs(layout.heroRight - layout.toggle.right)).toBeLessThanOrEqual(2);
+    if (page.viewportSize().width <= 720) {
+      expect(layout.toggle.top).toBeGreaterThanOrEqual(layout.title.bottom - 1);
+      expect(Math.abs(layout.toggle.bottom - layout.meta.bottom)).toBeLessThanOrEqual(8);
+    } else {
+      expect(Math.abs(layout.toggle.bottom - layout.title.bottom)).toBeLessThanOrEqual(8);
+    }
+
+    await expect(toggle).toHaveText('展开全部');
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await toggle.click();
+    await expect(toggle).toHaveText('收起全部');
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    await expect(sections).toHaveCount(await page.locator(archive.index).count());
+
+    for (let index = 0; index < await sections.count(); index += 1) {
+      await expect(sections.nth(index)).toHaveAttribute('data-expanded', 'true');
+      await expect(sections.nth(index).locator(archive.grid)).toBeVisible();
+      await expect(page.locator(archive.index).nth(index)).toHaveAttribute('aria-expanded', 'true');
+    }
+
+    await toggle.click();
+    await expect(toggle).toHaveText('展开全部');
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+
+    for (let index = 0; index < await sections.count(); index += 1) {
+      await expect(sections.nth(index)).toHaveAttribute('data-expanded', 'false');
+      await expect(sections.nth(index).locator(archive.grid)).toBeHidden();
+      await expect(page.locator(archive.index).nth(index)).toHaveAttribute('aria-expanded', 'false');
+    }
+  }
+});
+
 test('photo grid retries a transient CDN failure and preserves its lightbox details', async ({ page }) => {
   const retryRequests = [];
   await page.route('https://images.example.test/**', async (route) => {

@@ -5,8 +5,17 @@
   if (!yearSections.length) return;
 
   const yearLinks = [...document.querySelectorAll('.photo-year-index a[aria-controls]')];
+  const toggleAll = document.querySelector('[data-photo-years-toggle]');
   let imageObserver = null;
   const maximumRetries = 2;
+
+  const syncToggleAll = () => {
+    if (!toggleAll) return;
+    const allExpanded = yearSections.every((section) => section.dataset.expanded === 'true');
+    toggleAll.textContent = allExpanded ? '收起全部' : '展开全部';
+    toggleAll.setAttribute('aria-expanded', String(allExpanded));
+    toggleAll.setAttribute('aria-label', `${allExpanded ? '收起' : '展开'}全部年份照片`);
+  };
 
   const retrySource = (source, attempt) => {
     try {
@@ -158,6 +167,7 @@
       .forEach((link) => link.setAttribute('aria-expanded', String(expanded)));
     if (expanded) activateYear(section);
     else deactivateYear(section);
+    syncToggleAll();
   };
 
   yearSections.forEach((section) => {
@@ -166,6 +176,12 @@
     section.querySelector('.photo-year__toggle')?.addEventListener('click', () => {
       setYearExpanded(section, section.dataset.expanded !== 'true');
     });
+  });
+
+  toggleAll?.addEventListener('click', () => {
+    const shouldExpand = !yearSections.every((section) => section.dataset.expanded === 'true');
+    yearSections.forEach((section) => setYearExpanded(section, shouldExpand));
+    syncToggleAll();
   });
 
   document.querySelectorAll('.photo-frame img[src]:not([data-src])').forEach(watchDirectImage);

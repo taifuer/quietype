@@ -5,6 +5,15 @@
   if (!yearSections.length) return;
 
   const yearLinks = [...document.querySelectorAll('.book-year-index a[aria-controls]')];
+  const toggleAll = document.querySelector('[data-book-years-toggle]');
+
+  const syncToggleAll = () => {
+    if (!toggleAll) return;
+    const allExpanded = yearSections.every((section) => section.dataset.expanded === 'true');
+    toggleAll.textContent = allExpanded ? '收起全部' : '展开全部';
+    toggleAll.setAttribute('aria-expanded', String(allExpanded));
+    toggleAll.setAttribute('aria-label', `${allExpanded ? '收起' : '展开'}全部年份书籍`);
+  };
 
   const setYearExpanded = (section, expanded) => {
     const grid = section.querySelector('.book-grid');
@@ -19,6 +28,7 @@
     yearLinks
       .filter((link) => link.getAttribute('aria-controls') === grid.id)
       .forEach((link) => link.setAttribute('aria-expanded', String(expanded)));
+    syncToggleAll();
   };
 
   yearSections.forEach((section) => {
@@ -26,6 +36,12 @@
     section.querySelector('.book-year-toggle')?.addEventListener('click', () => {
       setYearExpanded(section, section.dataset.expanded !== 'true');
     });
+  });
+
+  toggleAll?.addEventListener('click', () => {
+    const shouldExpand = !yearSections.every((section) => section.dataset.expanded === 'true');
+    yearSections.forEach((section) => setYearExpanded(section, shouldExpand));
+    syncToggleAll();
   });
 
   yearLinks.forEach((link) => {

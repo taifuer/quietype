@@ -4,6 +4,10 @@ All notable changes to Quietype will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Added responsive expand-all and collapse-all controls to annual book and photo collections while preserving viewport-aware photo hydration.
+
 ### Fixed
 
 - Kept manually confirmed offline friend links at the end of each category while preserving rating and natural-name order within each status group.
