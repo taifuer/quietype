@@ -2,6 +2,12 @@
 
 All notable changes to Quietype will be documented in this file.
 
+## [Unreleased]
+
+### Fixed
+
+- Kept manually confirmed offline friend links at the end of each category while preserving rating and natural-name order within each status group.
+
 ## [0.10.21] - 2026-08-01
 
 ### Added

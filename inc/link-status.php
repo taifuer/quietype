@@ -50,6 +50,16 @@ function quietype_link_category_order( $term_id ) {
 	return '' === $value ? PHP_INT_MAX : absint( $value );
 }
 
+/** Keep confirmed offline links last, then preserve rating and natural-name order. */
+function quietype_compare_links( $left, $right ) {
+	$offline = (int) ( 'offline' === quietype_link_state( $left->link_id )['status'] ) <=> (int) ( 'offline' === quietype_link_state( $right->link_id )['status'] );
+	if ( 0 !== $offline ) {
+		return $offline;
+	}
+	$rating = (int) $right->link_rating <=> (int) $left->link_rating;
+	return 0 !== $rating ? $rating : strnatcasecmp( $left->link_name, $right->link_name );
+}
+
 /** Return visible bookmarks grouped by every configured non-empty category. */
 function quietype_link_groups() {
 	$terms = get_terms(
@@ -83,10 +93,7 @@ function quietype_link_groups() {
 		}
 		usort(
 			$links,
-			function ( $left, $right ) {
-				$rating = (int) $right->link_rating <=> (int) $left->link_rating;
-				return 0 !== $rating ? $rating : strnatcasecmp( $left->link_name, $right->link_name );
-			}
+			'quietype_compare_links'
 		);
 		$groups[] = array( 'term' => $term, 'links' => $links );
 	}

@@ -29,4 +29,29 @@ $fallback_menu = (string) ob_get_clean();
 quietype_test_assert( false === strpos( $fallback_menu, 'articlearchive' ), 'fallback navigation must not hard-code the legacy archive slug' );
 quietype_test_assert( false === strpos( $fallback_menu, '/missing-' ), 'fallback navigation must omit missing optional pages' );
 
+$writing_links = get_bookmarks(
+	array(
+		'category_name' => '独立写作',
+		'orderby'       => 'rating',
+		'order'         => 'DESC',
+	)
+);
+quietype_test_assert( 3 === count( $writing_links ), 'the deterministic writing category should contain three links' );
+$saved_link_states = quietype_link_states();
+quietype_update_link_state( $writing_links[0]->link_id, array( 'status' => 'offline' ) );
+$writing_group = array_values(
+	array_filter(
+		quietype_link_groups(),
+		function ( $group ) {
+			return '独立写作' === $group['term']->name;
+		}
+	)
+);
+quietype_test_assert( 1 === count( $writing_group ), 'the writing link category should remain available after sorting' );
+quietype_test_assert(
+	array( '留白之间', '开放笔记', '山茶书房' ) === wp_list_pluck( $writing_group[0]['links'], 'link_name' ),
+	'confirmed offline links should follow reachable links even when their rating is higher'
+);
+update_option( 'quietype_link_states', $saved_link_states, false );
+
 printf( "Quietype WordPress integration checks passed.\n" );
