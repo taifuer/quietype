@@ -340,7 +340,7 @@ function quietype_book_rating_html( $rating ) {
 	return $html;
 }
 
-/** Render one category and up to two tags as quiet metadata, not filters. */
+/** Render one category and every assigned tag as quiet metadata, not filters. */
 function quietype_book_terms_html( $post_id = null ) {
 	$post_id    = $post_id ?: get_the_ID();
 	$categories = get_the_terms( $post_id, 'book_category' );
@@ -350,7 +350,7 @@ function quietype_book_terms_html( $post_id = null ) {
 		$html .= '<span class="post-category">' . esc_html( $categories[0]->name ) . '</span>';
 	}
 	if ( $tags && ! is_wp_error( $tags ) ) {
-		foreach ( array_slice( $tags, 0, 2 ) as $tag ) {
+		foreach ( $tags as $tag ) {
 			$html .= '<span class="post-tag"><i aria-hidden="true">#</i>' . esc_html( $tag->name ) . '</span>';
 		}
 	}

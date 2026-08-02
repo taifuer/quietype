@@ -455,6 +455,9 @@ test('book archive groups compact reading records by year', async ({ page }) => 
   });
   expect(recommendationGeometry).toEqual({ centerFromTop: 9, centerFromRight: 9, width: 20, height: 20 });
   await expect(page.locator('.book-item').filter({ hasText: '小王子' }).locator('.book-title-row h3 a')).toHaveCount(0);
+  const littlePrinceTags = page.locator('.book-item').filter({ hasText: '小王子' }).locator('.book-terms .post-tag');
+  await expect(littlePrinceTags).toHaveCount(3);
+  await expect(littlePrinceTags).toContainText(['#成长', '#经典', '#重读']);
   await expect(page.locator('a.book-cover')).toHaveCount(0);
   await expect(page.locator('.book-cover').first()).toHaveJSProperty('tagName', 'DIV');
   const localCover = page.locator('.book-cover img.attachment-quietype-book-cover');
