@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const fs = require('node:fs');
 const path = require('node:path');
+const pixelGif = Buffer.from('R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=', 'base64');
 
 const photoFixtures = [
   'mountain-lake.jpg',
@@ -26,6 +27,9 @@ async function routeDemoPhotos(page) {
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('quietype-reading-bg', 'paper'));
   await page.route('**/wp-admin/admin-ajax.php', (route) => route.abort());
+  await page.route('**/avatar/**', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'image/gif', body: pixelGif });
+  });
   await routeDemoPhotos(page);
 });
 

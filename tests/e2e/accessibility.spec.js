@@ -2,11 +2,15 @@ const { test, expect } = require('@playwright/test');
 const AxeBuilder = require('@axe-core/playwright').default;
 
 const routes = ['/', '/quietype-reading-test/', '/books/', '/photos/', '/archive/', '/?s=Quietype', '/quietype-missing-page/'];
+const pixelGif = Buffer.from('R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=', 'base64');
 
 for (const path of routes) {
   test(`${path} has no serious WCAG A/AA violations`, async ({ page }) => {
     await page.route('https://images.example.test/**', async (route) => {
-      await route.fulfill({ status: 200, contentType: 'image/gif', body: Buffer.from('R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=', 'base64') });
+      await route.fulfill({ status: 200, contentType: 'image/gif', body: pixelGif });
+    });
+    await page.route('**/avatar/**', async (route) => {
+      await route.fulfill({ status: 200, contentType: 'image/gif', body: pixelGif });
     });
     await page.goto(path, { waitUntil: 'networkidle' });
     const results = await new AxeBuilder({ page })

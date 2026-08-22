@@ -1,4 +1,11 @@
 const { test, expect } = require('@playwright/test');
+const pixelGif = Buffer.from('R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=', 'base64');
+
+test.beforeEach(async ({ page }) => {
+  await page.route('**/avatar/**', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'image/gif', body: pixelGif });
+  });
+});
 
 const routes = [
   ['首页', '/'],
@@ -22,7 +29,7 @@ test.describe('public pages', () => {
         if (message.type() === 'error' && !expectedMissingDocument) browserErrors.push(message.text());
       });
       await page.route('https://images.example.test/**', async (route) => {
-        await route.fulfill({ status: 200, contentType: 'image/gif', body: Buffer.from('R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=', 'base64') });
+        await route.fulfill({ status: 200, contentType: 'image/gif', body: pixelGif });
       });
 
       const response = await page.goto(path, { waitUntil: 'networkidle' });
