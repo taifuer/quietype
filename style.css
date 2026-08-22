@@ -117,7 +117,7 @@ figure { margin: 0; }
 .eyebrow { color: var(--accent) !important; font-size: 13px !important; font-weight: 650; line-height: 1.5 !important; letter-spacing: .18em; text-transform: uppercase; }
 .page-entry.section-wrap, .archive-index.section-wrap, .archive-page.section-wrap, .links-page.section-wrap, .tags-page.section-wrap { padding-top: 42px; }
 .site-main .page-hero { max-width: 800px; margin-bottom: 24px; }
-.page-hero h1 { margin: 12px 0 20px; font: 650 clamp(36px, 4.25vw, 48px)/1.24 var(--sans); letter-spacing: -.03em; }
+.page-hero h1 { margin: 0 0 20px; font: 650 clamp(36px, 4.25vw, 48px)/1.24 var(--sans); letter-spacing: -.03em; }
 .page-hero > p:last-child, .page-description { color: var(--muted); font-size: 17px; }
 .page-hero > :last-child, .page-description p { margin-bottom: 0; }
 .page-entry > .content-width { max-width: 800px; margin-right: 0; margin-left: 0; }

@@ -36,8 +36,6 @@ if ( $category instanceof WP_Term ) {
 					<?php endif; ?>
 				<?php endforeach; ?>
 			</nav>
-		<?php else : ?>
-			<p class="eyebrow"><?php echo esc_html( is_tag() ? 'TAG' : 'CATALOGUE' ); ?></p>
 		<?php endif; ?>
 		<h1><?php echo esc_html( $archive_title ); ?></h1>
 		<?php the_archive_description( '<div class="page-description">', '</div>' ); ?>

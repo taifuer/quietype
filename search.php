@@ -1,7 +1,6 @@
 <?php get_header(); ?>
 <section class="archive-index section-wrap">
 	<header class="page-hero">
-		<p class="eyebrow">SEARCH</p>
 		<h1>“<?php echo esc_html( get_search_query() ); ?>”的搜索结果</h1>
 	</header>
 	<?php if ( have_posts() ) : ?>

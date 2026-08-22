@@ -35,6 +35,31 @@ test.describe('public pages', () => {
   }
 });
 
+test('page headers use eyebrows only when they add context', async ({ page }) => {
+  for (const path of [
+    '/about/',
+    '/archive/',
+    '/links/',
+    '/?s=Quietype',
+    '/category/technology/',
+    '/tag/agent/'
+  ]) {
+    await page.goto(path, { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('.page-hero > .eyebrow')).toHaveCount(0);
+  }
+
+  for (const [path, label] of [
+    ['/books/', 'BOOKS'],
+    ['/photos/', 'PHOTOS']
+  ]) {
+    await page.goto(path, { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('.eyebrow')).toHaveText(label);
+  }
+
+  await page.goto('/quietype-missing-page/', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('.not-found > .eyebrow')).toHaveText('404 · NOT FOUND');
+});
+
 test('core sitemap is canonical and includes the public book and photo archives', async ({ request }) => {
   const legacy = await request.get('/sitemap.xml', { maxRedirects: 0 });
   expect(legacy.status()).toBe(301);

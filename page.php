@@ -6,7 +6,6 @@ $article  = quietype_prepare_article( $rendered );
 ?>
 <article <?php post_class( 'page-entry section-wrap' ); ?>>
 	<header class="page-hero">
-		<p class="eyebrow">PAGE</p>
 		<h1><?php the_title(); ?></h1>
 	</header>
 	<div class="article-content content-width"><?php echo $article['content']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>

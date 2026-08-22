@@ -11,7 +11,6 @@ $archive_stats = quietype_archive_stats();
 ?>
 <section class="archive-page section-wrap">
 	<header class="page-hero">
-		<p class="eyebrow">ARCHIVE</p>
 		<h1><?php the_title(); ?></h1>
 		<p><?php echo esc_html( number_format_i18n( $archive_stats['posts'] ) ); ?> 篇文章，<?php echo esc_html( number_format_i18n( $archive_stats['views'] ) ); ?> 次浏览，<?php echo esc_html( number_format_i18n( $archive_stats['comments'] ) ); ?> 条评论</p>
 	</header>

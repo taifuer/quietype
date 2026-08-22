@@ -10,7 +10,6 @@ $link_groups = quietype_link_groups();
 ?>
 <section class="links-page section-wrap">
 	<header class="page-hero">
-		<p class="eyebrow">LINKS</p>
 		<h1><?php the_title(); ?></h1>
 	</header>
 	<?php if ( trim( wp_strip_all_tags( get_the_content() ) ) ) : ?><div class="article-content content-width links-intro"><?php the_content(); ?></div><?php endif; ?>
