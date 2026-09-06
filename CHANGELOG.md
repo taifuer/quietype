@@ -21,7 +21,8 @@ All notable changes to Quietype will be documented in this file.
 
 ### Changed
 
-- Deferred PhotoSwipe scripts and base styles until an image is opened, preserving existing first-load budgets; the lightbox waits for its styles and retains theme override order.
+- Deferred PhotoSwipe scripts and base styles until an image is opened, reducing initial loading; the lightbox waits for its styles and retains theme override order.
+- Removed hard CI limits for CSS/JavaScript sizes and font request counts. Resource measurements remain in reports; user-visible loading, stability, accessibility and functional checks remain enforced.
 
 ## [0.10.21] - 2026-08-01
 

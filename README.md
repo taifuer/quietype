@@ -92,7 +92,7 @@ Quietype 使用 WordPress 数据库存储书籍、照片、浏览量和主题选
 
 ## 开发与质量
 
-主题没有前端构建步骤。自动化回归需要 Node.js 22.22+ 与 Docker Compose；仓库提供隔离的 WordPress、固定测试内容、Playwright、axe、视觉回归和 Lighthouse 预算：
+主题没有前端构建步骤。自动化回归需要 Node.js 22.22+ 与 Docker Compose；仓库提供隔离的 WordPress、固定测试内容、Playwright、axe、视觉回归和 Lighthouse 性能检查：
 
 ```bash
 npm ci
@@ -106,6 +106,8 @@ npm run env:stop
 ```
 
 `env:plugins` 仅给隔离测试站安装带 SHA-256 校验的 WP Editor.md 10.2.1，并从真实 Markdown 生成代码、公式、图表、提示块和长目录。请在常规视觉/性能测试之后运行插件集成测试；再次进行无插件基线检查前，停止并重建测试环境。
+
+CSS、JavaScript 等资源体积与字体请求数量只记录在 Lighthouse 报告中，不设固定大小或数量的 CI 硬门槛。性能检查关注实际加载速度、主线程阻塞和布局稳定性，并保留功能、可访问性与安全检查。
 
 PHP 安全基线与静态检查：
 

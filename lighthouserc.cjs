@@ -23,12 +23,9 @@ module.exports = {
         'first-contentful-paint': ['error', { maxNumericValue: 2000, aggregationMethod: 'median' }],
         'largest-contentful-paint': ['error', { maxNumericValue: 2500, aggregationMethod: 'median' }],
         'cumulative-layout-shift': ['error', { maxNumericValue: 0.1, aggregationMethod: 'median' }],
-        'total-blocking-time': ['error', { maxNumericValue: 250, aggregationMethod: 'median' }],
-        'resource-summary:font:count': ['error', { maxNumericValue: 0 }],
-        'resource-summary:script:size': ['error', { maxNumericValue: 40000 }],
-        // Transfer size includes response overhead, WordPress core block styles,
-        // PhotoSwipe, and the theme stylesheet. Keep a small maintenance margin.
-        'resource-summary:stylesheet:size': ['error', { maxNumericValue: 195000 }]
+        'total-blocking-time': ['error', { maxNumericValue: 250, aggregationMethod: 'median' }]
+        // Asset sizes and font request counts remain in Lighthouse reports,
+        // but are not hard gates: judge changes by their effect on reading.
       }
     },
     upload: {

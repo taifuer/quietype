@@ -73,7 +73,7 @@ jobs:
         run: npm run env:seed
       - name: Run browser regression suite
         run: npm run test:e2e
-      - name: Enforce Lighthouse budgets
+      - name: Check reading performance
         run: npm run test:performance
       - name: Install pinned Editor.md and seed real Markdown
         run: npm run env:plugins
