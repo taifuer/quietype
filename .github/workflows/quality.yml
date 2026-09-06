@@ -75,6 +75,10 @@ jobs:
         run: npm run test:e2e
       - name: Enforce Lighthouse budgets
         run: npm run test:performance
+      - name: Install pinned Editor.md and seed real Markdown
+        run: npm run env:plugins
+      - name: Check plugin rendering and long-article interactions
+        run: npm run test:integration
       - name: Upload regression artifacts
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7

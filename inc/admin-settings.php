@@ -39,6 +39,7 @@ function quietype_register_admin_settings() {
 		'quietype_photo_thumbnail_base_url'   => array( 'string', '', 'quietype_sanitize_photo_thumbnail_base_url' ),
 		'quietype_link_check_enabled'         => array( 'boolean', false, 'quietype_sanitize_checkbox' ),
 		'quietype_article_copyright_enabled'  => array( 'boolean', false, 'quietype_sanitize_checkbox' ),
+		'quietype_mermaid_enabled'            => array( 'boolean', true, 'quietype_sanitize_checkbox' ),
 		'quietype_article_author_name'        => array( 'string', '', 'sanitize_text_field' ),
 		'quietype_article_author_url'         => array( 'string', '', 'esc_url_raw' ),
 		'quietype_article_license'            => array( 'string', 'cc-by-nc-sa', 'quietype_sanitize_article_license' ),
@@ -346,6 +347,7 @@ function quietype_render_settings_page() {
 					<tr><th>隐私政策入口</th><td><?php quietype_settings_checkbox( 'quietype_footer_privacy_link_enabled', '在页脚显示已发布的隐私政策链接' ); ?><p class="description">默认不显示；启用前请先在“设置 → 隐私”中发布并指定政策页。</p></td></tr>
 					<tr><th><label for="quietype_start_year">建站年份</label></th><td><input class="small-text" id="quietype_start_year" name="quietype_start_year" type="number" min="1990" max="<?php echo esc_attr( gmdate( 'Y' ) ); ?>" value="<?php echo esc_attr( quietype_get_setting( 'quietype_start_year', (int) gmdate( 'Y' ) ) ); ?>"><p class="description">用于页脚版权年份范围。</p></td></tr>
 					<tr><th>友链检测</th><td><?php quietype_settings_checkbox( 'quietype_link_check_enabled', '每天分批检测友链可达性' ); ?><p class="description">启用后每天最多检测五条；连续失败三次只会进入“待确认”，不会自动在前台标记失联。</p></td></tr>
+					<tr><th>Mermaid 图表</th><td><?php quietype_settings_checkbox( 'quietype_mermaid_enabled', '渲染文章中的 Mermaid 流程图与时序图', true ); ?><p class="description">按内容加载主题内置的图表库，支持亮色背景和放大查看。无需打开 WP Editor.md 的前台 Mermaid 开关；关闭后保留图表源码。</p></td></tr>
 					<tr><th>文章版权声明</th><td><?php quietype_settings_checkbox( 'quietype_article_copyright_enabled', '在文章正文末尾显示版权声明' ); ?></td></tr>
 					<tr><th><label for="quietype_article_author_name">版权署名</label></th><td><input class="regular-text" id="quietype_article_author_name" name="quietype_article_author_name" type="text" value="<?php echo esc_attr( quietype_get_setting( 'quietype_article_author_name', '' ) ); ?>"><p class="description">留空时使用文章作者的 WordPress 显示名称。</p></td></tr>
 					<tr><th><label for="quietype_article_author_url">作者链接</label></th><td><input class="regular-text" id="quietype_article_author_url" name="quietype_article_author_url" type="url" value="<?php echo esc_attr( quietype_get_setting( 'quietype_article_author_url', '' ) ); ?>" placeholder="https://example.com/about/"><p class="description">留空时仅在作者归档已启用的情况下链接到归档，否则显示普通文字。</p></td></tr>

@@ -13,5 +13,9 @@
 /package.json export-ignore
 /phpcs.xml.dist export-ignore
 /playwright.config.js export-ignore
+/playwright.integration.config.js export-ignore
 /tests export-ignore
 /tools/check-release-version.sh export-ignore
+
+# Preserve the upstream bundle byte-for-byte for SHA-256 verification.
+/assets/vendor/mermaid/mermaid.min.js -whitespace linguist-vendored

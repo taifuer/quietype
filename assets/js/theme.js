@@ -196,7 +196,31 @@
     yml: 'YAML', sql: 'SQL', nginx: 'Nginx', docker: 'Dockerfile', markdown: 'Markdown', md: 'Markdown'
   };
 
+  const resizeCodeLines = (pre) => {
+    const rows = pre.querySelector('.line-numbers-rows');
+    const code = pre.querySelector('code');
+    if (!rows || !code) return;
+    if (!pre.classList.contains('code-wrap')) {
+      [...rows.children].forEach((row) => { row.style.height = ''; });
+    } else if (window.Prism?.plugins?.lineNumbers?.resize) {
+      window.Prism.plugins.lineNumbers.resize(pre);
+    } else {
+      // Editor.md bundles an older Prism without a public resize method.
+      const lines = code.textContent.split(/\n(?!$)/);
+      const sizer = document.createElement('span');
+      sizer.className = 'line-numbers-sizer';
+      sizer.setAttribute('aria-hidden', 'true');
+      code.append(sizer);
+      lines.forEach((line, index) => {
+        sizer.textContent = line || '\u200b';
+        if (rows.children[index]) rows.children[index].style.height = `${sizer.getBoundingClientRect().height}px`;
+      });
+      sizer.remove();
+    }
+  };
+
   const enhanceCodeBlocks = () => document.querySelectorAll('.article-content pre').forEach((pre) => {
+    if (pre.matches('.mermaid, .language-mermaid') || pre.querySelector('.language-mermaid') || pre.closest('.mermaid-figure')) return;
     if (!pre.hasAttribute('tabindex')) pre.tabIndex = 0;
 
     let wrapper = pre.closest('.code-toolbar');
@@ -208,6 +232,40 @@
     }
 
     const code = pre.querySelector('code');
+    let actions = wrapper.querySelector('.code-actions');
+    if (!actions) {
+      actions = document.createElement('div');
+      actions.className = 'code-actions';
+      actions.setAttribute('role', 'group');
+      actions.setAttribute('aria-label', '代码操作');
+      wrapper.append(actions);
+    }
+    if (code && !wrapper.querySelector('.wrap-code')) {
+      const wrap = document.createElement('button');
+      wrap.type = 'button';
+      wrap.className = 'wrap-code';
+      wrap.textContent = '换行';
+      wrap.setAttribute('aria-label', '自动换行代码');
+      wrap.setAttribute('aria-pressed', 'false');
+      let lastWidth = 0;
+      const updateWrap = () => {
+        wrap.hidden = !pre.classList.contains('code-wrap') && pre.scrollWidth <= pre.clientWidth + 1;
+        if (pre.clientWidth !== lastWidth) { lastWidth = pre.clientWidth; resizeCodeLines(pre); }
+      };
+      wrap.addEventListener('click', (event) => {
+        const enabled = pre.classList.toggle('code-wrap');
+        wrap.setAttribute('aria-pressed', String(enabled));
+        wrap.textContent = enabled ? '不换行' : '换行';
+        resizeCodeLines(pre);
+        updateWrap();
+        releasePointerFocus(event);
+      });
+      actions.append(wrap);
+      updateWrap();
+      if ('ResizeObserver' in window) new ResizeObserver(updateWrap).observe(pre);
+      if (document.fonts?.ready) document.fonts.ready.then(updateWrap);
+      window.addEventListener('load', updateWrap, { once: true });
+    }
     const languageClass = [...new Set([...(pre.classList || []), ...(code?.classList || [])])]
       .find((name) => name.startsWith('language-'));
     const prismLanguagePlugin = document.querySelector('#prism-plugin-show-language-js, script[src*="prism-show-language"]');
@@ -235,7 +293,7 @@
       }
       window.setTimeout(() => { button.textContent = '复制'; }, 1500);
     });
-    wrapper.append(button);
+    actions.append(button);
   });
 
   if (document.readyState === 'loading') {
@@ -259,22 +317,6 @@
       } catch (error) {}
     });
   });
-
-  const tocLinks = [...document.querySelectorAll('.article-toc a')];
-  const mobileToc = document.querySelector('.mobile-toc');
-  mobileToc?.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => {
-    mobileToc.open = false;
-  }));
-  const headings = tocLinks.map((link) => document.getElementById(decodeURIComponent(link.hash.slice(1)))).filter(Boolean);
-  if (tocLinks.length && headings.length && 'IntersectionObserver' in window) {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        tocLinks.forEach((link) => link.classList.toggle('active', link.hash === `#${entry.target.id}`));
-      });
-    }, { rootMargin: '-18% 0px -72% 0px' });
-    headings.forEach((heading) => observer.observe(heading));
-  }
 
   const progressBars = [...document.querySelectorAll('.site-reading-progress i')];
   const articleContent = document.querySelector('.article-content');

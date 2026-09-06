@@ -24,7 +24,7 @@ jobs:
           archive="quietype-${version}.zip"
           git archive --format=zip --prefix=quietype/ --output="${archive}" "${GITHUB_SHA}"
           unzip -t "${archive}"
-          if unzip -Z1 "${archive}" | grep -Eq '^quietype/(\.editorconfig|\.github|AGENTS\.md|CONTRIBUTING\.md|SECURITY\.md|docs|tests|node_modules|composer\.(json|lock)|lighthouserc\.cjs|package(-lock)?\.json|phpcs\.xml\.dist|playwright\.config\.js|tools/check-release-version\.sh)(/|$)'; then
+          if unzip -Z1 "${archive}" | grep -Eq '^quietype/(\.editorconfig|\.github|AGENTS\.md|CONTRIBUTING\.md|SECURITY\.md|docs|tests|node_modules|composer\.(json|lock)|lighthouserc\.cjs|package(-lock)?\.json|phpcs\.xml\.dist|playwright(\.integration)?\.config\.js|tools/check-release-version\.sh)(/|$)'; then
             echo 'Development-only files leaked into the installable archive.' >&2
             exit 1
           fi

@@ -7,10 +7,21 @@ All notable changes to Quietype will be documented in this file.
 ### Added
 
 - Added responsive expand-all and collapse-all controls to annual book and photo collections while preserving viewport-aware photo hydration.
+- Added viewport-loaded, locally bundled Mermaid diagrams with light reading palettes, zoom controls, strict security and readable source fallback, including legacy Editor.md markup compatibility.
+- Added an in-reading compact TOC dialog, overflow-only code wrapping with legacy Prism line-number support, and restrained GitHub-style Markdown alerts.
+- Added pinned WP Editor.md integration tests for actual code, KaTeX, diagrams, tables, long TOCs, failure recovery and accessibility.
 
 ### Fixed
 
 - Kept manually confirmed offline friend links at the end of each category while preserving rating and natural-name order within each status group.
+- Restored shared table header/body column sizing inside a keyboard-accessible horizontal scroll container.
+- Truncated long desktop TOC labels visually while preserving full hover/focus text and scrolling the active item into view.
+- Corrected Editor.md Prism auto-loader dependency/configuration order and disabled its default stylesheet as well as unused footer initializers.
+- Grouped compact code actions with a consistent gap so copy success/failure messages never overlap the wrap toggle.
+
+### Changed
+
+- Deferred the PhotoSwipe lightbox loader until an image is opened, preserving the existing first-load script budget as reading interactions grow.
 
 ## [0.10.21] - 2026-08-01
 

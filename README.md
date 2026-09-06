@@ -46,9 +46,10 @@ Quietype 是一款面向中文长文与技术写作的经典 WordPress 主题。
 
 ### 阅读与交互
 
-- H2/H3 自动目录、章节永久链接、阅读进度和移动端折叠目录
+- H2/H3 自动目录、章节永久链接、阅读进度；桌面长目录省略显示并跟随当前章节，移动端阅读中可随时打开目录
 - 固定移动 Header、抽屉导航、搜索、背景切换与返回顶部工具
-- 亮色代码配色、语言标记、行号、复制按钮和键盘可访问的横向滚动
+- 亮色代码配色、语言标记、行号、复制按钮和按需换行，宽表格独立横向滚动
+- 本地按需加载的 Mermaid 图表、适配阅读背景的放大视图、源码回退及 Markdown 提示块
 - 响应式图片、图注、打印样式及 PhotoSwipe 图片预览
 - 首页、文章、分类、标签、搜索、年度归档、友链、关于与 404 模板
 
@@ -81,7 +82,7 @@ git clone https://github.com/taifuer/quietype.git
 3. 在“外观 → Quietype 设置”配置站点信息、内容页面、SEO、访问、安全和邮件。
 4. 访问“设置 → 固定链接”并保存一次，使 `/books/` 与 `/photos/` 路由生效。
 
-完整字段、缓存、登录保护、SMTP、书籍和照片配置见 [配置指南](docs/CONFIGURATION.md)。
+完整字段、缓存、登录保护、SMTP、书籍和照片配置见 [配置指南](docs/CONFIGURATION.md)；图表、提示块与技术文章写法见 [技术内容指南](docs/READING.md)。
 
 ## 内容与数据
 
@@ -99,8 +100,12 @@ npm run env:start
 npm run env:seed
 npm run test:e2e
 npm run test:performance
+npm run env:plugins
+npm run test:integration
 npm run env:stop
 ```
+
+`env:plugins` 仅给隔离测试站安装带 SHA-256 校验的 WP Editor.md 10.2.1，并从真实 Markdown 生成代码、公式、图表、提示块和长目录。请在常规视觉/性能测试之后运行插件集成测试；再次进行无插件基线检查前，停止并重建测试环境。
 
 PHP 安全基线与静态检查：
 
@@ -124,8 +129,8 @@ GitHub Actions 在 PHP 8.0、8.2、8.4 以及 WordPress 6.6、6.8 上执行检�
 
 Quietype 在研究阶段参考了不同生态中优秀阅读主题与独立博客的信息层级、中文排版和交互取舍，包括 [Retypeset](https://retypeset.radishzz.cc/)、[Hugo PaperMod](https://adityatelange.github.io/hugo-PaperMod/)、[Hugo Stack](https://demo.stack.cai.im/)、[Adams](https://github.com/Tokinx/Adams)、[writings.sh 存档](https://web.archive.org/web/20250807154239/https://writings.sh/)以及 [Typora 主题库](https://theme.typora.io/)。搬砖日记、笔记、三迹、Moeyua、Joway、Halo 主题商店和 NiceTheme 等站点与主题生态，也帮助我们比较了阅读密度、归档方式和后台能力。完整参考清单及具体经验见[开发复盘](BUILDING-QUIETYPE.md#六参考与鸣谢)。
 
-主题建立在 [WordPress](https://wordpress.org/) 之上，图片预览使用 [PhotoSwipe](https://photoswipe.com/)；自动化质量体系使用 Playwright、axe-core、Lighthouse CI、html-validate 与 WordPress Coding Standards。感谢这些项目及其维护者。Quietype 没有复刻某个主题，仓库内直接分发的第三方代码及许可均单独保留。
+主题建立在 [WordPress](https://wordpress.org/) 之上，图片预览使用 [PhotoSwipe](https://photoswipe.com/)，技术图表使用 [Mermaid](https://mermaid.js.org/)，兼容 [WP Editor.md](https://wordpress.org/plugins/wp-editormd/)、Prism 与 KaTeX；自动化质量体系使用 Playwright、axe-core、Lighthouse CI、html-validate 与 WordPress Coding Standards。感谢这些项目及其维护者。Quietype 没有复刻某个主题，仓库内直接分发的第三方代码及许可均单独保留。
 
 ## 许可证
 
-Quietype 基于 [GNU General Public License v2 or later](LICENSE.txt) 发布。主题内置 PhotoSwipe 5.4.4，并依据其 [MIT License](assets/vendor/photoswipe/LICENSE) 分发。
+Quietype 基于 [GNU General Public License v2 or later](LICENSE.txt) 发布。主题内置 [PhotoSwipe 5.4.4](assets/vendor/photoswipe/LICENSE) 与 [Mermaid 11.17.2](assets/vendor/mermaid/LICENSE)，依各自 MIT License 分发；Mermaid 的来源、校验值和捆绑许可说明见[依赖记录](assets/vendor/mermaid/README.md)。

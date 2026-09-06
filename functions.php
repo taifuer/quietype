@@ -19,6 +19,7 @@ require_once get_template_directory() . '/inc/archive-records.php';
 require_once get_template_directory() . '/inc/seo.php';
 require_once get_template_directory() . '/inc/mail.php';
 require_once get_template_directory() . '/inc/content-performance.php';
+require_once get_template_directory() . '/inc/reading-content.php';
 require_once get_template_directory() . '/inc/wordpress-tweaks.php';
 require_once get_template_directory() . '/inc/privacy.php';
 require_once get_template_directory() . '/inc/link-status.php';
@@ -61,6 +62,11 @@ function quietype_assets() {
 	}
 	wp_enqueue_style( 'quietype', get_stylesheet_uri(), $style_dependencies, quietype_asset_version( 'style.css' ) );
 	wp_enqueue_script( 'quietype', get_template_directory_uri() . '/assets/js/theme.js', array(), quietype_asset_version( 'assets/js/theme.js' ), true );
+	wp_register_script( 'quietype-reading', get_template_directory_uri() . '/assets/js/reading.js', array( 'quietype' ), quietype_asset_version( 'assets/js/reading.js' ), true );
+	$entry = is_singular( array( 'post', 'page' ) ) ? get_queried_object() : null;
+	if ( $entry instanceof WP_Post && preg_match( '/<h[23]\b|<table\b/i', $entry->post_content ) ) {
+		wp_enqueue_script( 'quietype-reading' );
+	}
 	if ( is_singular( 'post' ) ) {
 		wp_localize_script(
 			'quietype',
@@ -112,7 +118,7 @@ add_filter( 'login_headertext', 'quietype_login_header_text' );
 
 /** Load the dependency-free lightbox entry point as an ES module. */
 function quietype_module_script( $tag, $handle, $src ) {
-	if ( 'quietype-lightbox' !== $handle ) {
+	if ( ! in_array( $handle, array( 'quietype-lightbox', 'quietype-mermaid' ), true ) ) {
 		return $tag;
 	}
 	return '<script type="module" src="' . esc_url( $src ) . '"></script>';
@@ -125,7 +131,7 @@ add_filter( 'script_loader_tag', 'quietype_module_script', 10, 3 );
  */
 function quietype_trim_editor_assets() {
 	$features = quietype_content_features();
-	$prism_styles = array( 'prism-theme-style', 'prism-plugin-toolbar', 'prism-plugin-line-numbers', 'Prism' );
+	$prism_styles = array( 'prism-theme-default', 'prism-theme-style', 'prism-plugin-toolbar', 'prism-plugin-line-numbers', 'Prism' );
 	foreach ( $prism_styles as $handle ) {
 		wp_dequeue_style( $handle );
 	}
@@ -450,6 +456,7 @@ add_filter( 'excerpt_more', 'quietype_excerpt_more' );
  * @return array{content:string,items:array<int,array<string,string>>}
  */
 function quietype_prepare_article( $content ) {
+	$content = quietype_prepare_reading_content( $content );
 	$items = array();
 	$used  = array();
 	$index = 0;
