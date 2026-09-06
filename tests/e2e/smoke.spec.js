@@ -303,6 +303,51 @@ test('photo year deep links expand and hydrate archived images', async ({ page }
   await expect(targetYear.locator('img').first()).toHaveAttribute('src', 'https://images.example.test/photos/thumbs/2024/photo-6.webp');
 });
 
+test('lightbox styles load only on demand and settle before opening', async ({ page }) => {
+  await page.route('https://images.example.test/**', (route) => route.fulfill({
+    contentType: 'image/gif', body: Buffer.from('R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=', 'base64')
+  }));
+  let releaseStyles;
+  let requests = 0;
+  await page.route('**/photoswipe.css*', async (route) => {
+    requests++;
+    await new Promise((resolve) => { releaseStyles = resolve; });
+    await route.continue();
+  });
+  await page.goto('/photos/');
+  expect(requests).toBe(0);
+  await expect(page.locator('#quietype-photoswipe-css')).toHaveCount(0);
+  await page.locator('.photo-frame img').first().click();
+  try {
+    await expect.poll(() => requests).toBe(1);
+    await expect(page.locator('.pswp')).toHaveCount(0);
+  } finally {
+    releaseStyles?.();
+  }
+  await expect(page.locator('.pswp')).toBeVisible();
+  expect(await page.evaluate(() => {
+    const base = document.getElementById('quietype-photoswipe-css');
+    const theme = document.getElementById('quietype-css');
+    return Boolean(base.sheet) && Boolean(base.compareDocumentPosition(theme) & Node.DOCUMENT_POSITION_FOLLOWING);
+  })).toBe(true);
+  await expect.poll(() => page.evaluate(() => Boolean(window.pswp?.opener?.isOpen))).toBe(true);
+  await page.locator('.pswp__button--close').click();
+  await expect(page.locator('.pswp')).toHaveCount(0);
+  await page.locator('.photo-frame img').first().click();
+  await expect(page.locator('.pswp')).toBeVisible();
+  expect(requests).toBe(1);
+});
+
+test('a failed lightbox stylesheet falls back to the image itself', async ({ page }) => {
+  await page.route('https://images.example.test/**', (route) => route.fulfill({
+    contentType: 'image/gif', body: Buffer.from('R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=', 'base64')
+  }));
+  await page.route('**/photoswipe.css*', (route) => route.abort());
+  await page.goto('/photos/');
+  await page.locator('.photo-frame img').first().click();
+  await expect(page).toHaveURL('https://images.example.test/photos/2026/photo-1.jpg');
+});
+
 test('photo lightbox loads deferred slides and browser Back closes it in place', async ({ page }) => {
   await page.route('https://images.example.test/**', async (route) => {
     await route.fulfill({ status: 200, contentType: 'image/gif', body: Buffer.from('R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=', 'base64') });

@@ -30,9 +30,22 @@ if (images.length) {
 
   let initialization;
   let opening = false;
+  const loadStyles = () => new Promise((resolve, reject) => {
+    if (document.getElementById('quietype-photoswipe-css')?.sheet) { resolve(); return; }
+    const link = document.createElement('link');
+    link.id = 'quietype-photoswipe-css';
+    link.rel = 'stylesheet';
+    link.href = new URL('../vendor/photoswipe/photoswipe.css?ver=5.4.4', import.meta.url).href;
+    link.onload = resolve;
+    link.onerror = () => { link.remove(); reject(new Error('Lightbox styles unavailable')); };
+    // Preserve Quietype's existing cascade overrides even when loading on demand.
+    const themeStyle = document.getElementById('quietype-css');
+    if (themeStyle) themeStyle.before(link);
+    else document.head.append(link);
+  });
   const getLightbox = () => {
     if (!initialization) {
-      initialization = import('../vendor/photoswipe/photoswipe-lightbox.esm.js').then(({ default: PhotoSwipeLightbox }) => {
+      initialization = Promise.all([import('../vendor/photoswipe/photoswipe-lightbox.esm.js'), loadStyles()]).then(([{ default: PhotoSwipeLightbox }]) => {
         const lightbox = new PhotoSwipeLightbox({
           pswpModule: () => import('../vendor/photoswipe/photoswipe.esm.js'),
           bgOpacity: 0.92,

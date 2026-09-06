@@ -53,14 +53,9 @@ function quietype_asset_version( $relative_path ) {
 }
 
 function quietype_assets() {
-	$style_dependencies = array();
 	$features = quietype_content_features();
 	$has_lightbox = ( is_singular() && $features['images'] ) || is_post_type_archive( 'photo' );
-	if ( $has_lightbox ) {
-		wp_enqueue_style( 'quietype-photoswipe', get_template_directory_uri() . '/assets/vendor/photoswipe/photoswipe.css', array(), '5.4.4' );
-		$style_dependencies[] = 'quietype-photoswipe';
-	}
-	wp_enqueue_style( 'quietype', get_stylesheet_uri(), $style_dependencies, quietype_asset_version( 'style.css' ) );
+	wp_enqueue_style( 'quietype', get_stylesheet_uri(), array(), quietype_asset_version( 'style.css' ) );
 	wp_enqueue_script( 'quietype', get_template_directory_uri() . '/assets/js/theme.js', array(), quietype_asset_version( 'assets/js/theme.js' ), true );
 	wp_register_script( 'quietype-reading', get_template_directory_uri() . '/assets/js/reading.js', array( 'quietype' ), quietype_asset_version( 'assets/js/reading.js' ), true );
 	$entry = is_singular( array( 'post', 'page' ) ) ? get_queried_object() : null;
