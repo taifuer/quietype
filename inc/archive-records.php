@@ -20,6 +20,10 @@ function quietype_archive_record_types() {
 			'fragment' => 'photo',
 			'label'    => '在图库中查看',
 		),
+		'project' => array(
+			'fragment' => 'project',
+			'label'    => '在项目页查看',
+		),
 	);
 }
 

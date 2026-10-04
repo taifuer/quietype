@@ -54,4 +54,6 @@ quietype_test_assert(
 );
 update_option( 'quietype_link_states', $saved_link_states, false );
 
+require __DIR__ . '/check-projects.php';
+
 printf( "Quietype WordPress integration checks passed.\n" );

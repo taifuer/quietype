@@ -29,7 +29,7 @@ function quietype_filter_sitemap_provider( $provider, $name ) {
 }
 add_filter( 'wp_sitemaps_add_provider', 'quietype_filter_sitemap_provider', 10, 2 );
 
-/** Register the two public archive pages without exposing redirect-only records. */
+/** Register public archive pages without exposing redirect-only records. */
 function quietype_register_archive_sitemap_provider() {
 	if ( ! class_exists( 'WP_Sitemaps_Provider' ) || ! function_exists( 'wp_register_sitemap_provider' ) ) {
 		return;
@@ -46,7 +46,7 @@ function quietype_register_archive_sitemap_provider() {
 				return array();
 			}
 			$entries = array();
-			foreach ( array( 'book', 'photo' ) as $post_type ) {
+			foreach ( array( 'book', 'photo', 'project' ) as $post_type ) {
 				$latest = get_posts(
 					array(
 						'post_type'      => $post_type,
@@ -118,6 +118,12 @@ function quietype_get_meta_description() {
 	}
 	if ( is_post_type_archive( 'photo' ) ) {
 		$description = quietype_archive_page_text( 'photo', 'intro' );
+		if ( $description ) {
+			return quietype_normalize_meta_text( $description );
+		}
+	}
+	if ( is_post_type_archive( 'project' ) ) {
+		$description = quietype_archive_page_text( 'project', 'intro' );
 		if ( $description ) {
 			return quietype_normalize_meta_text( $description );
 		}

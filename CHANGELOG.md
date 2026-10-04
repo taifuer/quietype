@@ -6,6 +6,7 @@ All notable changes to Quietype will be documented in this file.
 
 ### Added
 
+- Added an archive-only project showcase at `/projects/`, with media/external screenshots, lazy PhotoSwipe previews, editable/default project types, optional source status and language metadata, stable ordering, archive caching and regression coverage. Project content and menu placement stay administrator-owned.
 - Added responsive expand-all and collapse-all controls to annual book and photo collections while preserving viewport-aware photo hydration.
 - Added viewport-loaded, locally bundled Mermaid diagrams with light reading palettes, zoom controls, strict security and readable source fallback, including legacy Editor.md markup compatibility.
 - Added an in-reading compact TOC dialog, overflow-only code wrapping with legacy Prism line-number support, and restrained GitHub-style Markdown alerts.

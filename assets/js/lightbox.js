@@ -1,9 +1,9 @@
-const images = [...document.querySelectorAll('.article-content img:not(.emoji):not(.avatar):not(.no-lightbox), .photo-frame img')];
+const images = [...document.querySelectorAll('.article-content img:not(.emoji):not(.avatar):not(.no-lightbox), .photo-frame img, .project-preview img')];
 
 if (images.length) {
   const imageSource = (image) => {
     const link = image.closest('a');
-    const isPhotoArchive = Boolean(image.closest('.photo-frame'));
+    const isPhotoArchive = Boolean(image.closest('.photo-frame, .project-preview'));
     const declaredSource = link?.dataset.pswpSrc;
     const linkedImage = link && /\.(?:avif|gif|jpe?g|png|webp)(?:[?#].*)?$/i.test(link.href);
     const thumbnailReady = !isPhotoArchive && image.complete && image.naturalWidth > 0;
@@ -25,6 +25,7 @@ if (images.length) {
       photoCaption: link?.dataset.photoCaption || '',
       photoOriginal: link?.dataset.photoOriginal || '',
       isPhotoArchive,
+      isProjectPreview: Boolean(image.closest('.project-preview')),
     };
   };
 
@@ -141,6 +142,20 @@ if (images.length) {
           if (content.data.isPhotoArchive && content.element) {
             content.element.referrerPolicy = 'no-referrer';
           }
+        });
+
+        // External project screenshots need no hand-entered dimensions. Correct
+        // a deferred slide's initial estimate once its full image is decoded.
+        lightbox.on('loadComplete', ({ content }) => {
+          if (!content?.data.isProjectPreview || !content.element?.naturalWidth) return;
+          const { naturalWidth: width, naturalHeight: height } = content.element;
+          if (content.data.width === width && content.data.height === height) return;
+          content.data.width = width;
+          content.data.height = height;
+          const pswp = lightbox.pswp;
+          requestAnimationFrame(() => {
+            if (pswp && lightbox.pswp === pswp && pswp.isOpen) pswp.refreshSlideContent(content.index);
+          });
         });
 
         lightbox.on('loadError', ({ slide }) => {

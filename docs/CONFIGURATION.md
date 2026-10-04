@@ -53,6 +53,16 @@ php tools/generate-photo-thumbnails.php ../photos-cdn ../photos-thumbs
 
 书籍页和照片页的中文标题、英文标识与简介均可在“内容页面”中修改。简介也作为归档 SEO 描述，留空时不输出。
 
+## 项目
+
+后台“项目”维护 `/projects/`，默认标题“格物致用”。每条记录包含标题、短简介、截图和类型；在线地址、源码仓库、介绍文章、主要语言、开源状态都可留空。截图可使用媒体库特色图片或 HTTP(S) 外链，外链优先；点击后复用按需加载的 PhotoSwipe 预览，不在服务器上自动抓取网页或 GitHub 数据。
+
+“项目 → 项目类型”可增删、改名，初始提供个人项目、数据看板、资讯索引、博客主题、硬件固件。在“外观 → Quietype 设置 → 内容页面”设置项目页标题、简介与默认类型；没有指定类型或类型被删除的项目使用默认值。默认类型也被删除时回退为个人项目，不强制重建已删除分类。
+
+开源状态只使用手工选择的“开源 / 未开源”，不根据是否填写 GitHub 链接推断。多种语言用逗号分隔。显示顺序数字越小越靠前，相同数值按发布时间倒序排列。
+
+项目不建立独立详情或类型归档页，后台“查看”定位到 `/projects/#project-ID`。可在 WordPress 原生菜单中把 `/projects/` 添加到页尾上方导航；主题不自动插入菜单或迁移、删除友链数据。
+
 ## 友链
 
 主题启用期间恢复 WordPress 原生“链接”管理，并提供链接状态、分类顺序和可选可达性检测。前台按照后台链接分类动态分组；数字顺序越小越靠前，空分类不显示。
@@ -63,7 +73,7 @@ php tools/generate-photo-thumbnails.php ../photos-cdn ../photos-thumbs
 
 未检测到主流 SEO 插件时，Quietype 输出 description、keywords、Open Graph、社交摘要和 Schema.org JSON-LD；启用专用 SEO 插件后停止整组输出，避免重复。文章描述依次使用自定义描述、手工摘要、自动摘要；社交图片依次使用特色图、正文首图、默认分享图。
 
-站点地图统一使用 WordPress Core 的 `/wp-sitemap.xml`。没有独立详情页的书籍和照片记录会被排除，`/books/` 与 `/photos/` 归档会加入地图；`/sitemap.xml` 永久跳转到核心地图。
+站点地图统一使用 WordPress Core 的 `/wp-sitemap.xml`。没有独立详情页的书籍、照片和项目记录会被排除，对应的非空 `/books/`、`/photos/`、`/projects/` 归档会加入地图；`/sitemap.xml` 永久跳转到核心地图。
 
 Quietype 不包含遥测、广告脚本或无条件 Cookie 横幅。主题会向 WordPress 隐私政策指南加入建议文本，但 Footer 入口默认关闭；发布并指定政策页后，可以在“站点与页脚”中主动启用。头像镜像、统计代码、外链图片及其他第三方服务仍需站点管理员在政策中说明。
 
@@ -76,6 +86,7 @@ Quietype 不包含遥测、广告脚本或无条件 Cookie 横幅。主题会向
 ```php
 define( 'QUIETYPE_CACHE_PURGE_ENDPOINT', 'http://127.0.0.1/internal-purge/books' );
 define( 'QUIETYPE_PHOTO_CACHE_PURGE_ENDPOINT', 'http://127.0.0.1/internal-purge/photos' );
+define( 'QUIETYPE_PROJECT_CACHE_PURGE_ENDPOINT', 'http://127.0.0.1/internal-purge/projects' );
 ```
 
 保存、改变状态或永久删除记录后，主题会在请求结束前尝试清理对应归档；未定义常量时不发请求，失败也不会阻止内容保存。
@@ -106,6 +117,6 @@ Quietype 可统一登录、找回密码和重置密码页面样式，并启用�
 
 ## 备份与迁移
 
-书籍、照片、浏览量和主题设置均保存在 WordPress 数据库中。切换主题不会删除数据，但相关管理入口和路由会停止注册。主题使用 `book`、`photo`、`book_category` 和 `book_tag` 标识，启用注册同名类型的插件前应检查冲突。
+书籍、照片、项目、浏览量和主题设置均保存在 WordPress 数据库中。切换主题不会删除数据，但相关管理入口和路由会停止注册。主题使用 `book`、`photo`、`project`、`book_category`、`book_tag` 和 `project_type` 标识，启用注册同名类型的插件前应检查冲突。
 
 升级、迁移或卸载前，请同时备份数据库、`wp-content/uploads`、服务器缓存配置及 `wp-config.php` 中的 Quietype 常量。

@@ -38,6 +38,7 @@ for (const [name, path] of [
   ['article', '/quietype-reading-test/'],
   ['reading', '/books/'],
   ['photos', '/photos/'],
+  ['projects', '/projects/'],
   ['archive', '/archive/'],
   ['links', '/links/'],
   ['about', '/about/']

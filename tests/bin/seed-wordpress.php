@@ -22,7 +22,7 @@ require_once ABSPATH . 'wp-admin/includes/bookmark.php';
 
 // Keep parallel administration suites on separate sessions. WordPress stores
 // session tokens per user, so simultaneous logins to one account can race.
-foreach ( array( 'books-admin', 'photos-admin' ) as $admin_login ) {
+foreach ( array( 'books-admin', 'photos-admin', 'projects-admin' ) as $admin_login ) {
 	$admin_id = username_exists( $admin_login );
 	if ( ! $admin_id ) {
 		$admin_id = wp_create_user( $admin_login, 'password', $admin_login . '@example.test' );
@@ -44,10 +44,14 @@ if ( ! post_type_exists( 'book' ) ) {
 if ( ! post_type_exists( 'photo' ) ) {
 	quietype_register_photos();
 }
+if ( ! post_type_exists( 'project' ) ) {
+	quietype_register_projects();
+}
+quietype_upgrade_projects();
 
 $existing_posts = get_posts(
 	array(
-		'post_type'      => array( 'post', 'page', 'book', 'photo', 'attachment' ),
+		'post_type'      => array( 'post', 'page', 'book', 'photo', 'project', 'attachment' ),
 		'post_status'    => 'any',
 		'posts_per_page' => -1,
 		'fields'         => 'ids',
@@ -324,6 +328,25 @@ foreach ( $photos as $index => $photo ) {
 			update_post_meta( $photo_id, $meta_key, $meta_value );
 		}
 	}
+}
+
+$project_type = get_term_by( 'slug', 'dashboard', 'project_type' );
+foreach ( array( '公开数据小站', '个人实验笔记', '未开源工具' ) as $index => $project_title ) {
+	$project_id = wp_insert_post( array(
+		'post_type' => 'project', 'post_status' => 'publish', 'post_title' => $project_title,
+		'post_name' => 'quietype-project-' . ( $index + 1 ), 'menu_order' => $index,
+		'post_excerpt' => '把日常使用的小工具与实现过程整理在一起。',
+	) );
+	if ( 0 === $index ) {
+		wp_set_post_terms( $project_id, array( $project_type->term_id ), 'project_type' );
+	}
+	if ( $index < 2 ) {
+		update_post_meta( $project_id, '_quietype_project_url', 'https://example.com/project' );
+		update_post_meta( $project_id, '_quietype_project_source_url', 'https://github.com/example/project' );
+		update_post_meta( $project_id, '_quietype_project_image_url', 'http://' . $_SERVER['HTTP_HOST'] . '/wp-content/themes/quietype/tests/fixtures/photos/forest-road.jpg' );
+	}
+	update_post_meta( $project_id, '_quietype_project_source_state', array( 'open', '', 'closed' )[ $index ] );
+	update_post_meta( $project_id, '_quietype_project_languages', 0 === $index ? 'PHP, JavaScript' : '' );
 }
 
 $quietype_test_menus = array();

@@ -37,6 +37,9 @@ function quietype_register_admin_settings() {
 		'quietype_photos_page_intro'          => array( 'string', '', 'quietype_sanitize_archive_intro' ),
 		'quietype_photos_default_expanded_years' => array( 'integer', 1, 'quietype_sanitize_archive_expanded_years' ),
 		'quietype_photo_thumbnail_base_url'   => array( 'string', '', 'quietype_sanitize_photo_thumbnail_base_url' ),
+		'quietype_projects_page_title'       => array( 'string', '格物致用', 'quietype_sanitize_archive_title' ),
+		'quietype_projects_page_intro'       => array( 'string', '一些工具、网站与开源作品。', 'quietype_sanitize_archive_intro' ),
+		'quietype_projects_default_type'     => array( 'integer', 0, 'quietype_sanitize_project_default_type' ),
 		'quietype_link_check_enabled'         => array( 'boolean', false, 'quietype_sanitize_checkbox' ),
 		'quietype_article_copyright_enabled'  => array( 'boolean', false, 'quietype_sanitize_checkbox' ),
 		'quietype_mermaid_enabled'            => array( 'boolean', true, 'quietype_sanitize_checkbox' ),
@@ -193,6 +196,10 @@ function quietype_archive_page_text( $post_type, $field ) {
 			'eyebrow' => 'PHOTOS',
 			'intro'   => '',
 		),
+		'project' => array(
+			'title' => '格物致用',
+			'intro' => '一些工具、网站与开源作品。',
+		),
 	);
 	if ( ! isset( $defaults[ $post_type ][ $field ] ) ) {
 		return '';
@@ -207,6 +214,8 @@ function quietype_archive_document_title( $parts ) {
 		$parts['title'] = quietype_archive_page_text( 'book', 'title' );
 	} elseif ( is_post_type_archive( 'photo' ) ) {
 		$parts['title'] = quietype_archive_page_text( 'photo', 'title' );
+	} elseif ( is_post_type_archive( 'project' ) ) {
+		$parts['title'] = quietype_archive_page_text( 'project', 'title' );
 	}
 	return $parts;
 }
@@ -357,8 +366,8 @@ function quietype_render_settings_page() {
 			</section>
 
 			<section class="quietype-settings__section" id="quietype-section-archives">
-				<h2>书籍与照片页面</h2>
-				<p>控制年度书架与图库页首的展示文字和初始展开范围。简介留空时不输出对应区域。</p>
+				<h2>书籍、照片与项目页面</h2>
+				<p>控制内容页面的展示文字、年度归档的初始展开范围和项目默认类型。简介留空时不输出对应区域。</p>
 				<table class="form-table" role="presentation">
 					<tr><th><label for="quietype_books_page_title">书籍页标题</label></th><td><input class="regular-text" id="quietype_books_page_title" name="quietype_books_page_title" type="text" maxlength="80" value="<?php echo esc_attr( quietype_get_setting( 'quietype_books_page_title', '万卷古今' ) ); ?>" placeholder="万卷古今"></td></tr>
 					<tr><th><label for="quietype_books_page_eyebrow">书籍页英文标识</label></th><td><input class="regular-text code" id="quietype_books_page_eyebrow" name="quietype_books_page_eyebrow" type="text" maxlength="32" value="<?php echo esc_attr( quietype_get_setting( 'quietype_books_page_eyebrow', 'BOOKS' ) ); ?>" placeholder="BOOKS"></td></tr>
@@ -369,6 +378,14 @@ function quietype_render_settings_page() {
 					<tr><th><label for="quietype_photos_page_intro">照片页简介</label></th><td><textarea class="large-text" id="quietype_photos_page_intro" name="quietype_photos_page_intro" rows="2" maxlength="180" placeholder="留空不显示"><?php echo esc_textarea( quietype_get_setting( 'quietype_photos_page_intro', '' ) ); ?></textarea></td></tr>
 					<tr><th><label for="quietype_photos_default_expanded_years">照片默认展开年份数</label></th><td><input class="small-text" id="quietype_photos_default_expanded_years" name="quietype_photos_default_expanded_years" type="number" min="0" max="100" value="<?php echo esc_attr( quietype_archive_expanded_years( 'photo' ) ); ?>"><p class="description">默认展开最近几个年份；填写 0 时全部展开。较早照片仍按接近视口时加载。</p></td></tr>
 					<tr><th><label for="quietype_photo_thumbnail_base_url">照片 CDN 基础目录</label></th><td><input class="large-text code" id="quietype_photo_thumbnail_base_url" name="quietype_photo_thumbnail_base_url" type="url" value="<?php echo esc_attr( quietype_get_setting( 'quietype_photo_thumbnail_base_url', '' ) ); ?>" placeholder="https://example.com/photos"><p class="description">可选。填写后，网格会读取 <code>thumbs/年份/同名文件.webp</code>，灯箱仍使用展示图；缩略图缺失时自动回退。留空保持原有行为。</p></td></tr>
+					<tr><th><label for="quietype_projects_page_title">项目页标题</label></th><td><input class="regular-text" id="quietype_projects_page_title" name="quietype_projects_page_title" type="text" maxlength="80" value="<?php echo esc_attr( quietype_archive_page_text( 'project', 'title' ) ); ?>"></td></tr>
+					<tr><th><label for="quietype_projects_page_intro">项目页简介</label></th><td><textarea class="large-text" id="quietype_projects_page_intro" name="quietype_projects_page_intro" rows="2" maxlength="180" placeholder="留空不显示"><?php echo esc_textarea( quietype_archive_page_text( 'project', 'intro' ) ); ?></textarea></td></tr>
+					<tr><th><label for="quietype_projects_default_type">项目默认类型</label></th><td><select id="quietype_projects_default_type" name="quietype_projects_default_type"><option value="0">自动回退到基础类型</option>
+						<?php $project_types = get_terms( array( 'taxonomy' => 'project_type', 'hide_empty' => false ) ); ?>
+						<?php foreach ( is_wp_error( $project_types ) ? array() : $project_types as $project_type ) : ?>
+							<option value="<?php echo esc_attr( $project_type->term_id ); ?>" <?php selected( (int) quietype_get_setting( 'quietype_projects_default_type', 0 ), $project_type->term_id ); ?>><?php echo esc_html( $project_type->name ); ?></option>
+						<?php endforeach; ?>
+					</select><p class="description">项目未选择类型或原类型已删除时使用。在“项目 → 项目类型”中管理可选类型。</p></td></tr>
 				</table>
 			</section>
 

@@ -15,6 +15,7 @@ require_once get_template_directory() . '/inc/admin-settings.php';
 require_once get_template_directory() . '/inc/login-security.php';
 require_once get_template_directory() . '/inc/books.php';
 require_once get_template_directory() . '/inc/photos.php';
+require_once get_template_directory() . '/inc/projects.php';
 require_once get_template_directory() . '/inc/archive-records.php';
 require_once get_template_directory() . '/inc/seo.php';
 require_once get_template_directory() . '/inc/mail.php';
@@ -54,7 +55,7 @@ function quietype_asset_version( $relative_path ) {
 
 function quietype_assets() {
 	$features = quietype_content_features();
-	$has_lightbox = ( is_singular() && $features['images'] ) || is_post_type_archive( 'photo' );
+	$has_lightbox = ( is_singular() && $features['images'] ) || is_post_type_archive( array( 'photo', 'project' ) );
 	wp_enqueue_style( 'quietype', get_stylesheet_uri(), array(), quietype_asset_version( 'style.css' ) );
 	wp_enqueue_script( 'quietype', get_template_directory_uri() . '/assets/js/theme.js', array(), quietype_asset_version( 'assets/js/theme.js' ), true );
 	wp_register_script( 'quietype-reading', get_template_directory_uri() . '/assets/js/reading.js', array( 'quietype' ), quietype_asset_version( 'assets/js/reading.js' ), true );
@@ -76,6 +77,10 @@ function quietype_assets() {
 	}
 	if ( is_post_type_archive( 'book' ) ) {
 		wp_enqueue_script( 'quietype-books', get_template_directory_uri() . '/assets/js/books.js', array(), quietype_asset_version( 'assets/js/books.js' ), true );
+	}
+	if ( is_post_type_archive( 'project' ) ) {
+		wp_enqueue_style( 'quietype-projects', get_template_directory_uri() . '/assets/css/projects.css', array( 'quietype' ), quietype_asset_version( 'assets/css/projects.css' ) );
+		wp_enqueue_script( 'quietype-projects', get_template_directory_uri() . '/assets/js/projects.js', array(), quietype_asset_version( 'assets/js/projects.js' ), true );
 	}
 	$lightbox_dependencies = array();
 	if ( is_post_type_archive( 'photo' ) ) {
@@ -287,6 +292,8 @@ function quietype_icon( $name ) {
 		'down'    => '<path d="m6 10 6 6 6-6"></path><path d="M12 5v11"></path>',
 		'menu'    => '<path d="M4 7h16"></path><path d="M4 12h16"></path><path d="M4 17h16"></path>',
 		'link'    => '<path d="M9 17H7A5 5 0 0 1 7 7h3"></path><path d="M15 7h2a5 5 0 0 1 0 10h-3"></path><path d="M8 12h8"></path>',
+		'external' => '<path d="M14 4h6v6M20 4l-9 9M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path>',
+		'expand' => '<path d="M9 4H4v5M15 4h5v5M20 15v5h-5M9 20H4v-5"></path>',
 		'eye'     => '<path d="M3.5 12s3-5 8.5-5 8.5 5 8.5 5-3 5-8.5 5-8.5-5-8.5-5Z"></path><circle cx="12" cy="12" r="2"></circle>',
 		'star'    => '<path d="m12 1.75 3.17 6.43 7.1 1.03-5.14 5.01 1.22 7.06L12 17.94l-6.35 3.34 1.22-7.06-5.14-5.01 7.1-1.03L12 1.75Z"></path>',
 		'github'  => '<path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3.28-.36 6.72-1.61 6.72-7A5.4 5.4 0 0 0 20.22 4 5 5 0 0 0 20.08.5S18.9.14 16 1.84a13.38 13.38 0 0 0-7 0C6.1.14 4.92.5 4.92.5A5 5 0 0 0 4.78 4a5.4 5.4 0 0 0-1.5 3.75c0 5.42 3.44 6.67 6.72 7A4.8 4.8 0 0 0 9 18v4"></path><path d="M9 18c-3 .9-3-1.5-4-2"></path>',

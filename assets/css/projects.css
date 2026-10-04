@@ -1,0 +1,56 @@
+/* A small, optional collection; the shared theme owns header, footer and palette. */
+.projects-page { padding-top: 42px; padding-bottom: 36px; }
+.site-main .projects-hero { max-width: none; }
+.projects-hero { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; }
+.projects-hero p { margin: 13px 0 0; color: var(--muted); font-size: 16px; line-height: 1.65; }
+.project-count { flex: none; padding-bottom: 1px; color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+.project-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
+.project-card { display: flex; min-width: 0; flex-direction: column; border: 1px solid var(--line); border-radius: 5px; scroll-margin-top: 90px; }
+.project-preview { position: relative; display: block; overflow: hidden; border-bottom: 1px solid var(--line); border-radius: 4px 4px 0 0; background: color-mix(in srgb, var(--line) 28%, var(--page)); cursor: zoom-in; }
+.project-preview img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: contain; }
+.project-preview__hint { position: absolute; right: 12px; bottom: 12px; display: grid; place-items: center; width: 30px; height: 30px; border: 1px solid var(--line); border-radius: 4px; color: var(--muted); background: var(--page); }
+.project-preview__hint .quietype-icon { width: 16px; height: 16px; }
+.project-preview:focus-visible { outline-offset: 3px; }
+.project-preview.is-unavailable { display: grid; aspect-ratio: 16 / 10; padding: 24px; place-items: center; }
+.project-preview.is-unavailable img, .project-preview.is-unavailable .project-preview__hint { display: none; }
+.project-preview.is-unavailable::after { content: attr(data-preview-title); color: var(--muted); font: 600 20px/1.5 var(--serif); }
+.project-body { display: flex; flex: 1; min-width: 0; flex-direction: column; padding: 19px 21px 17px; }
+.project-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.project-heading h2 { min-width: 0; margin: 0; font: 620 20px/1.5 var(--serif); overflow-wrap: anywhere; }
+.project-kind { flex: 0 1 auto; max-width: 40%; color: var(--muted); font-size: 13px; line-height: 1.5; text-align: right; overflow-wrap: anywhere; }
+.project-description { margin: 9px 0 10px; color: var(--text-soft); font-size: 15px; line-height: 1.75; overflow-wrap: anywhere; }
+.project-meta { display: flex; align-items: baseline; gap: 8px; margin: 0 0 8px; color: var(--muted); font-size: 13px; line-height: 1.7; }
+.project-source { display: inline-flex; flex: none; align-items: baseline; gap: 8px; }
+.project-meta.has-languages .project-source::after { content: "·"; }
+.project-languages { min-width: 0; overflow-wrap: anywhere; }
+.project-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 7px 24px; margin-top: auto; }
+.project-actions a { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; color: var(--accent); font-size: 14px; line-height: 1.5; }
+.project-actions .quietype-icon { width: 15px; height: 15px; }
+.project-empty { color: var(--muted); }
+@media (hover: hover) {
+  .project-heading a:hover { color: var(--accent); }
+  .project-preview:hover .project-preview__hint { color: var(--accent); border-color: var(--accent); }
+  .project-actions a:hover { text-decoration: underline; text-underline-offset: 4px; }
+}
+@media (max-width: 760px) {
+  .projects-page { padding-top: 30px; padding-bottom: 28px; }
+  .projects-hero { gap: 12px; }
+  .projects-hero p { margin-top: 10px; font-size: 15px; }
+  .project-count { font-size: 13px; }
+  .project-grid { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .project-body { padding: 16px 17px 13px; }
+  .project-heading { gap: 9px; }
+  .project-heading h2 { font-size: 19px; }
+  .project-description { margin-top: 7px; margin-bottom: 10px; line-height: 1.7; }
+  .project-actions { gap: 8px 24px; }
+  .project-actions a { min-height: 38px; }
+  .project-preview__hint { right: 10px; bottom: 10px; }
+}
+@media (max-width: 370px) {
+  .projects-hero { flex-wrap: wrap; gap: 8px; }
+  .project-count { margin-left: auto; }
+}
+@media print {
+  .project-preview__hint { display: none; }
+  .project-card { break-inside: avoid; }
+}
