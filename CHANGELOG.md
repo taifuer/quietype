@@ -6,6 +6,7 @@ All notable changes to Quietype will be documented in this file.
 
 ### Added
 
+- Added explicit `[!CAPTION]` image/table captions with safe inline formatting, semantic feed/excerpt output, native-caption preservation and plain-text PhotoSwipe descriptions; covered by shared plugin-free and real Editor.md regression tests.
 - Added an archive-only project showcase at `/projects/`, with media/external screenshots, lazy PhotoSwipe previews, editable/default project types, optional source status and language metadata, stable ordering, archive caching and regression coverage. Project content and menu placement stay administrator-owned.
 - Added responsive expand-all and collapse-all controls to annual book and photo collections while preserving viewport-aware photo hydration.
 - Added viewport-loaded, locally bundled Mermaid diagrams with light reading palettes, zoom controls, strict security and readable source fallback, including legacy Editor.md markup compatibility.
@@ -14,6 +15,7 @@ All notable changes to Quietype will be documented in this file.
 
 ### Fixed
 
+- Supplied cached external-image dimensions before WordPress Core's content-image optimization, restoring offscreen lazy loading while retaining first-image priorities and author-specified attributes without changing photo-gallery loading.
 - Kept manually confirmed offline friend links at the end of each category while preserving rating and natural-name order within each status group.
 - Restored shared table header/body column sizing inside a keyboard-accessible horizontal scroll container.
 - Truncated long desktop TOC labels visually while preserving full hover/focus text and scrolling the active item into view.

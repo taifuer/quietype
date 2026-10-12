@@ -96,6 +96,19 @@ wp_set_post_terms( $article_id, array( $practice['term_id'] ), 'category' );
 wp_set_post_terms( $article_id, array( 'agent', 'wordpress' ), 'post_tag', false );
 update_post_meta( $article_id, 'views', 42 );
 
+$captions_id = wp_insert_post( array(
+	'post_type'    => 'page',
+	'post_status'  => 'publish',
+	'post_title'   => '图与表，让说明留在身旁',
+	'post_name'    => 'quietype-captions-test',
+	'post_content' => file_get_contents( __DIR__ . '/../fixtures/captions.html' ),
+) );
+$caption_dimensions = array();
+foreach ( quietype_remote_image_urls( get_post_field( 'post_content', $captions_id ) ) as $image_url ) {
+	$caption_dimensions[ $image_url ] = array( 'width' => 960, 'height' => 593 );
+}
+update_post_meta( $captions_id, '_quietype_image_dimensions', $caption_dimensions );
+
 $demo_posts = array(
 	array( '一页博客应该保留什么', '从导航、摘要到页脚，留下真正帮助阅读的部分。' ),
 	array( '在终端之外散步', '合上电脑以后，沿着河岸重新认识一天的光线。' ),

@@ -9,6 +9,64 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Turn an explicit caption paragraph into semantic image/table markup.
+ *
+ * Runs after Markdown/wpautop/shortcodes, including excerpts and feeds. Only
+ * adjacent, standalone media qualify; saved content and existing captions stay
+ * untouched. Avoid reserializing the rest of an article (SVG, math and code).
+ */
+function quietype_render_captions( $content ) {
+	if ( false === stripos( $content, '[!CAPTION]' ) ) {
+		return $content;
+	}
+
+	// Quoted attributes may contain >; do not mistake it for the end of a tag.
+	$attrs = '(?:[^<>"\']|"[^"]*"|\'[^\']*\')*';
+	$image = '<img\b' . $attrs . '>';
+	$picture = '<picture\b' . $attrs . '>\s*(?:<source\b' . $attrs . '>\s*)*' . $image . '\s*</picture>';
+	$media = '(?:' . $image . '|' . $picture . ')';
+	$media = '(?:<a\b' . $attrs . '>\s*' . $media . '\s*</a>|' . $media . ')';
+	$pattern = '~<!--.*?-->(*SKIP)(*F)'
+		. '|<(?P<protected>pre|code|script|style|textarea|figure|svg|math|noscript)\b' . $attrs . '>.*?</(?P=protected)\s*>(*SKIP)(*F)'
+		. '|<div\b(?=[^>]*\bclass=["\'][^"\']*\bwp-caption\b)' . $attrs . '>.*?</div\s*>(*SKIP)(*F)'
+		. '|(?:(?P<image><p\b' . $attrs . '>\s*' . $media . '\s*</p>)'
+		. '|(?P<table>(?P<table_open><table\b' . $attrs . '>)(?:(?!</table\b).)*</table>))'
+		. '\s*<p\b' . $attrs . '>\s*\[!CAPTION\][\t ]+(?P<caption>.*?)</p>~isu';
+
+	$rendered = preg_replace_callback(
+		$pattern,
+		function ( $match ) {
+			$caption = trim( wp_kses( $match['caption'], array(
+				'a'      => array( 'href' => true, 'title' => true ),
+				'strong' => array(),
+				'em'     => array(),
+				'b'      => array(),
+				'i'      => array(),
+				'code'   => array(),
+				'del'    => array(),
+				'sup'    => array(),
+				'sub'    => array(),
+				'br'     => array(),
+			) ) );
+			if ( '' === trim( wp_strip_all_tags( $caption ) ) ) {
+				return $match[0];
+			}
+			if ( ! empty( $match['image'] ) ) {
+				return '<figure class="article-figure">' . $match['image'] . '<figcaption>' . $caption . '</figcaption></figure>';
+			}
+			// Do not overwrite a native caption or interpret nested tables.
+			if ( preg_match( '/<caption\b/i', $match['table'] ) || 1 !== preg_match_all( '/<table\b/i', $match['table'] ) ) {
+				return $match[0];
+			}
+			return $match['table_open'] . '<caption>' . $caption . '</caption>' . substr( $match['table'], strlen( $match['table_open'] ) );
+		},
+		$content
+	);
+	return null === $rendered ? $content : $rendered;
+}
+add_filter( 'the_content', 'quietype_render_captions', 11 );
+
 /** Normalize technical reading markup without changing the stored article. */
 function quietype_prepare_reading_content( $content ) {
 	// Editor.md stores diagrams as document.write payloads. Decode that exact

@@ -87,9 +87,9 @@ function quietype_refresh_image_metadata( $post_id ) {
 }
 add_action( 'quietype_refresh_image_metadata', 'quietype_refresh_image_metadata' );
 
-/** Add non-blocking decoding and known intrinsic dimensions after Markdown renders. */
+/** Supply cached dimensions before Core decides which content images to lazy-load. */
 function quietype_optimize_content_images( $content ) {
-	if ( ! is_singular() || false === stripos( $content, '<img' ) || ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
+	if ( ! is_singular( array( 'post', 'page' ) ) || false === stripos( $content, '<img' ) || ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
 		return $content;
 	}
 	$dimensions = (array) get_post_meta( get_queried_object_id(), '_quietype_image_dimensions', true );
@@ -106,7 +106,10 @@ function quietype_optimize_content_images( $content ) {
 	}
 	return $processor->get_updated_html();
 }
-add_filter( 'the_content', 'quietype_optimize_content_images', 100 );
+// Core's wp_filter_content_tags runs at 12, after shortcodes at 11. Late
+// dimension injection prevents remote Markdown images from receiving loading
+// attributes. Keep Core's first-image heuristics and author overrides intact.
+add_filter( 'the_content', 'quietype_optimize_content_images', 11 );
 
 /** Warn authors about generic or missing image descriptions before publishing. */
 function quietype_image_accessibility_notice() {

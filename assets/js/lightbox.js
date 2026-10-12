@@ -4,6 +4,10 @@ if (images.length) {
   const imageSource = (image) => {
     const link = image.closest('a');
     const isPhotoArchive = Boolean(image.closest('.photo-frame, .project-preview'));
+    const articleCaption = !isPhotoArchive && (
+      image.closest('figure')?.querySelector(':scope > figcaption')
+      || image.closest('.wp-caption')?.querySelector('.wp-caption-text')
+    );
     const declaredSource = link?.dataset.pswpSrc;
     const linkedImage = link && /\.(?:avif|gif|jpe?g|png|webp)(?:[?#].*)?$/i.test(link.href);
     const thumbnailReady = !isPhotoArchive && image.complete && image.naturalWidth > 0;
@@ -22,7 +26,8 @@ if (images.length) {
       photoMeta: link?.dataset.photoMeta || '',
       photoExif: link?.dataset.photoExif || '',
       photoDevice: link?.dataset.photoDevice || '',
-      photoCaption: link?.dataset.photoCaption || '',
+      // Use text, not innerHTML: caption links/formatting stay in the article.
+      photoCaption: link?.dataset.photoCaption || (articleCaption ? articleCaption.textContent.trim() : ''),
       photoOriginal: link?.dataset.photoOriginal || '',
       isPhotoArchive,
       isProjectPreview: Boolean(image.closest('.project-preview')),

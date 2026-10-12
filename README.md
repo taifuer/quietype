@@ -50,7 +50,8 @@ Quietype 是一款面向中文长文与技术写作的经典 WordPress 主题。
 - 固定移动 Header、抽屉导航、搜索、背景切换与返回顶部工具
 - 亮色代码配色、语言标记、行号、复制按钮和按需换行，宽表格独立横向滚动
 - 本地按需加载的 Mermaid 图表、适配阅读背景的放大视图、源码回退及 Markdown 提示块
-- 响应式图片、图注、打印样式及 PhotoSwipe 图片预览
+- `[!CAPTION]` 图片与表格题注，支持原生题注、灯箱说明、RSS 与自动摘要；正文外链图片按 WordPress 原生策略延迟加载
+- 响应式图片、打印样式及 PhotoSwipe 图片预览
 - 首页、文章、分类、标签、搜索、年度归档、友链、关于与 404 模板
 
 ### 内容与管理
@@ -83,7 +84,7 @@ git clone https://github.com/taifuer/quietype.git
 3. 在“外观 → Quietype 设置”配置站点信息、内容页面、SEO、访问、安全和邮件。
 4. 访问“设置 → 固定链接”并保存一次，使 `/books/` 与 `/photos/` 路由生效。
 
-完整字段、缓存、登录保护、SMTP、书籍、照片和项目配置见 [配置指南](docs/CONFIGURATION.md)；图表、提示块与技术文章写法见 [技术内容指南](docs/READING.md)。
+完整字段、缓存、登录保护、SMTP、书籍、照片和项目配置见 [配置指南](docs/CONFIGURATION.md)；题注、图表、提示块与技术文章写法见 [技术内容指南](docs/READING.md)。
 
 ## 内容与数据
 

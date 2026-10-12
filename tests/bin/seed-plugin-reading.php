@@ -60,3 +60,29 @@ if ( is_wp_error( $post_id ) || ! $post_id ) {
 	exit( "Could not create plugin reading fixture.\n" );
 }
 echo "Editor.md integration article created: /quietype-plugin-reading-test/\n";
+
+// Replace only the isolated caption fixture with the real Markdown parser's
+// output. This shares the browser assertions with the plugin-free suite.
+$existing = get_page_by_path( 'quietype-captions-test', OBJECT, 'page' );
+$source = file_get_contents( __DIR__ . '/../fixtures/captions.md' );
+$reporting = error_reporting( E_ALL & ~E_DEPRECATED );
+$content = $parser->transform( $source );
+$caption_id = wp_insert_post( wp_slash( array(
+	'ID' => $existing ? $existing->ID : 0,
+	'post_type' => 'page',
+	'post_status' => 'publish',
+	'post_title' => '图与表，让说明留在身旁',
+	'post_name' => 'quietype-captions-test',
+	'post_content' => $content,
+	'post_content_filtered' => $source,
+) ) );
+error_reporting( $reporting );
+if ( is_wp_error( $caption_id ) || ! $caption_id ) {
+	exit( "Could not create plugin caption fixture.\n" );
+}
+$dimensions = array();
+foreach ( quietype_remote_image_urls( $content ) as $url ) {
+	$dimensions[ $url ] = array( 'width' => 960, 'height' => 593 );
+}
+update_post_meta( $caption_id, '_quietype_image_dimensions', $dimensions );
+echo "Editor.md caption fixture created: /quietype-captions-test/\n";

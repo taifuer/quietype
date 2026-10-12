@@ -213,10 +213,14 @@ figure { margin: 0; }
 .article-content img:not(.emoji):not(.avatar) { padding: 2px; border: 1px solid var(--line); background: var(--paper); }
 .article-content img:not(.emoji):not(.avatar):not(.no-lightbox) { cursor: zoom-in; }
 .article-content figcaption, .article-content .wp-caption-text { margin: 10px auto 0; color: var(--muted); font: 13px/1.6 var(--sans); text-align: center; }
+.article-content .article-figure { margin: 1.35em 0; }
+.article-content .article-figure > p { margin: 0; }
+.article-content .article-figure figcaption { font-size: 14px; overflow-wrap: anywhere; }
 .article-content .alignwide { width: min(960px, calc(100vw - 48px)); max-width: none; margin-left: 50%; transform: translateX(-50%); }
 .article-content .alignfull { width: 100vw; max-width: none; margin-left: 50%; transform: translateX(-50%); }
 .article-table { max-width: 100%; margin: 1.35em 0; overflow-x: auto; overscroll-behavior-inline: contain; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
 .article-content table { width: 100%; margin: 0; border-collapse: collapse; font: 14px/1.6 var(--sans); }
+.article-content table > caption { padding: 0 0 10px; caption-side: top; color: var(--muted); font: 14px/1.6 var(--sans); text-align: left; overflow-wrap: anywhere; }
 .article-content th, .article-content td { padding: 11px 13px; border: 1px solid var(--line); text-align: left; }
 .article-content th { background: var(--code); font-weight: 650; }
 .article-content mark { padding: 0 .12em; background: #eadc91; color: inherit; }
