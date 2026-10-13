@@ -31,7 +31,8 @@
     "html-validate": "11.9.0"
   },
   "overrides": {
-    "brace-expansion": "5.0.9",
+    "basic-ftp": "6.2.3",
+    "brace-expansion": "5.0.12",
     "lighthouse": "13.4.1",
     "tmp": "0.2.7",
     "uuid": "11.1.1"

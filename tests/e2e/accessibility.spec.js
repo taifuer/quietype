@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const AxeBuilder = require('@axe-core/playwright').default;
 
-const routes = ['/', '/quietype-reading-test/', '/books/', '/photos/', '/projects/', '/archive/', '/?s=Quietype', '/quietype-missing-page/'];
+const routes = ['/', '/quietype-reading-test/', '/books/', '/photos/', '/projects/', '/archive/', '/links/', '/?s=Quietype', '/quietype-missing-page/'];
 const pixelGif = Buffer.from('R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=', 'base64');
 
 for (const path of routes) {

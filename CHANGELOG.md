@@ -1,31 +1,45 @@
-# Changelog
+# 更新记录
 
-All notable changes to Quietype will be documented in this file.
+记录影响使用的变化，不逐条抄录提交。`main` 是开发版本；下面的日期表示代码更新日期，不代表已发布新的 Release。
 
-## [Unreleased]
+## main（尚未发布）
 
-### Added
+### 2026-10-13
 
-- Added explicit `[!CAPTION]` image/table captions with safe inline formatting, semantic feed/excerpt output, native-caption preservation and plain-text PhotoSwipe descriptions; covered by shared plugin-free and real Editor.md regression tests.
-- Added an archive-only project showcase at `/projects/`, with media/external screenshots, lazy PhotoSwipe previews, editable/default project types, optional source status and language metadata, stable ordering, archive caching and regression coverage. Project content and menu placement stay administrator-owned.
-- Added responsive expand-all and collapse-all controls to annual book and photo collections while preserving viewport-aware photo hydration.
-- Added viewport-loaded, locally bundled Mermaid diagrams with light reading palettes, zoom controls, strict security and readable source fallback, including legacy Editor.md markup compatibility.
-- Added an in-reading compact TOC dialog, overflow-only code wrapping with legacy Prism line-number support, and restrained GitHub-style Markdown alerts.
-- Added pinned WP Editor.md integration tests for actual code, KaTeX, diagrams, tables, long TOCs, failure recovery and accessibility.
+- 将归档标签总数、友链分类数量移到对应标题旁；友链数量使用随阅读背景变化的浅色圆形标记。
+- 更新测试工具的间接依赖，修复安全审计导致的 CI 失败，保留原有检查门槛。
+- 精简 README，移除单独的贡献流程和安全报告文档；按日期补齐开发分支更新记录。
 
-### Fixed
+### 2026-10-12
 
-- Supplied cached external-image dimensions before WordPress Core's content-image optimization, restoring offscreen lazy loading while retaining first-image priorities and author-specified attributes without changing photo-gallery loading.
-- Kept manually confirmed offline friend links at the end of each category while preserving rating and natural-name order within each status group.
-- Restored shared table header/body column sizing inside a keyboard-accessible horizontal scroll container.
-- Truncated long desktop TOC labels visually while preserving full hover/focus text and scrolling the active item into view.
-- Corrected Editor.md Prism auto-loader dependency/configuration order and disabled its default stylesheet as well as unused footer initializers.
-- Grouped compact code actions with a consistent gap so copy success/failure messages never overlap the wrap toggle.
+- 新增 `[!CAPTION]` 图注、表题，支持安全的行内格式、灯箱说明、RSS 与自动摘要，兼容原生题注；增加无插件与真实 Editor.md 回归测试。
+- 修正正文外链图片的尺寸补全时机，让 WordPress 能正常延迟加载屏外图片，同时保留首图优先级和作者指定的属性。
 
-### Changed
+### 2026-10-05
 
-- Deferred PhotoSwipe scripts and base styles until an image is opened, reducing initial loading; the lightbox waits for its styles and retains theme override order.
-- Removed hard CI limits for CSS/JavaScript sizes and font request counts. Resource measurements remain in reports; user-visible loading, stability, accessibility and functional checks remain enforced.
+- 新增 `/projects/` 项目展示：截图、简介、自定义类型、可选在线/源码链接、开源状态和主要语言；包含缓存、灯箱与后台管理。
+
+### 2026-09-06
+
+- 新增本地按需加载的 Mermaid 图表、源码回退、Markdown 提示块、阅读中的移动目录与代码换行开关。
+- 修正长目录省略与滚动、宽表格列对齐、Prism 自动加载顺序，以及复制反馈与换行按钮重叠。
+- PhotoSwipe 改为打开图片时加载；增加真实 WP Editor.md 集成测试。
+- 取消资源体积和字体数量的硬性 CI 限制，继续检查实际加载、布局稳定性、可访问性与安全。
+
+### 2026-08-22
+
+- 移除页面多余的英文 eyebrow；更新测试工具并修复静态检查与发布包验证。
+
+### 2026-08-11
+
+- 调整桌面、移动端的文章和页面标题字号；更新测试依赖的安全补丁。
+
+### 2026-08-02
+
+- 书籍、照片页增加展开/折叠全部年份；书籍标签不再限制数量。
+- 手动确认失联的友链在各自分类内置底，组内继续按评级和名称排序。
+
+## 已发布版本
 
 ## [0.10.21] - 2026-08-01
 

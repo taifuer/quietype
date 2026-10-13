@@ -2,7 +2,7 @@
 
 > A quiet WordPress theme for thoughtful reading.
 
-Quietype 是一款面向中文长文与技术写作的经典 WordPress 主题。它以简约、素雅、明亮为设计基调，把排版、导航和交互集中在持续阅读这件事上，同时兼顾 Markdown 技术内容、移动端体验、访问性能与站点管理。
+Quietype 是一款面向中文长文与技术写作的经典 WordPress 主题。简约、明亮，兼顾桌面与手机阅读；集成年度书架、轻量图库和项目展示，适合个人博客。
 
 [在线演示](https://taifua.com/) · [版本发布](https://github.com/taifuer/quietype/releases) · [更新记录](CHANGELOG.md) · [开发复盘](BUILDING-QUIETYPE.md)
 
@@ -33,25 +33,19 @@ Quietype 是一款面向中文长文与技术写作的经典 WordPress 主题。
 
 </details>
 
-演示图由隔离测试环境和固定内容生成，不依赖线上文章、私人书目或个人照片；图库素材的来源与许可记录在[演示照片来源](tests/fixtures/photos/README.md)。
-
-## 设计原则
-
-- **阅读优先**：800px 长文区、克制的标题层级和适合中英文混排的系统字体栈。
-- **安静但不简陋**：纸白、米杏、浅绿三种亮色阅读背景，保留必要反馈而减少视觉噪音。
-- **技术写作友好**：支持常见 Markdown 结构、KaTeX、Prism、表格、脚注、多级列表和长标识符换行。
-- **保持轻量**：不加载网络字体，图片预览组件本地分发，代码、公式和图库资源按内容加载。
+演示图使用固定测试内容，照片来源与许可见[素材说明](tests/fixtures/photos/README.md)。
 
 ## 主要能力
 
 ### 阅读与交互
 
+- 中英文系统字体、克制的标题层级，以及纸白、米杏、浅绿三种亮色阅读背景
 - H2/H3 自动目录、章节永久链接、阅读进度；桌面长目录省略显示并跟随当前章节，移动端阅读中可随时打开目录
 - 固定移动 Header、抽屉导航、搜索、背景切换与返回顶部工具
 - 亮色代码配色、语言标记、行号、复制按钮和按需换行，宽表格独立横向滚动
-- 本地按需加载的 Mermaid 图表、适配阅读背景的放大视图、源码回退及 Markdown 提示块
+- 兼容 WP Editor.md 的代码高亮与公式；主题负责阅读样式、Mermaid 图表和 Markdown 提示块，**不内置 Markdown 编辑器或解析器**
 - `[!CAPTION]` 图片与表格题注，支持原生题注、灯箱说明、RSS 与自动摘要；正文外链图片按 WordPress 原生策略延迟加载
-- 响应式图片、打印样式及 PhotoSwipe 图片预览
+- 响应式图片、打印样式及按需加载的 PhotoSwipe 图片预览；不加载网络字体
 - 首页、文章、分类、标签、搜索、年度归档、友链、关于与 404 模板
 
 ### 内容与管理
@@ -61,7 +55,7 @@ Quietype 是一款面向中文长文与技术写作的经典 WordPress 主题。
 - `/projects/` 项目展示：截图预览、简介、可编辑类型与默认类型，可选在线链接、源码、开源状态和主要语言
 - 可配置文章版权声明、浏览量、友链状态、SMTP、轻量 SEO 与隐私说明
 - 自定义登录入口、评论验证及面向单作者站点的 WordPress 常用优化
-- 不写入主题私有短代码；普通文章正文不会因切换主题而锁定
+- 普通文章使用 WordPress 原有内容存储，不引入主题私有短代码
 
 ## 环境与安装
 
@@ -82,7 +76,7 @@ git clone https://github.com/taifuer/quietype.git
 1. 在“外观 → 菜单”分配顶部主导航；需要时再分配正文之后的页尾上方导航。
 2. 创建 `/archive/` 页面并指定“文章归档”模板；友链页指定“友情链接”模板。
 3. 在“外观 → Quietype 设置”配置站点信息、内容页面、SEO、访问、安全和邮件。
-4. 访问“设置 → 固定链接”并保存一次，使 `/books/` 与 `/photos/` 路由生效。
+4. 访问“设置 → 固定链接”并保存一次，使 `/books/`、`/photos/` 与 `/projects/` 路由生效。
 
 完整字段、缓存、登录保护、SMTP、书籍、照片和项目配置见 [配置指南](docs/CONFIGURATION.md)；题注、图表、提示块与技术文章写法见 [技术内容指南](docs/READING.md)。
 
@@ -92,14 +86,19 @@ Quietype 使用 WordPress 数据库存储书籍、照片、项目、浏览量和
 
 主题没有遥测或广告脚本。启用头像镜像、友链检测、SMTP、远程图片或自定义统计后，站点可能产生相应的外部请求；请在隐私政策中据实说明。部署或迁移前始终备份数据库与 `wp-content/uploads`。
 
-## 开发与质量
+## 本地开发
 
-主题没有前端构建步骤。自动化回归需要 Node.js 22.22+ 与 Docker Compose；仓库提供隔离的 WordPress、固定测试内容、Playwright、axe、视觉回归和 Lighthouse 性能检查：
+主题没有前端构建步骤，将仓库放入 WordPress 的 `wp-content/themes/quietype` 即可开发。自动化测试另用隔离环境，不连接线上数据库，需要 Node.js 22.22+（或 24.8+）与 Docker Compose：
+
+<details>
+<summary>测试命令</summary>
 
 ```bash
 npm ci
 npm run env:start
 npm run env:seed
+npm run env:check
+npm run test:js
 npm run test:e2e
 npm run test:performance
 npm run env:plugins
@@ -107,27 +106,20 @@ npm run test:integration
 npm run env:stop
 ```
 
-`env:plugins` 仅给隔离测试站安装带 SHA-256 校验的 WP Editor.md 10.2.1，并从真实 Markdown 生成代码、公式、图表、提示块和长目录。请在常规视觉/性能测试之后运行插件集成测试；再次进行无插件基线检查前，停止并重建测试环境。
+`env:plugins` 安装固定版本的 WP Editor.md，验证真实 Markdown 渲染；放在无插件的视觉与性能检查之后运行。测试结束务必执行 `env:stop`，它只清理隔离测试环境。
 
-CSS、JavaScript 等资源体积与字体请求数量只记录在 Lighthouse 报告中，不设固定大小或数量的 CI 硬门槛。性能检查关注实际加载速度、主线程阻塞和布局稳定性，并保留功能、可访问性与安全检查。
-
-PHP 安全基线与静态检查：
+有 PHP 和 Composer 时，还可以运行：
 
 ```bash
 composer install
 composer lint -- --warning-severity=0
-find . -name '*.php' -not -path './node_modules/*' -print0 | xargs -0 -n1 php -l
-npm run test:js
+find . -maxdepth 2 -name '*.php' -exec php -l {} \;
 git diff --check
 ```
 
-GitHub Actions 在 PHP 8.0、8.2、8.4 以及 WordPress 6.6、6.8 上执行检查。推送 `v*` Tag 前，版本号必须同时匹配 `style.css`、`package.json` 和 `CHANGELOG.md`；通过后发布工作流会生成可安装 ZIP 与 SHA-256 校验文件。
+GitHub Actions 检查 PHP/WordPress 兼容性、浏览器交互、视觉、可访问性、性能与依赖安全。资源体积仅记录，不设严格大小门槛。发布时校验 `style.css`、`functions.php`、`package.json` 与版本标签一致，再生成可安装 ZIP。
 
-## 参与与安全
-
-- 贡献流程与代码约定：[CONTRIBUTING.md](CONTRIBUTING.md)
-- 安全问题与私密报告方式：[SECURITY.md](SECURITY.md)
-- 版本变化与迁移说明：[CHANGELOG.md](CHANGELOG.md)
+</details>
 
 ## 鸣谢
 

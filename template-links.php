@@ -17,7 +17,7 @@ $link_groups = quietype_link_groups();
 		<div class="link-groups">
 			<?php foreach ( $link_groups as $group ) : ?>
 				<section class="link-group" aria-labelledby="link-category-<?php echo esc_attr( $group['term']->term_id ); ?>">
-					<header class="link-group__header"><h2 id="link-category-<?php echo esc_attr( $group['term']->term_id ); ?>"><?php echo esc_html( $group['term']->name ); ?></h2><span><?php echo esc_html( count( $group['links'] ) ); ?></span></header>
+					<header class="link-group__header"><h2 id="link-category-<?php echo esc_attr( $group['term']->term_id ); ?>"><?php echo esc_html( $group['term']->name ); ?></h2><span class="link-group__count"><?php echo esc_html( count( $group['links'] ) ); ?><span class="screen-reader-text"> 个友链</span></span></header>
 					<div class="link-grid">
 						<?php foreach ( $group['links'] as $bookmark ) : ?>
 							<?php $link_state = quietype_link_state( $bookmark->link_id ); ?>

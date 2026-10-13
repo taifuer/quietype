@@ -450,9 +450,9 @@ html:not(.js) .photo-frame img[data-photo-deferred] { display: none; }
 
 /* Archives */
 .archive-tags { padding: 20px 0 22px; margin: 0 0 40px; border-block: 1px solid var(--line); }
-.archive-tags__heading { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 17px; }
+.archive-tags__heading { display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px; margin-bottom: 17px; }
 .archive-tags__heading h2 { margin: 0; font-size: 19px; }
-.archive-tags__heading span { color: var(--muted); font-size: 13px; }
+.archive-tags__heading span { color: var(--muted); font-size: 13px; white-space: nowrap; }
 .archive-tags__list { display: grid; grid-template-columns: repeat(auto-fill, minmax(138px, 1fr)); gap: 8px; }
 .archive-tags__list a { display: inline-flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-width: 0; padding: 6px 10px; border: 1px solid var(--line); border-radius: 4px; background: color-mix(in srgb, var(--paper) 65%, transparent); font-size: 14px; }
 .archive-tags__list a:hover { border-color: var(--accent); color: var(--accent); }
@@ -477,9 +477,9 @@ html:not(.js) .photo-frame img[data-photo-deferred] { display: none; }
 .link-groups { display: block; }
 .link-group { min-width: 0; }
 .link-group + .link-group { margin-top: 38px; }
-.link-group__header { display: flex; align-items: baseline; justify-content: space-between; padding: 0 1px; margin: 0 0 13px; }
+.link-group__header { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 0 1px; margin: 0 0 13px; }
 .link-group__header h2 { margin: 0; color: var(--text); font: 650 18px/1.4 var(--serif); letter-spacing: .02em; }
-.link-group__header > span { color: var(--muted); font: 13px/1.4 var(--mono); }
+.link-group__count { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; min-width: 24px; height: 24px; padding-inline: 5px; border-radius: 999px; background: var(--accent-soft); color: var(--text-soft); font: 13px/1 var(--sans); font-variant-numeric: tabular-nums; }
 .link-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: transparent; }
 .link-grid > a { display: block; padding: 27px; border: 1px solid var(--line); background: var(--paper); }
 .link-grid > a:hover strong { color: var(--accent); }
