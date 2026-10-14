@@ -21,6 +21,8 @@ require_once get_template_directory() . '/inc/seo.php';
 require_once get_template_directory() . '/inc/mail.php';
 require_once get_template_directory() . '/inc/content-performance.php';
 require_once get_template_directory() . '/inc/reading-content.php';
+require_once get_template_directory() . '/inc/video.php';
+require_once get_template_directory() . '/inc/markdown.php';
 require_once get_template_directory() . '/inc/wordpress-tweaks.php';
 require_once get_template_directory() . '/inc/privacy.php';
 require_once get_template_directory() . '/inc/link-status.php';
@@ -204,19 +206,6 @@ function quietype_trim_editor_footer_scripts() {
 	}
 }
 add_action( 'wp', 'quietype_trim_editor_footer_scripts', 20 );
-
-/** Remove the legacy Plyr plugin's global footer payload when no media exists. */
-function quietype_conditionally_disable_plyr() {
-	if ( ! function_exists( 'themtuts_plyr_css_and_js_files' ) ) {
-		return;
-	}
-	$post       = is_singular() ? get_queried_object() : null;
-	$has_media  = $post instanceof WP_Post && preg_match( '/<(audio|video)\b|\[(audio|video)\b/i', $post->post_content );
-	if ( ! $has_media ) {
-		remove_action( 'wp_footer', 'themtuts_plyr_css_and_js_files' );
-	}
-}
-add_action( 'wp', 'quietype_conditionally_disable_plyr' );
 
 function quietype_resource_hints( $urls, $relation_type ) {
 	if ( 'preconnect' === $relation_type ) {
@@ -509,10 +498,9 @@ function quietype_prepare_article( $content ) {
 		},
 		$content
 	);
-	$content = preg_replace_callback(
-		'~<(pre|code|script|style|kbd|math|svg)\b[^>]*>.*?</\1>(*SKIP)(*F)|(?<=>)([^<]+)(?=<)~isu',
-		function ( $matches ) {
-			$text            = $matches[2];
+	$content = quietype_transform_reading_prose(
+		$content,
+		function ( $text ) {
 			$has_visible_url = preg_match( '~(?:https?://|www\.)~i', $text );
 			if ( $has_visible_url ) {
 				$text = preg_replace_callback(
@@ -542,7 +530,7 @@ function quietype_prepare_article( $content ) {
 			}
 			return $text;
 		},
-		$content
+		true
 	);
 	return array( 'content' => $content, 'items' => $items );
 }

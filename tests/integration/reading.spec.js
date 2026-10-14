@@ -3,6 +3,15 @@ const AxeBuilder = require('@axe-core/playwright').default;
 
 const articleURL = '/quietype-plugin-reading-test/';
 
+test('reactivating Editor.md does not replace or duplicate built-in article renderers', async ({ page }) => {
+  const response = await page.goto('/quietype-markdown-test/', { waitUntil: 'networkidle' });
+  test.skip(response.status() === 404, 'Run env:markdown before env:plugins to include switch-back coverage.');
+  await expect(page.locator('.quietype-math .katex-html')).toHaveCount(5);
+  await expect(page.locator('code.language-python .token.keyword').first()).toBeAttached();
+  await expect(page.locator('script[src*="wp-editormd"][src*="prism"], script[src*="wp-editormd"][src*="KaTeX"], link[href*="wp-editormd"][href*="KaTeX"]')).toHaveCount(0);
+  await expect(page.locator('.line-numbers-rows')).toHaveCount(1);
+});
+
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('quietype-reading-bg', 'paper'));
   await page.route('**/wp-admin/admin-ajax.php', (route) => route.abort());

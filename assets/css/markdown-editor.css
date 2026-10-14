@@ -1,0 +1,26 @@
+.quietype-markdown-editor{margin-top:20px;border:1px solid #dcdcde;background:#fff;border-radius:4px;overflow:hidden}
+.quietype-markdown-editor__bar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #e7e4dd;gap:12px}
+.quietype-markdown-editor__bar strong{color:#3e413b;font-size:15px}
+.quietype-markdown-editor__modes{display:flex;gap:6px}
+.quietype-markdown-editor__modes .button[aria-pressed=true]{background:#795844;border-color:#795844;color:#fff}
+.quietype-markdown-editor__toolbar{display:flex;flex-wrap:wrap;gap:4px 18px;padding:10px 16px;border-bottom:1px solid #e7e4dd}
+.quietype-markdown-editor__toolbar button.button-link{color:#795844;font-size:14px;text-decoration:none;min-height:28px}
+.quietype-markdown-editor__panes{display:grid;min-width:0}
+.quietype-markdown-editor [hidden]{display:none!important}
+.quietype-markdown-editor #postdivrich{margin:0;min-width:0}
+.quietype-markdown-editor #wp-content-editor-tools{display:none}
+.quietype-markdown-editor .wp-editor-container{border:0}
+.quietype-markdown-editor .CodeMirror{height:600px;font-size:15px;line-height:1.7;background:#fdfdfb;font-family:ui-monospace,SFMono-Regular,Consolas,"Noto Sans Mono CJK SC",monospace}
+.quietype-markdown-editor .CodeMirror-gutters{background:#f8f7f3;border-color:#eeeae3}
+.quietype-markdown-editor .CodeMirror-lines{padding:16px 0}
+.quietype-markdown-editor .cm-header,.quietype-markdown-editor .cm-link{color:#795844}
+.quietype-markdown-editor #wp-word-count{visibility:hidden}
+.quietype-markdown-editor textarea#content{box-sizing:border-box;width:100%;min-height:500px;padding:16px;font-size:15px;line-height:1.7}
+.quietype-markdown-editor__preview{display:block;width:100%;height:625px;border:0;background:#fdfdfb;min-width:0}
+.quietype-markdown-editor[data-view=split] .quietype-markdown-editor__panes{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.quietype-markdown-editor[data-view=split] iframe{border-left:1px solid #e7e4dd}
+.quietype-markdown-editor__status{margin:0;padding:10px 16px;border-top:1px solid #e7e4dd;color:#646970}
+.quietype-markdown-editor__help{padding:0 16px 12px;color:#646970;line-height:1.7}
+.quietype-markdown-editor__help summary{cursor:pointer}
+.quietype-markdown-editor__help p:last-child{margin-bottom:0}
+@media(max-width:782px){.quietype-markdown-editor[data-view=split] .quietype-markdown-editor__panes{grid-template-columns:1fr}.quietype-markdown-editor[data-view=split] iframe{border-left:0;border-top:1px solid #e7e4dd}.quietype-markdown-editor .CodeMirror{height:420px}.quietype-markdown-editor__preview{height:480px}.quietype-markdown-editor__bar{padding:10px}.quietype-markdown-editor__toolbar{gap:2px 14px}}

@@ -20,7 +20,7 @@ function quietype_content_features() {
 	$features = array(
 		'images'   => (bool) preg_match( '/<img\b|!\[[^\]]*\]\([^\)]+\)/iu', $content ),
 		'code'     => (bool) preg_match( '/<pre\b|<code\b[^>]*\blanguage-|(?:^|\n)[ \t]*(?:```|~~~)/iu', $content ),
-		'math'     => (bool) preg_match( '/class=["\'][^"\']*\bkatex\b|<math\b|\\\\\[|\\\\\]|\$\$|(?:^|[\s(])\$[^$\n]{1,500}\$(?=[\s).,，。]|$)/iu', $content ),
+		'math'     => quietype_content_has_math( $content ),
 		'mermaid'  => (bool) preg_match( '/(?:```|~~~)[ \t]*mermaid\b|class=["\'][^"\']*\bmermaid\b/iu', $content ),
 		'mindmap'  => (bool) preg_match( '/(?:```|~~~)[ \t]*mindmap\b|class=["\'][^"\']*\bmindmap\b/iu', $content ),
 	);

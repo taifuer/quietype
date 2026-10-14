@@ -24,11 +24,17 @@ case "${1:-}" in
   check)
     "${compose[@]}" exec -T wordpress php /var/www/html/wp-content/themes/quietype/tests/bin/check-wordpress.php
     ;;
+  markdown)
+    # Deactivation does not unregister callbacks in the current PHP request.
+    # Seed in a fresh process, so switching back from the plugin is repeatable.
+    "${compose[@]}" exec -T wordpress php /var/www/html/wp-content/themes/quietype/tests/bin/seed-markdown.php deactivate
+    "${compose[@]}" exec -T wordpress php /var/www/html/wp-content/themes/quietype/tests/bin/seed-markdown.php
+    ;;
   stop)
     "${compose[@]}" down --volumes --remove-orphans
     ;;
   *)
-    printf 'Usage: %s {start|seed|check|stop}\n' "$0" >&2
+    printf 'Usage: %s {start|seed|check|markdown|stop}\n' "$0" >&2
     exit 2
     ;;
 esac

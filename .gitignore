@@ -9,6 +9,12 @@ vendor/
 !assets/vendor/photoswipe/**
 !assets/vendor/mermaid/
 !assets/vendor/mermaid/**
+!assets/vendor/php-markdown/
+!assets/vendor/php-markdown/**
+!assets/vendor/prism/
+!assets/vendor/prism/**
+!assets/vendor/katex/
+!assets/vendor/katex/**
 *.zip
 *.log
 .lighthouseci/

@@ -1,0 +1,6 @@
+/* The preview shares public typography without bringing site navigation along. */
+body.quietype-markdown-preview{min-width:0;padding:22px 24px;margin:0}
+.quietype-markdown-preview .article-content{width:100%;max-width:800px;margin:0 auto;padding:0}
+.quietype-markdown-preview .article-content>:first-child{margin-top:0}
+.quietype-markdown-preview .heading-permalink{display:none}
+@media(max-width:480px){body.quietype-markdown-preview{padding:18px}}

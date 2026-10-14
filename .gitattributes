@@ -14,6 +14,11 @@
 /playwright.integration.config.js export-ignore
 /tests export-ignore
 /tools/check-release-version.sh export-ignore
+/tools/vendor-markdown.sh export-ignore
+/playwright.markdown.config.js export-ignore
 
 # Preserve the upstream bundle byte-for-byte for SHA-256 verification.
 /assets/vendor/mermaid/mermaid.min.js -whitespace linguist-vendored
+/assets/vendor/php-markdown/** -whitespace linguist-vendored
+/assets/vendor/prism/** -whitespace linguist-vendored
+/assets/vendor/katex/** -whitespace linguist-vendored

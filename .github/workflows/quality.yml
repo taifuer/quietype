@@ -75,6 +75,10 @@ jobs:
         run: npm run test:e2e
       - name: Check reading performance
         run: npm run test:performance
+      - name: Check optional built-in Markdown without plugins
+        run: |
+          npm run env:markdown
+          npm run test:markdown
       - name: Install pinned Editor.md and seed real Markdown
         run: npm run env:plugins
       - name: Check plugin rendering and long-article interactions

@@ -1,0 +1,45 @@
+const { test, expect } = require('@playwright/test');
+const { createClip, routeMedia } = require('../helpers/videos');
+
+let clip;
+test.beforeAll(async ({ browser }) => { clip = await createClip(browser); });
+
+test('video preview, save and reopen need no player plugin', async ({ page }, testInfo) => {
+  const errors = [];
+  const requests = [];
+  page.on('pageerror', error => errors.push(error.message));
+  page.on('request', request => requests.push(request.url()));
+  await routeMedia(page, clip);
+  await page.goto('/wp-login.php');
+  const mobile = testInfo.project.name.includes('mobile');
+  await page.locator('#user_login').fill(mobile ? 'video-mobile' : 'video-desktop');
+  await page.locator('#user_pass').fill('password');
+  await Promise.all([page.waitForURL(/wp-admin/), page.locator('#wp-submit').click()]);
+  await page.goto('/wp-admin/post-new.php', { waitUntil: 'networkidle' });
+  await page.locator('#title').fill('Video preview draft');
+  await page.locator('[data-md-command="video"]').click();
+  await expect(page.locator('#content')).toHaveValue(/\[video src="https:\/\/example.com\/demo.mp4"\]/);
+  const source = '## 原生视频\n\n[video src="https://media.example.test/wide.webm?token=a&part=2" poster="https://media.example.test/poster.svg" title="操作演示"]\n\n示例 `[video src="https://media.example.test/example.webm"]`';
+  await page.evaluate(text => document.querySelector('.CodeMirror').CodeMirror.setValue(text), source);
+  await page.locator('[data-md-view="split"]').click();
+  const preview = page.frameLocator('.quietype-markdown-editor__preview');
+  const video = preview.locator('video.quietype-video');
+  await expect(video).toHaveCount(1);
+  await expect(video).toBeVisible();
+  await expect(video).toHaveAttribute('preload', 'none');
+  expect(requests.filter(url => /media\.example\.test\/.*\.webm/.test(url))).toEqual([]);
+  await video.evaluate(async element => { element.muted = true; await element.play(); });
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(0.1);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
+  expect(await video.evaluate(element => element.getBoundingClientRect().width <= element.closest('.article-content').clientWidth + 1)).toBe(true);
+  await page.locator('[data-md-view="write"]').click();
+  await Promise.all([page.waitForURL(/post\.php\?post=\d+&action=edit/), page.locator('#save-post').click()]);
+  await page.reload();
+  await expect(page.locator('#content')).toHaveValue(source);
+  const [fullPreview] = await Promise.all([page.waitForEvent('popup'), page.locator('#post-preview').click()]);
+  await fullPreview.waitForLoadState('domcontentloaded');
+  await expect(fullPreview.locator('video.quietype-video')).toHaveCount(1);
+  await expect(fullPreview.locator('video.quietype-video source')).toHaveAttribute('src', 'https://media.example.test/wide.webm?token=a&part=2');
+  await fullPreview.close();
+  expect(errors).toEqual([]);
+});

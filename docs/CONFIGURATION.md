@@ -17,7 +17,7 @@ Quietype 自有选项集中在“外观 → Quietype 设置”。站点标题、
 
 ## 文章与技术内容
 
-主题通过标准 `the_content` 渲染文章，不修改编辑器保存的 Markdown 原文。WP Editor.md、KaTeX 和 Prism 均非强制依赖；使用 WP Editor.md 时，原始 Markdown 仍由插件保存在 `post_content_filtered`，主题只处理最终前台 HTML。
+默认通过标准 `the_content` 渲染文章，兼容 WP Editor.md。也可以在主题设置中试用默认关闭的“内置 Markdown”模块：先停用 WP Editor.md，再用内置编辑/预览保存原文与 HTML，无需额外插件；不会批量转换现有内容。两种方式都保留 `post_content_filtered` 原文，具体语法、兼容边界和切换说明见[技术内容指南](READING.md#可选的内置-markdown试用)。
 
 目录依据渲染后的 H2/H3 自动生成，章节锚点不会写回数据库。桌面长标题以省略号显示，悬停或键盘聚焦可以读全文；当前章节始终保持在目录滚动区内。窄屏滑过正文前的目录后，右侧阅读工具提供目录按钮。
 

@@ -227,6 +227,9 @@ figure { margin: 0; }
 .article-content kbd { padding: 2px 5px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 3px; background: var(--paper); font: 13px/1 var(--mono); }
 .article-content sup a { border: 0; }
 .article-content iframe { max-width: 100%; }
+.article-content video { display: block; max-width: 100%; height: auto; margin: 1.35em auto; }
+.article-content .quietype-video { width: 100%; border-radius: 4px; background: var(--code); }
+.article-video-error { color: var(--muted); }
 
 /* Code and formula rendering */
 .article-content pre, .article-content pre[class*="language-"], .article-content div.code-toolbar { max-width: 100%; min-width: 0; }
@@ -270,6 +273,7 @@ figure { margin: 0; }
 .article-content .token.atrule, .article-content .token.attr-value, .article-content .token.keyword { color: #8f3f91; }
 .article-content .token.function, .article-content .token.class-name { color: #356b9a; }
 .article-content .katex { font-size: 1.06em !important; }
+.article-content .quietype-math[data-display="false"], .article-content .quietype-math[data-display="false"] > .katex, .article-content .quietype-math[data-display="false"] .katex-html, .article-content .quietype-math[data-display="false"] .katex-html > .base { display: inline; max-width: 100%; white-space: normal; }
 .article-content .katex-display { margin: 1.5em 0; padding: .25em 0; overflow: auto hidden; }
 .article-content mjx-container[display="true"] { margin: 1.5em 0 !important; overflow-x: auto; overflow-y: hidden; font-size: 100% !important; }
 .article-content p > .katex, .article-content li > .katex, .article-content td > .katex { max-width: 100%; white-space: normal; }

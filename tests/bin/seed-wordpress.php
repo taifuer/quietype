@@ -109,6 +109,12 @@ foreach ( quietype_remote_image_urls( get_post_field( 'post_content', $captions_
 }
 update_post_meta( $captions_id, '_quietype_image_dimensions', $caption_dimensions );
 
+wp_insert_post( array(
+	'post_type' => 'page', 'post_status' => 'publish',
+	'post_title' => '视频，留在正文之内', 'post_name' => 'quietype-video-test',
+	'post_content' => file_get_contents( __DIR__ . '/../fixtures/video.html' ),
+) );
+
 $demo_posts = array(
 	array( '一页博客应该保留什么', '从导航、摘要到页脚，留下真正帮助阅读的部分。' ),
 	array( '在终端之外散步', '合上电脑以后，沿着河岸重新认识一天的光线。' ),
@@ -401,6 +407,7 @@ wp_insert_comment(
 );
 
 update_option( 'blogname', 'Quietype Demo' );
+update_option( 'quietype_markdown_enabled', false );
 update_option( 'blogdescription', '安静地写作，专注地阅读' );
 update_option( 'wp_page_for_privacy_policy', $privacy_id );
 update_option( 'quietype_start_year', 2024, false );

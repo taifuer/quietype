@@ -10,6 +10,104 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Transform prose while preserving code, formulas, attributes and literal HTML.
+ *
+ * Do not serialize the document or decode entities: code must remain byte-for-
+ * byte unchanged. Ordinary prose stays in contiguous runs to retain the
+ * plugin's existing formula-formatting behavior. Text-only mode visits actual
+ * text tokens instead, never treating a > inside a quoted attribute as text.
+ */
+function quietype_transform_reading_prose( $content, $callback, $text_only = false ) {
+	$output = '';
+	$pending = '';
+	$protected_tag = '';
+	$depth = 0;
+	$literal_tags = array( 'pre', 'code', 'kbd', 'samp', 'script', 'style', 'textarea', 'noscript', 'svg', 'math', 'xmp', 'title' );
+	// wp_html_split stops at > even inside quotes; keep complete HTML tags.
+	$tokens = preg_split( '~(<!--.*?(?:-->|$)|<!\[CDATA\[.*?(?:\]\]>|$)|<\?.*?(?:\?>|$)|</?[a-z][a-z0-9:-]*\b(?:[^<>"\']|"[^"]*"|\'[^\']*\')*>|<![^>]*>)~is', $content, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY );
+	if ( false === $tokens ) {
+		return $content;
+	}
+	foreach ( $tokens as $part ) {
+		$is_tag = isset( $part[0] ) && '<' === $part[0];
+		$tag = '';
+		$closing = false;
+		$self_closing = false;
+		if ( $is_tag && preg_match( '~^<(/?)([a-z][a-z0-9:-]*)\b~i', $part, $match ) ) {
+			$tag = strtolower( $match[2] );
+			$closing = '/' === $match[1];
+			$self_closing = (bool) preg_match( '~/\s*>$~', $part );
+		}
+		if ( $depth > 0 ) {
+			$output .= $part;
+			if ( $tag === $protected_tag ) {
+				if ( $closing ) {
+					--$depth;
+				} elseif ( ! $self_closing ) {
+					++$depth;
+				}
+			}
+			continue;
+		}
+		$literal = ! $closing && in_array( $tag, $literal_tags, true );
+		if ( ! $closing && in_array( $tag, array( 'span', 'div' ), true ) ) {
+			$processor = new WP_HTML_Tag_Processor( $part );
+			$processor->next_tag();
+			$literal = $processor->has_class( 'katex' ) || $processor->has_class( 'quietype-math' ) || $processor->has_class( 'mermaid' );
+		}
+		// Comments and dollar signs in attributes are also literal, not formulas.
+		if ( $literal || ( $is_tag && ( '' === $tag || false !== strpos( $part, '$' ) ) ) ) {
+			$output .= ( '' !== $pending ? call_user_func( $callback, $pending ) : '' ) . $part;
+			$pending = '';
+			if ( $literal && ! $self_closing ) {
+				$protected_tag = $tag;
+				$depth = 1;
+			}
+			continue;
+		}
+		if ( $text_only ) {
+			$output .= $is_tag ? $part : call_user_func( $callback, $part );
+		} else {
+			$pending .= $part;
+		}
+	}
+	return $output . ( '' !== $pending ? call_user_func( $callback, $pending ) : '' );
+}
+
+/** Keep literal subtrees out of Editor.md's legacy dollar-math filters. */
+function quietype_filter_editor_math( $content, $callback ) {
+	return false === strpos( $content, '$' ) ? $content : quietype_transform_reading_prose( $content, $callback );
+}
+
+/** Wrap only the plugin's registered math filters, at their original priorities. */
+function quietype_protect_editor_math() {
+	global $wp_filter;
+	foreach ( array( 'the_content', 'comment_text' ) as $hook ) {
+		if ( empty( $wp_filter[ $hook ]->callbacks ) ) {
+			continue;
+		}
+		foreach ( $wp_filter[ $hook ]->callbacks as $priority => $callbacks ) {
+			foreach ( $callbacks as $entry ) {
+				$callback = $entry['function'];
+				if ( ! is_array( $callback ) || ! is_object( $callback[0] ) || ! is_a( $callback[0], 'EditormdApp\\KaTeX' ) || ! in_array( $callback[1], array( 'katex_markup_single', 'katex_markup_double' ), true ) ) {
+					continue;
+				}
+				remove_filter( $hook, $callback, $priority );
+				add_filter( $hook, static function ( $content ) use ( $callback, $hook ) {
+					// Native saves already distinguish formulas from escaped dollars.
+					// Reactivating the old plugin must not interpret those literals again.
+					if ( 'the_content' === $hook && get_post_meta( get_the_ID(), '_quietype_markdown_html_hash', true ) && function_exists( 'quietype_markdown_post' ) && quietype_markdown_post( get_the_ID() ) ) {
+						return $content;
+					}
+					return quietype_filter_editor_math( $content, $callback );
+				}, $priority );
+			}
+		}
+	}
+}
+add_action( 'init', 'quietype_protect_editor_math', 20 );
+
+/**
  * Turn an explicit caption paragraph into semantic image/table markup.
  *
  * Runs after Markdown/wpautop/shortcodes, including excerpts and feeds. Only

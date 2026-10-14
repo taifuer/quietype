@@ -86,3 +86,23 @@ foreach ( quietype_remote_image_urls( $content ) as $url ) {
 }
 update_post_meta( $caption_id, '_quietype_image_dimensions', $dimensions );
 echo "Editor.md caption fixture created: /quietype-captions-test/\n";
+
+$source = file_get_contents( __DIR__ . '/../fixtures/shell-math.md' );
+$reporting = error_reporting( E_ALL & ~E_DEPRECATED );
+$content = $parser->transform( $source );
+$existing = get_page_by_path( 'quietype-shell-math-test', OBJECT, 'post' );
+$shell_id = wp_insert_post( wp_slash( array(
+	'ID' => $existing ? $existing->ID : 0,
+	'post_type' => 'post',
+	'post_status' => 'publish',
+	'post_title' => 'Shell 提示符与正常数学公式',
+	'post_name' => 'quietype-shell-math-test',
+	'post_content' => $content,
+	'post_content_filtered' => $source,
+	'post_date' => '2016-01-01 10:00:00',
+) ) );
+error_reporting( $reporting );
+if ( is_wp_error( $shell_id ) || ! $shell_id ) {
+	exit( "Could not create shell/math fixture.\n" );
+}
+echo "Editor.md shell/math fixture created: /quietype-shell-math-test/\n";
