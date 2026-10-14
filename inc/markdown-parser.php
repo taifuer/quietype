@@ -53,6 +53,26 @@ class Quietype_Markdown_Parser extends \QuietypeVendor\Michelf\MarkdownExtra {
 		return preg_replace( '/~~(?=\S)(.+?)(?<=\S)~~/s', '<del>$1</del>', $text );
 	}
 
+	/** A caption on the next line terminates a table, just like a blank line. */
+	protected function doTables( $text ) {
+		if ( false === stripos( $text, '[!CAPTION]' ) ) {
+			return parent::doTables( $text );
+		}
+		// Fenced code and raw HTML are already protected by the parent parser.
+		// Probe complete table candidates with Extra itself; do not split prose,
+		// indented code or a caption's own pipes into additional table cells.
+		$text = preg_replace_callback(
+			'~^([ ]{0,3}(?=\S)[^\n]*\|[^\n]*\n[ ]{0,3}\|?[ ]*[-:][-| :]*\n(?:[ ]{0,3}(?![ \t]|\[!CAPTION\])[^\n]*\|[^\n]*\n)*)(?=[ ]{0,3}\[!CAPTION\][ \t]+\S)~mi',
+			function ( $match ) {
+				$table = parent::doTables( $match[1] . "\n" );
+				// Only a single, fully parsed table may create the new boundary.
+				return preg_match( '/\AB\x1A[0-9]+B\n+\z/', $table ) ? $table . "\n" : $match[1];
+			},
+			$text
+		) ?? $text;
+		return parent::doTables( $text );
+	}
+
 	protected function _doFencedCodeBlocks_callback( $matches ) {
 		$language = strtolower( ltrim( $matches[2], '.' ) );
 		if ( in_array( $language, array( 'math', 'latex', 'katex' ), true ) ) {

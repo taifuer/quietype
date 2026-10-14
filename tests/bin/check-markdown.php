@@ -5,6 +5,7 @@ quietype_test_assert( ! quietype_markdown_enabled(), 'Markdown is off by default
 update_option( 'quietype_markdown_enabled', true );
 wp_set_current_user( 1 );
 require __DIR__ . '/check-markdown-math.php';
+require __DIR__ . '/check-markdown-captions.php';
 $source = file_get_contents( __DIR__ . '/../fixtures/markdown.md' );
 $html = quietype_markdown_render( $source );
 foreach ( array( '<h2>', '<strong>', '<del>', '<table>', 'language-python', 'class="mermaid"', 'quietype-math', 'footnotes' ) as $feature ) {

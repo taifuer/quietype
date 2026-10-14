@@ -65,7 +65,7 @@ function quietype_markdown_editor_chrome( $post ) {
 			<iframe class="quietype-markdown-editor__preview" title="Markdown 正文预览" sandbox="allow-scripts allow-same-origin" hidden></iframe>
 		</div>
 		<p class="quietype-markdown-editor__status" role="status" aria-live="polite">原文与 HTML 同时保存；预览不会发布文章。</p>
-		<details class="quietype-markdown-editor__help"><summary>语法与兼容说明</summary><p>支持表格、脚注、删除线、代码围栏、Mermaid、<code>$行内公式$</code> 与 <code>$$独立公式$$</code>。图片/表格后空一行再写 <code>[!CAPTION] 题注</code>。视频使用 <code>[video src="https://example.com/demo.mp4"]</code>，可加 <code>poster="封面图片地址"</code>。其他第三方短代码请使用 WordPress 的整页预览检查。已有 HTML / 区块文章不会自动转换。</p><p>试用前请备份。关闭模块后保留已保存 HTML；如果随后用 HTML 编辑器修改正文，原 Markdown 不会自动覆盖新内容。</p></details>
+		<details class="quietype-markdown-editor__help"><summary>语法与兼容说明</summary><p>支持表格、脚注、删除线、代码围栏、Mermaid、<code>$行内公式$</code> 与 <code>$$独立公式$$</code>。图片/表格下一行直接写 <code>[!CAPTION] 题注</code>，也兼容空一行的写法。视频使用 <code>[video src="https://example.com/demo.mp4"]</code>，可加 <code>poster="封面图片地址"</code>。其他第三方短代码请使用 WordPress 的整页预览检查。已有 HTML / 区块文章不会自动转换。</p><p>试用前请备份。关闭模块后保留已保存 HTML；如果随后用 HTML 编辑器修改正文，原 Markdown 不会自动覆盖新内容。</p></details>
 	</section>
 	<?php
 }

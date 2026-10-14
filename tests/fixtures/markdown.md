@@ -38,11 +38,9 @@ $$
 | --- | --- | --- |
 | 编辑 | 保留 | 保存生成 |
 | 阅读 | 不现场解析 | 直接输出 |
-
 [!CAPTION] 表 1：内容保存方式
 
 ![静物示意](/wp-content/themes/quietype/tests/fixtures/photos/alpine-lake.jpg)
-
 [!CAPTION] 图 1：**图与说明**一起预览
 
 [^note]: 这是 Markdown Extra 的脚注。

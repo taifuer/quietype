@@ -13,6 +13,13 @@ $linked = '<p><a href="https://images.example.test/full.jpg"><picture><source sr
 $rendered = quietype_render_captions( $linked . $caption );
 quietype_test_assert( false !== strpos( $rendered, '<figure class="article-figure">' . $linked ), 'linked pictures and quoted > characters must survive unchanged' );
 
+foreach ( array( $image, $linked ) as $caption_image ) {
+	foreach ( array( "\n", "\r\n", "  \n", '<br>', "<br />\n" ) as $line_break ) {
+		$adjacent = substr( $caption_image, 0, -4 ) . $line_break . substr( $caption, 3 );
+		quietype_test_assert( quietype_render_captions( $adjacent ) === quietype_render_captions( $caption_image . $caption ), 'a caption immediately below an image must match the separate-paragraph result' );
+	}
+}
+
 $table = '<table class="custom"><thead><tr><th>名称</th></tr></thead><tbody><tr><td>A</td></tr></tbody></table>';
 $table_caption = '<p>[!CAPTION] 表 1：方案对比</p>';
 $rendered = quietype_render_captions( $table . $table_caption );
@@ -25,6 +32,10 @@ $unchanged = array(
 	$image . '<p>中间有普通段落。</p>' . $caption,
 	'<p>段内 <img src="a.jpg" alt="A"> 不是独立图片。</p>' . $caption,
 	'<p><img src="a.jpg"><img src="b.jpg"></p>' . $caption,
+	'<p><img src="a.jpg"> [!CAPTION] 同一行不是题注。</p>',
+	"<p>段内 <img src=\"a.jpg\">\n[!CAPTION] 段内图片不转换。</p>",
+	"<p><img src=\"a.jpg\"><img src=\"b.jpg\">\n[!CAPTION] 多图同段不转换。</p>",
+	"<pre><p><img src=\"a.jpg\">\n[!CAPTION] 代码不转换。</p></pre>",
 	'<p>[!CAPTION] 没有关联的图片或表格。</p>',
 	$image . '<p>[!CAPTION] </p>',
 	'<pre>' . $image . $caption . '</pre>',

@@ -54,6 +54,7 @@ test('editor uses the server preview and persists the exact Markdown source', as
   await expect(preview.locator('.quietype-math .katex-html')).toHaveCount(5);
   await expect(preview.locator('pre code.language-python .token.keyword').first()).toBeAttached();
   await expect(preview.locator('figcaption')).toHaveText('图 1：图与说明一起预览');
+  await expect(preview.locator('caption')).toHaveText('表 1：内容保存方式');
   await preview.locator('.mermaid-figure').scrollIntoViewIfNeeded();
   await expect(preview.locator('.mermaid-figure')).toHaveAttribute('data-state', 'ready', { timeout: 15000 });
   await page.screenshot({ path: `artifacts/markdown-editor-${mobile ? 'mobile' : 'desktop'}.png`, fullPage: true });
@@ -79,6 +80,7 @@ test('editor uses the server preview and persists the exact Markdown source', as
   await expect(fullPreview.locator('.quietype-math .katex-html')).toHaveCount(5);
   await expect(fullPreview.locator('code.language-python .token.keyword').first()).toBeAttached();
   await expect(fullPreview.locator('figcaption')).toHaveText('图 1：图与说明一起预览');
+  await expect(fullPreview.locator('caption')).toHaveText('表 1：内容保存方式');
   await fullPreview.close();
 
   // The browser's emergency local backup must restore the visible editor too.

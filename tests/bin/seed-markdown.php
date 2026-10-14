@@ -34,6 +34,22 @@ $id = wp_insert_post( wp_slash( array(
 ) ) );
 echo "Optional Markdown fixture ready: /quietype-markdown-test/ ({$id})\n";
 
+// Run the full caption suite with adjacent markers under the native parser.
+$caption_source = preg_replace( '/\n\n(?=\[!CAPTION\])/', "\n", file_get_contents( __DIR__ . '/../fixtures/captions.md' ) );
+$caption_html = quietype_markdown_render( $caption_source );
+$caption_post = get_page_by_path( 'quietype-captions-test', OBJECT, 'page' );
+$caption_id = wp_insert_post( wp_slash( array(
+	'ID' => $caption_post ? $caption_post->ID : 0,
+	'post_type' => 'page', 'post_status' => 'publish', 'post_title' => '图片与表格题注',
+	'post_name' => 'quietype-captions-test', 'post_content' => $caption_html, 'post_content_filtered' => $caption_source,
+	'meta_input' => array( '_quietype_markdown_html_hash' => hash( 'sha256', $caption_html ), '_wpcom_is_markdown' => true ),
+) ) );
+$caption_dimensions = array();
+foreach ( quietype_remote_image_urls( $caption_html ) as $image_url ) {
+	$caption_dimensions[ $image_url ] = array( 'width' => 960, 'height' => 593 );
+}
+update_post_meta( $caption_id, '_quietype_image_dimensions', $caption_dimensions );
+
 foreach ( array( 'quietype-legacy-math-test' => file_get_contents( __DIR__ . '/../fixtures/legacy-math.html' ), 'quietype-shell-only-test' => '<p>代码示例 <code>$x$</code></p><pre><code class="language-bash">echo "$HOME" "$USER" "$$"</code></pre>' ) as $slug => $content ) {
 	$existing = get_page_by_path( $slug, OBJECT, 'post' );
 	wp_insert_post( wp_slash( array(

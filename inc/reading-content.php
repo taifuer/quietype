@@ -108,7 +108,7 @@ function quietype_protect_editor_math() {
 add_action( 'init', 'quietype_protect_editor_math', 20 );
 
 /**
- * Turn an explicit caption paragraph into semantic image/table markup.
+ * Turn explicit caption text into semantic image/table markup.
  *
  * Runs after Markdown/wpautop/shortcodes, including excerpts and feeds. Only
  * adjacent, standalone media qualify; saved content and existing captions stay
@@ -128,9 +128,12 @@ function quietype_render_captions( $content ) {
 	$pattern = '~<!--.*?-->(*SKIP)(*F)'
 		. '|<(?P<protected>pre|code|script|style|textarea|figure|svg|math|noscript)\b' . $attrs . '>.*?</(?P=protected)\s*>(*SKIP)(*F)'
 		. '|<div\b(?=[^>]*\bclass=["\'][^"\']*\bwp-caption\b)' . $attrs . '>.*?</div\s*>(*SKIP)(*F)'
-		. '|(?:(?P<image><p\b' . $attrs . '>\s*' . $media . '\s*</p>)'
+		. '|(?:(?:(?P<image><p\b' . $attrs . '>\s*' . $media . '\s*</p>)'
 		. '|(?P<table>(?P<table_open><table\b' . $attrs . '>)(?:(?!</table\b).)*</table>))'
-		. '\s*<p\b' . $attrs . '>\s*\[!CAPTION\][\t ]+(?P<caption>.*?)</p>~isu';
+		. '\s*<p\b' . $attrs . '>\s*'
+		// A Markdown soft/hard line break can keep image and caption in one p.
+		. '|(?P<adjacent_image><p\b' . $attrs . '>\s*' . $media . ')[\t ]*(?:\r?\n|<br\b' . $attrs . '>)[\t\r\n ]*)'
+		. '\[!CAPTION\][\t ]+(?P<caption>.*?)</p>~isu';
 
 	$rendered = preg_replace_callback(
 		$pattern,
@@ -152,6 +155,9 @@ function quietype_render_captions( $content ) {
 			}
 			if ( ! empty( $match['image'] ) ) {
 				return '<figure class="article-figure">' . $match['image'] . '<figcaption>' . $caption . '</figcaption></figure>';
+			}
+			if ( ! empty( $match['adjacent_image'] ) ) {
+				return '<figure class="article-figure">' . $match['adjacent_image'] . '</p><figcaption>' . $caption . '</figcaption></figure>';
 			}
 			// Do not overwrite a native caption or interpret nested tables.
 			if ( preg_match( '/<caption\b/i', $match['table'] ) || 1 !== preg_match_all( '/<table\b/i', $match['table'] ) ) {
