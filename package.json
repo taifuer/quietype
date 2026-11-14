@@ -12,6 +12,7 @@
   "engines": {
     "node": "^22.22.0 || >=24.8.0"
   },
+  "packageManager": "npm@11.21.2",
   "scripts": {
     "env:start": "bash tests/bin/test-env.sh start",
     "env:stop": "bash tests/bin/test-env.sh stop",
@@ -33,9 +34,8 @@
     "html-validate": "11.21.0"
   },
   "overrides": {
-    "basic-ftp": "6.2.3",
+    "basic-ftp": "6.2.6",
     "brace-expansion": "5.0.12",
-    "lighthouse": "13.4.1",
     "tmp": "0.2.7",
     "uuid": "11.1.1"
   }

@@ -55,6 +55,9 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      # Match the lockfile generator; npm 10 mishandles optional proxy peers.
+      - name: Use the declared npm version
+        run: npm install --global "$(node -p "require('./package.json').packageManager")"
       - run: npm ci
       - name: Check committed whitespace
         shell: bash
