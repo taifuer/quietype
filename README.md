@@ -90,12 +90,13 @@ Quietype 使用 WordPress 数据库存储书籍、照片、项目、浏览量和
 
 ## 本地开发
 
-主题没有前端构建步骤，将仓库放入 WordPress 的 `wp-content/themes/quietype` 即可开发。自动化测试另用隔离环境，不连接线上数据库，需要 Node.js 22.22+（或 24.8+）与 Docker Compose：
+主题没有前端构建步骤，将仓库放入 WordPress 的 `wp-content/themes/quietype` 即可开发。自动化测试另用隔离环境，不连接线上数据库，需要 Node.js 22.22+（或 24.8+）与 Docker Compose。安装依赖前使用 `package.json` 声明的 npm 版本，与 CI 保持一致：
 
 <details>
 <summary>测试命令</summary>
 
 ```bash
+npm install --global "$(node -p "require('./package.json').packageManager")"
 npm ci
 npm run env:start
 npm run env:seed
