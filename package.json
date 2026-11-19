@@ -29,9 +29,9 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",
-    "@lhci/cli": "0.16.0",
-    "@playwright/test": "1.65.0",
-    "html-validate": "11.21.0"
+    "@lhci/cli": "0.16.1",
+    "@playwright/test": "1.65.1",
+    "html-validate": "11.21.1"
   },
   "overrides": {
     "basic-ftp": "6.2.6",
